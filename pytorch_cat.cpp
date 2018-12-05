@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------------------	*/
 /*  HYPERNOMAD - Hyper-parameter optimization of deep neural networks with		*/
-/*		NOMAD.                                                  		*/
+/*		NOMAD - Version 1.0                                                   		*/
 /*                                                                              	*/
 /*                                                   					*/
 /*                                                                              	*/
