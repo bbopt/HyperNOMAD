@@ -29,8 +29,7 @@ Lin = fin.readlines()
 Xin = Lin[0].split()
 fin.close()
 
-# syst_cmd = 'OMP_NUM_THREADS=3 python cifar102.py '
-syst_cmd = 'OMP_NUM_THREADS=3 python mnist_pytorch.py '
+syst_cmd = 'OMP_NUM_THREADS=3 python cifar10.py'
 for i in range(len(Xin)):
     syst_cmd += str(Xin[i]) + ' '
 
