@@ -1,7 +1,5 @@
-# HYPERNOMAD
-An interface for hyper-parameter optimization with NOMAD.
 
-# A tutorial on Hyper-parameter Optimization of deep neural networks with the NOMAD software
+# A tutorial on hyper-parameter optimization of deep neural networks with HYPERNOMAD
 
 The following tutorial presents a step by step guide in order to build a project for optimizing the hyper-parameters of a deep neurla network using NOMAD. This is a derivative free optimization software that is designed to optimize constrained, single or bi-objective derivative black-boxes. NOMAD has the capacity to handle mized variable problems: real, integer and categorical.
 
@@ -34,3 +32,11 @@ Where
 * param_1 .. param_n are the hyper-parameters you want to optimize.
 
 ### Link with NOMAD
+
+With the black-box done, it is now time to link it to NOMAD.
+
+First, we start with the file 'param_test1.txt' where you need to indicate the black-box you want to optimize. The following line sais that the black-box is written in Python and the file is 'bb.py'.
+
+```
+BB_EXE "$python ./bb.py"
+```
