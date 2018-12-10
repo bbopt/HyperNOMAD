@@ -37,10 +37,10 @@ Where
 
 With the black-box done, it is now time to link it to NOMAD.
 
-First, we start with the file 'param_test1.txt' where you need to indicate the black-box you want to optimize. The following line sais that the black-box is written in Python and the file is 'bb.py'.
+First, we start with the file 'param_test1.txt' where you need to indicate the black-box you want to optimize. The following line sais that the black-box is written in Python and the file is 'pytorch_bb.py'.
 
 ```
-BB_EXE "$python ./bb.py"
+BB_EXE "$python ./pytorch_bb.py"
 ```
 
 The entry 'BB_INPUT_TYPE' defines the type of each variable.
@@ -56,3 +56,36 @@ The rest of the entries specify the following informations:
 * 'lower_bound' and 'upper_bound'.
 * 'BB_OUTPUT_TYPE' : the output of the black-box. Here, the black-box returns one value corresponding to the objective function.
 * 'MAX_BB_EVAL' : maximum number of black-box evaluations.
+
+
+### Dealing with categorical variables
+
+One of the advantages of NOMAD is its ability to deal with categorical variables. NOMAD also allows to defines a neighborhood structure for each categorical variable. These neighbohrs can be located in a different search space than the current point, and it is up to the user to define the neighbors and their search spaces for each categorical variable. This is done in the file 'pytorch_cat.cpp' with the function: 
+
+```
+void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
+```
+
+In our example, each convolutional layer is defined with 5 variables:
+
+* The number of output channels.
+* The kernel size.
+* The stride.
+* The padding.
+* Whether to do a pooling operation or not.
+
+Therefore, adding a convolutional layer means adding 5 other variables thus changing the dimension of the problem and the search space. 
+
+The same idea applies to the number of fully connected layers. These two values correspond to the only 2 categorical variables in our example.
+
+## Running an optimization
+
+The optimization starts by executing the command 
+
+```
+./pytorch_cat.exe
+```
+
+The stats are displayed according to the 'DISPLAY_DEGREE' chosen within the parameter file. It can be increased to 3 for more details about the steps of NOMAD. The details of the execution can also be saved in the file specified for the tag 'HISTORY_FILE'.
+
+
