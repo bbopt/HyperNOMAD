@@ -10,6 +10,8 @@ First, start with installing the latest version of:
 
 * [NOMAD](https://www.gerad.ca/nomad/)
 
+Reading the [user guide](https://www.gerad.ca/nomad/Downloads/user_guide.pdf) is strongly recommended to familiarize with this software along with the examples given with the NOMAD package.
+
 In order to execute the examples, you will also need to have:
 
 * [PyTorch](https://pytorch.org/)
@@ -40,3 +42,17 @@ First, we start with the file 'param_test1.txt' where you need to indicate the b
 ```
 BB_EXE "$python ./bb.py"
 ```
+
+The entry 'BB_INPUT_TYPE' defines the type of each variable.
+
+* C : categorical variables.
+* I : integar variables.
+* R : real variables.
+
+The rest of the entries specify the following informations:
+
+* 'DIMENSION' : dimension of the optimization problem.
+* 'x0' : the starting point.
+* 'lower_bound' and 'upper_bound'.
+* 'BB_OUTPUT_TYPE' : the output of the black-box. Here, the black-box returns one value corresponding to the objective function.
+* 'MAX_BB_EVAL' : maximum number of black-box evaluations.
