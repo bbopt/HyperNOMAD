@@ -1,7 +1,7 @@
 
 # A tutorial on hyper-parameter optimization of deep neural networks with HYPERNOMAD
 
-The following tutorial presents a step by step guide in order to build a project for optimizing the hyper-parameters of a deep neurla network using NOMAD. This is a derivative free optimization software that is designed to optimize constrained, single or bi-objective derivative black-boxes. NOMAD has the capacity to handle mized variable problems: real, integer and categorical.
+The following tutorial presents a step by step guide in order to build a project for optimizing the hyper-parameters of a deep neurla network using NOMAD. This is a derivative free optimization software that is designed to optimize constrained, single or bi-objective derivative black-boxes. NOMAD has the capacity to handle mixed variable problems: real, integer and categorical.
 
 
 ## Prerequisites
