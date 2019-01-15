@@ -333,7 +333,7 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
             {
                 y3[i] = x[i];
             }
-            y3[shift2] = m+1;
+            y3[index_m] = m+1;
             y3[index_m + shift2] = 100;
             for (int i = index_m + shift2 + 1 ; i < dim3 ; i++)
             {
