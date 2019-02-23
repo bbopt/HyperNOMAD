@@ -88,7 +88,7 @@ int main ( int argc , char ** argv )
 			p.set_HAS_SGTE ( true );
 
                 
-                p.read("param_test1.txt");
+                p.read("parameter_file.txt");
                 
                 p.set_EXTENDED_POLL_TRIGGER ( 10 , false );
 		
