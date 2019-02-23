@@ -18,11 +18,11 @@ In order to execute the examples, you will also need:
 
 ## Getting Started
 
-### Creating the black-box
+### Creating the blackbox
 
-The black-box is the file that will take the hyper-parameters as inputs, and will return the value of the objective and/or constraints as outputs.
+The blackbox is the file that will take the hyper-parameters as inputs, and will return the value of the objective and/or constraints as outputs.
 
-In order to make the black-box compatible with NOMAD, you have to make sure that you can execute the following command:
+In order to make the blackbox compatible with NOMAD, you have to make sure that you can execute the following command:
 
 ```
 .\bb.py param_1 param_2 ... param_n
@@ -30,14 +30,14 @@ In order to make the black-box compatible with NOMAD, you have to make sure that
 
 Where 
 
-* bb.py is the black-box. Note that you can also code it in C++.
+* bb.py is the blackbox. Note that you can also code it in C++.
 * param_1 .. param_n are the hyper-parameters you want to optimize.
 
 ### Link with NOMAD
 
-With the black-box done, it is now time to link it to NOMAD.
+With the blackbox done, it is now time to link it to NOMAD.
 
-First, we start with the file 'param_test1.txt' where you need to indicate the black-box you want to optimize. The following line sais that the black-box is written in Python and the file is 'pytorch_bb.py'.
+First, we start with the file 'parameter_file.txt' where you need to indicate the blackbox you want to optimize. The following line sais that the blackbox is written in Python and the file is 'pytorch_bb.py'.
 
 ```
 BB_EXE "$python ./pytorch_bb.py"
@@ -54,8 +54,8 @@ The rest of the entries specify the following informations:
 * 'DIMENSION' : dimension of the optimization problem.
 * 'x0' : the starting point.
 * 'lower_bound' and 'upper_bound'.
-* 'BB_OUTPUT_TYPE' : the output of the black-box. Here, the black-box returns one value corresponding to the objective function.
-* 'MAX_BB_EVAL' : maximum number of black-box evaluations.
+* 'BB_OUTPUT_TYPE' : the output of the blackbox. Here, the blackbox returns one value corresponding to the objective function.
+* 'MAX_BB_EVAL' : maximum number of blackbox evaluations.
 
 
 ### Dealing with categorical variables
@@ -83,7 +83,7 @@ The same idea applies to the number of fully connected layers. These two values 
 The optimization starts by executing the command 
 
 ```
-./pytorch_cat.exe
+./hypernomad.exe
 ```
 
 The stats are displayed according to the 'DISPLAY_DEGREE' chosen within the parameter file. It can be increased to 3 for more details about the steps of NOMAD. The details of the execution can also be saved in the file specified for the tag 'HISTORY_FILE'.
