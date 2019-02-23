@@ -79,6 +79,12 @@ The same idea applies to the number of fully connected layers. These two values 
 
 ## Running an optimization
 
+First build the executable.
+
+```
+make
+```
+
 The optimization starts by executing the command 
 
 ```
