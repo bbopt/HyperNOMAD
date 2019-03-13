@@ -209,6 +209,7 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
                                 ub_1                       ,
                                 _p.get_direction_types   () ,
                                 _p.get_sec_poll_dir_types() ,
+                                _p.get_int_poll_dir_types() ,
                                 _p.out()                    );
             
             
@@ -270,6 +271,7 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
                                 ub_2                       ,
                                 _p.get_direction_types   () ,
                                 _p.get_sec_poll_dir_types() ,
+                                _p.get_int_poll_dir_types() ,
                                 _p.out()                    );
 
             
@@ -331,6 +333,7 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
                                 ub_3                       ,
                                 _p.get_direction_types   () ,
                                 _p.get_sec_poll_dir_types() ,
+                                _p.get_int_poll_dir_types() ,
                                 _p.out()                    );
             Point y3 (dim3);
             
@@ -388,6 +391,7 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
                                 ub_4                       ,
                                 _p.get_direction_types   () ,
                                 _p.get_sec_poll_dir_types() ,
+                                _p.get_int_poll_dir_types() ,
                                 _p.out()                    );
             Point y4 (dim4);
             
