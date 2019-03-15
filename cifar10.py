@@ -88,7 +88,7 @@ try:
         optimizer = optim.Adagrad(cnn.parameters(), lr=arg1, lr_decay=arg2, weight_decay=arg4,
                                   initial_accumulator_value=arg3)
     if optimizer_choice == 4:
-        optimizer = optim.RMSProp(cnn.parameters(), lr=arg1, momentum=arg2, alpha=arg3, weight_decay=arg4)
+        optimizer = optim.RMSprop(cnn.parameters(), lr=arg1, momentum=arg2, alpha=arg3, weight_decay=arg4)
 except ValueError:
     print('optimizer got an empty list')
     exit(0)
