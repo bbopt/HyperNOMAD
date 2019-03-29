@@ -6,7 +6,7 @@ EXE_MPI	               = hypernomad_MPI.exe
 COMPILATOR             = g++
 COMPILATOR_MPI         = mpic++
 
-COMPILATOR_OPTIONS     = -g -ansi 
+COMPILATOR_OPTIONS     = -std=c++14  
 COMPILATOR_OPTIONS_MPI = $(COMPILATOR_OPTIONS) -DUSE_MPI
 
 

@@ -24,10 +24,13 @@
 /*            Example of a problem with categorical variables        */
 /*-------------------------------------------------------------------*/
 #include "nomad.hpp"
+#include "hyperTorchParameters.hpp"
 #include <vector>
 
 using namespace std;
 using namespace NOMAD;
+
+
 
 #define USE_SURROGATE false
 /*--------------------------------------------------*/
@@ -44,11 +47,17 @@ private:
     
     size_t _shift1, _shift2;
     
+    
+    std::shared_ptr<HyperParameters> _hyperParameters;
+    
+    
 public:
     
     // constructor:
-    My_Extended_Poll ( Parameters & p , size_t shift1 , size_t shift2):
-           Extended_Poll ( p ), _shift1(shift1) , _shift2(shift2){}
+    My_Extended_Poll ( Parameters & p , const std::shared_ptr<HyperParameters> & hyperParameters, size_t shift1 , size_t shift2):
+    Extended_Poll ( p ), _hyperParameters(hyperParameters),_shift1(shift1) , _shift2(shift2)
+    {
+    }
     
     // destructor:
     virtual ~My_Extended_Poll ( void ) {}
@@ -64,7 +73,7 @@ public:
 /*------------------------------------------*/
 int main ( int argc , char ** argv )
 {
-    
+
     // NOMAD initializations:
     begin ( argc , argv );
     
@@ -75,8 +84,24 @@ int main ( int argc , char ** argv )
     try
     {
         
+        
+        
+//        if ( ! readHyperParametersFromFile(hyperParameters,"hyperParams.txt") )
+//        {
+//            std::cerr << "Problem reading hyper parameter file" << std::endl;
+//            return 0;
+//        }
+        
         // parameters creation:
         Parameters p ( out );
+        
+        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperTorchParameters>();
+        p.set_DIMENSION( static_cast<int>(hyperParameters->getDimension()) );
+        p.set_BB_INPUT_TYPE( hyperParameters->getTypes() );
+        p.set_X0( hyperParameters->getValues( CURRENT_VALUE ) );
+        p.set_LOWER_BOUND( hyperParameters->getValues( LOWER_BOUND ) );
+        p.set_UPPER_BOUND( hyperParameters->getValues( UPPER_BOUND ) );
+        p.set_BB_EXE( hyperParameters->getBB() );
         
         if ( USE_SURROGATE )
             p.set_HAS_SGTE ( true );
@@ -94,7 +119,7 @@ int main ( int argc , char ** argv )
         // conv layer and each fully connected layer
         const size_t shift1 = 5;
         const size_t shift2 = 1;
-        My_Extended_Poll ep ( p , shift1 , shift2);
+        My_Extended_Poll ep ( p , hyperParameters, shift1 , shift2);
         
         // algorithm creation and execution:
         Mads mads ( p , NULL , &ep , NULL , NULL );
@@ -149,10 +174,10 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         Point ub_1 (dim1);
         
         vector<bb_input_type> bbit_1 (dim1);
-        bbit_1[0] = bbit_1[index_m + _shift1] = CATEGORICAL;
+        bbit_1[0] = bbit_1[index_m + _shift1] = NOMAD::CATEGORICAL;
         
         for ( int i = 1 ; i < index_m + _shift1 ; i++ )
-            bbit_1[i] = INTEGER;
+            bbit_1[i] = NOMAD::INTEGER;
         
         for ( int i = index_m + _shift1 + 1 ; i < dim1 ; i++ )
             bbit_1[i] = bbit_curr[i-_shift1];
@@ -214,10 +239,10 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         Point ub_2 (dim2);
         
         vector<bb_input_type> bbit_2 (dim2);
-        bbit_2[0] = bbit_2[index_m - _shift1] = CATEGORICAL;
+        bbit_2[0] = bbit_2[index_m - _shift1] = NOMAD::CATEGORICAL;
         
         for ( int i = 1 ; i < index_m - _shift1 ; i++ )
-            bbit_2[i] = INTEGER;
+            bbit_2[i] = NOMAD::INTEGER;
         
         for ( int i = index_m - _shift1 ; i < dim2 ; i++ )
             bbit_2[i] = bbit_curr[i+_shift1];
@@ -270,12 +295,12 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         Point ub_3 (dim3);
         
         vector<bb_input_type> bbit_3 (dim3);
-        bbit_3[0] = bbit_3[index_m] = CATEGORICAL;
+        bbit_3[0] = bbit_3[index_m] = NOMAD::CATEGORICAL;
         
         for ( int i = 1 ; i < index_m ; i++ )
-            bbit_3[i] = INTEGER;
+            bbit_3[i] = NOMAD::INTEGER;
         
-        bbit_3[index_m + 1] = INTEGER;
+        bbit_3[index_m + 1] = NOMAD::INTEGER;
         
         for ( int i = index_m + _shift2 +1 ; i < dim3 ; i++ )
             bbit_3[i] = bbit_curr[i-_shift2];
@@ -334,10 +359,10 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         Point ub_4 (dim4);
         
         vector<bb_input_type> bbit_4 (dim4);
-        bbit_4[0] = bbit_4[index_m] = CATEGORICAL;
+        bbit_4[0] = bbit_4[index_m] = NOMAD::CATEGORICAL;
         
         for ( int i = 1 ; i < index_m ; i++ )
-            bbit_4[i] = INTEGER;
+            bbit_4[i] = NOMAD::INTEGER;
         
         for ( int i = index_m + 1 ; i < dim4 ; i++ )
             bbit_4[i] = bbit_curr[i+_shift2];
@@ -384,4 +409,5 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         // cerr << endl << " Done with 4th neighbor." << endl << endl;
     }
 }
+
 
