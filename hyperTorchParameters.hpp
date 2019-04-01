@@ -27,7 +27,7 @@
 class HyperTorchParameters : public HyperParameters {
     
 public:
-    HyperTorchParameters(){ init();}
+    HyperTorchParameters(){ init(); expand(); }
     
     virtual void read ( const std::string & hyperParamFileName ) override ;
     virtual void init ( void ) override ;

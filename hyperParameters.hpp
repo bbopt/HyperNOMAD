@@ -31,7 +31,7 @@
 #include "nomad.hpp"
 
 
-enum valueType { CURRENT_VALUE =0, LOWER_BOUND= -1 , UPPER_BOUND =1 };
+enum valueType {  LOWER_BOUND= -1 ,CURRENT_VALUE =0, UPPER_BOUND =1 };
 
 enum ReportValueType {NO_REPORT, COPY_VALUE, INITIAL_VALUE, AVERAGE_VALUE} ;
 
@@ -45,6 +45,8 @@ struct GenericHyperParameter
     NOMAD::Double lowerBoundValue;
     
     ReportValueType reportValueType;
+    
+    bool isFixed;
 };
 
 
@@ -53,6 +55,8 @@ enum NeighborType {NONE,PLUS_ONE_MINUS_ONE, PLUS_TWO_MINUS_TWO, LOOP_PLUS_ONE, L
 enum AssociatedHyperParametersType {ZERO_TIME,ONE_TIME,MULTIPLE_TIMES} ;
 struct HyperParametersBlock
 {
+    
+    // The attributes
     std::string name;
     
     // The parameter at the head of a block.
@@ -68,7 +72,55 @@ struct HyperParametersBlock
     
     std::vector<GenericHyperParameter> inBlockAssociatedHyperParameters;
     
-    std::vector<NOMAD::bb_input_type> getAssociatedTypes ( )
+    
+    // Utility functions follow
+    void expand()
+    {
+        // The expansion is performed for MULTIPLE_TIMES associated parameters
+        if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL && associatedParametersType == MULTIPLE_TIMES ) // The head parameter of block has associated parameters
+        {
+            NOMAD::Double categoricalValue = headOfBlockHyperParameter.value;
+            
+            if ( ! categoricalValue.is_defined() || ! categoricalValue.is_integer() || categoricalValue < 0 )
+            {
+                std::string err = "The dimension of an hyper parameter block (head parameter " + headOfBlockHyperParameter.name + ") is invalid ";
+                throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+            }
+            // Expand the associated parameters by copying multiple times
+            std::vector<GenericHyperParameter> tmpAssociatedHyperParameters = inBlockAssociatedHyperParameters;
+            for ( size_t i= 1 ; i < categoricalValue.round() ; i++ )
+                inBlockAssociatedHyperParameters.insert(inBlockAssociatedHyperParameters.end(),std::begin(tmpAssociatedHyperParameters), std::end(tmpAssociatedHyperParameters));
+        }
+    }
+    
+    void updateAssociatedParameters( NOMAD::Point & x )
+    {
+        if ( x.size() < inBlockAssociatedHyperParameters.size()+1 )
+        {
+            std::string err = "Cannot update the associated parameter with a point of insufficient dimension (head parameter " + headOfBlockHyperParameter.name + ").";
+            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+        }
+        
+        // update associated parameters from x
+        size_t shift=1;
+        for ( auto & aP : inBlockAssociatedHyperParameters )
+        {
+            aP.value = x[shift++];
+        }
+        
+        std::cout << x << std::endl;
+        
+        NOMAD::Point xTrimmed ( static_cast<int>(x.size() - shift) );
+        for ( size_t i=0 ; i < xTrimmed.size(); i++ )
+        {
+            xTrimmed[i]=x[i+shift];
+        }
+        x = xTrimmed;
+        std::cout << x << std::endl;
+        
+    }
+    
+    std::vector<NOMAD::bb_input_type> getAssociatedTypes ( ) const
     {
         std::vector<NOMAD::bb_input_type> bbi;
         for ( auto aP : inBlockAssociatedHyperParameters )
@@ -78,7 +130,7 @@ struct HyperParametersBlock
         return bbi;
     }
     
-    std::vector<NOMAD::Double> getAssociatedValues ( valueType t )
+    std::vector<NOMAD::Double> getAssociatedValues ( valueType t ) const
     {
         std::vector<NOMAD::Double> values;
         for ( auto aP : inBlockAssociatedHyperParameters )
@@ -90,63 +142,31 @@ struct HyperParametersBlock
             else if ( t == UPPER_BOUND )
                 values.push_back ( aP.upperBoundValue );
             else
-               std::cerr << "The value type of " << name << "is not known " << endl;
+            {
+                std::string err = "The value type of " + name + "is not known ";
+                throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+            }
         }
         return values;
     }
     
-    size_t getDimension ( )
+    size_t getDimension ( ) const
     {
-        size_t dim = 1;
-        
-        if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL && associatedParametersType > ZERO_TIME ) // The head parameter of block has associated parameters
-        {
-            dim = inBlockAssociatedHyperParameters.size();
-            if ( associatedParametersType == MULTIPLE_TIMES )
-            {
-                NOMAD::Double categoricalValue = headOfBlockHyperParameter.value;
-                
-                if ( ! categoricalValue.is_defined() || ! categoricalValue.is_integer() || categoricalValue < 0 )
-                {
-                    std::cerr << "The dimension of an hyper parameter block (head parameter " << headOfBlockHyperParameter.name << ") is invalid " << endl;
-                    return 0;
-                }
-                
-                dim *= categoricalValue.round();
-            }
-            dim ++; // This is to account for the categorical variable
-        }
-        // The head parameter of block has no associated parameters --> dim = 1
-        
-        return dim;
+        return inBlockAssociatedHyperParameters.size()+1;
     }
     
     
-    std::vector<NOMAD::bb_input_type> getTypes(  )
+    std::vector<NOMAD::bb_input_type> getTypes(  ) const
     {
         std::vector<NOMAD::bb_input_type> bbi{headOfBlockHyperParameter.type };
-        
-        if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL && associatedParametersType > ZERO_TIME ) // The head parameter of block has associated parameters
-        {
-            NOMAD::Double categoricalValue = headOfBlockHyperParameter.value;
-            if ( ! categoricalValue.is_defined() || ! categoricalValue.is_integer() || categoricalValue < 0 )
-            {
-                std::cerr << "The dimension of an hyper parameter block (head parameter " << headOfBlockHyperParameter.name << ") is invalid " << endl;
-                return bbi;
-            }
-            
-            std::vector<NOMAD::bb_input_type> bbiAssociatedParameters = getAssociatedTypes( );
-            size_t times = ( (associatedParametersType == MULTIPLE_TIMES ) ? categoricalValue.round() : 1);
-            for ( size_t i= 0 ; i < times ; i++ )
-            {
-                bbi.insert(bbi.end(),std::begin(bbiAssociatedParameters), std::end(bbiAssociatedParameters));
-            }
-        }
+        std::vector<NOMAD::bb_input_type> bbiAssociatedParameters = getAssociatedTypes( );
+        bbi.insert(bbi.end(),std::begin(bbiAssociatedParameters), std::end(bbiAssociatedParameters));
         
         return bbi;
     }
-    std::vector<NOMAD::Double> getValues( valueType t )
+    std::vector<NOMAD::Double> getValues( valueType t ) const
     {
+        
         std::vector<NOMAD::Double> values;
         if ( t == CURRENT_VALUE )
             values.push_back( headOfBlockHyperParameter.value  );
@@ -155,52 +175,50 @@ struct HyperParametersBlock
         else if ( t == UPPER_BOUND )
             values.push_back ( headOfBlockHyperParameter.upperBoundValue  );
         else
-            std::cerr << "The value type of " << name << "is not known " << endl;
-        
-        if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL && associatedParametersType > ZERO_TIME ) // The head parameter of block has associated parameters
         {
-            NOMAD::Double categoricalValue = headOfBlockHyperParameter.value;
-            if ( ! categoricalValue.is_defined() || ! categoricalValue.is_integer() || categoricalValue < 0 )
-            {
-                std::cerr << "The dimension of an hyper parameter block (head parameter " << headOfBlockHyperParameter.name << ") is invalid " << endl;
-                return values;
-            }
-            
-            std::vector<NOMAD::Double> valuesAssociatedParameters = getAssociatedValues( t );
-            size_t times = ( (associatedParametersType == MULTIPLE_TIMES ) ? categoricalValue.round() : 1);
-            for ( size_t i= 0 ; i < times ; i++ )
-            {
-                values.insert(values.end(),std::begin(valuesAssociatedParameters), std::end(valuesAssociatedParameters));
-            }
+            std::string err = "The value type of " + name + "is not known ";
+            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
         }
         
+        std::vector<NOMAD::Double> valuesAssociatedParameters = getAssociatedValues( t );
+        values.insert(values.end(),std::begin(valuesAssociatedParameters), std::end(valuesAssociatedParameters));
         return values;
     }
+    
+    
 };
 
 class HyperParameters {
 
 protected:
-    std::vector<HyperParametersBlock> _allParameters;
+    std::vector<HyperParametersBlock> _baseHyperParameters;
+    
     std::string _databaseName;
     std::string _bbEXE;
 
+    void expand();
 public:
     
     NOMAD::Point getValues( valueType t ) const;
+    NOMAD::Point getValues( const HyperParameters & hp , const NOMAD::Point & v ) const;
     
     std::string getBB () const { return _bbEXE;  }
     
     size_t getDimension() const;
     
-    // std::vector<HyperParameters> getNeighboors();
+    std::vector<HyperParameters> getNeighboors( const NOMAD::Point & x ) ;
     std::vector<NOMAD::bb_input_type> getTypes() const;
-    void update( const NOMAD::Eval_Point & x );
+    void update( const NOMAD::Point & x );
+    
+    std::vector<size_t> getIndexFixedParams() const;
     
     virtual void read ( const std::string & hyperParamFileName ) = 0 ;
+    
 
 private:
     virtual void init ( void ) = 0;
+    
+    std::vector<HyperParametersBlock> _expandedHyperParameters;
     
 
 };
