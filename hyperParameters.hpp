@@ -30,197 +30,135 @@
 
 #include "nomad.hpp"
 
-
-enum valueType {  LOWER_BOUND= -1 ,CURRENT_VALUE =0, UPPER_BOUND =1 };
-
-enum ReportValueType {NO_REPORT, COPY_VALUE, INITIAL_VALUE, AVERAGE_VALUE} ;
-
-struct GenericHyperParameter
-{
-    std::string name;
-    NOMAD::bb_input_type type;
-    
-    NOMAD::Double value;
-    NOMAD::Double upperBoundValue;
-    NOMAD::Double lowerBoundValue;
-    
-    ReportValueType reportValueType;
-    
-    bool isFixed;
-};
-
-
-
-enum NeighborType {NONE,PLUS_ONE_MINUS_ONE, PLUS_TWO_MINUS_TWO, LOOP_PLUS_ONE, LOOP_MINUS_ONE } ;
-enum AssociatedHyperParametersType {ZERO_TIME,ONE_TIME,MULTIPLE_TIMES} ;
-struct HyperParametersBlock
-{
-    
-    // The attributes
-    std::string name;
-    
-    // The parameter at the head of a block.
-    // If it is a categorical parameters, associated variables are possible (can be none).
-    // If not a categorical parameter: there is no associated parameters (ZERO_TIME) and no neigboor type (NONE)
-    GenericHyperParameter headOfBlockHyperParameter;
-    
-    // How to obtain neigboors
-    NeighborType neighboorType;
-    
-    // Make the link between the categorical parameter and the associated parameters
-    AssociatedHyperParametersType associatedParametersType;
-    
-    std::vector<GenericHyperParameter> inBlockAssociatedHyperParameters;
-    
-    
-    // Utility functions follow
-    void expand()
-    {
-        // The expansion is performed for MULTIPLE_TIMES associated parameters
-        if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL && associatedParametersType == MULTIPLE_TIMES ) // The head parameter of block has associated parameters
-        {
-            NOMAD::Double categoricalValue = headOfBlockHyperParameter.value;
-            
-            if ( ! categoricalValue.is_defined() || ! categoricalValue.is_integer() || categoricalValue < 0 )
-            {
-                std::string err = "The dimension of an hyper parameter block (head parameter " + headOfBlockHyperParameter.name + ") is invalid ";
-                throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
-            }
-            // Expand the associated parameters by copying multiple times
-            std::vector<GenericHyperParameter> tmpAssociatedHyperParameters = inBlockAssociatedHyperParameters;
-            for ( size_t i= 1 ; i < categoricalValue.round() ; i++ )
-                inBlockAssociatedHyperParameters.insert(inBlockAssociatedHyperParameters.end(),std::begin(tmpAssociatedHyperParameters), std::end(tmpAssociatedHyperParameters));
-        }
-    }
-    
-    void updateAssociatedParameters( NOMAD::Point & x )
-    {
-        if ( x.size() < inBlockAssociatedHyperParameters.size()+1 )
-        {
-            std::string err = "Cannot update the associated parameter with a point of insufficient dimension (head parameter " + headOfBlockHyperParameter.name + ").";
-            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
-        }
-        
-        // update associated parameters from x
-        size_t shift=1;
-        for ( auto & aP : inBlockAssociatedHyperParameters )
-        {
-            aP.value = x[shift++];
-        }
-        
-        std::cout << x << std::endl;
-        
-        NOMAD::Point xTrimmed ( static_cast<int>(x.size() - shift) );
-        for ( size_t i=0 ; i < xTrimmed.size(); i++ )
-        {
-            xTrimmed[i]=x[i+shift];
-        }
-        x = xTrimmed;
-        std::cout << x << std::endl;
-        
-    }
-    
-    std::vector<NOMAD::bb_input_type> getAssociatedTypes ( ) const
-    {
-        std::vector<NOMAD::bb_input_type> bbi;
-        for ( auto aP : inBlockAssociatedHyperParameters )
-        {
-            bbi.push_back( aP.type );
-        }
-        return bbi;
-    }
-    
-    std::vector<NOMAD::Double> getAssociatedValues ( valueType t ) const
-    {
-        std::vector<NOMAD::Double> values;
-        for ( auto aP : inBlockAssociatedHyperParameters )
-        {
-            if ( t == CURRENT_VALUE )
-                values.push_back( aP.value );
-            else if ( t == LOWER_BOUND )
-                values.push_back( aP.lowerBoundValue );
-            else if ( t == UPPER_BOUND )
-                values.push_back ( aP.upperBoundValue );
-            else
-            {
-                std::string err = "The value type of " + name + "is not known ";
-                throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
-            }
-        }
-        return values;
-    }
-    
-    size_t getDimension ( ) const
-    {
-        return inBlockAssociatedHyperParameters.size()+1;
-    }
-    
-    
-    std::vector<NOMAD::bb_input_type> getTypes(  ) const
-    {
-        std::vector<NOMAD::bb_input_type> bbi{headOfBlockHyperParameter.type };
-        std::vector<NOMAD::bb_input_type> bbiAssociatedParameters = getAssociatedTypes( );
-        bbi.insert(bbi.end(),std::begin(bbiAssociatedParameters), std::end(bbiAssociatedParameters));
-        
-        return bbi;
-    }
-    std::vector<NOMAD::Double> getValues( valueType t ) const
-    {
-        
-        std::vector<NOMAD::Double> values;
-        if ( t == CURRENT_VALUE )
-            values.push_back( headOfBlockHyperParameter.value  );
-        else if ( t == LOWER_BOUND )
-            values.push_back( headOfBlockHyperParameter.lowerBoundValue  );
-        else if ( t == UPPER_BOUND )
-            values.push_back ( headOfBlockHyperParameter.upperBoundValue  );
-        else
-        {
-            std::string err = "The value type of " + name + "is not known ";
-            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
-        }
-        
-        std::vector<NOMAD::Double> valuesAssociatedParameters = getAssociatedValues( t );
-        values.insert(values.end(),std::begin(valuesAssociatedParameters), std::end(valuesAssociatedParameters));
-        return values;
-    }
-    
-    
-};
+enum valueType {  LOWER_BOUND= -1 ,CURRENT_VALUE =0, UPPER_BOUND =1 , INITIAL_VALUE };
 
 class HyperParameters {
+private:
+    
+    enum ReportValueType { NO_REPORT, COPY_VALUE, COPY_INITIAL_VALUE } ;
+    enum FixedParameterType { NEVER_FIXED, ALWAYS_FIXED, FIXED_IF_IN_LAST_GROUP, FIXED_IF_IN_FIRST_GROUP };
+    
+    struct GenericHyperParameter
+    {
+        std::string name;
+        NOMAD::bb_input_type type;
+        
+        NOMAD::Double value;
+        
+        NOMAD::Double lowerBoundValue;
+        NOMAD::Double upperBoundValue;
+        
+        // Remaining attributes do not need to be set during initialization.
+        ReportValueType reportValueType = NO_REPORT ;
+        
+        FixedParameterType fixedParamType = NEVER_FIXED;
+        
+        NOMAD::Double fixedValue {};
+        NOMAD::Double initialValue {};
 
-protected:
+        bool isFixed = false;
+    };
+    
+    enum NeighborType {NONE,PLUS_ONE_MINUS_ONE_RIGHT,PLUS_ONE_MINUS_ONE_LEFT, LOOP_PLUS_ONE_RIGHT, LOOP_PLUS_ONE_LEFT, LOOP_MINUS_ONE_RIGHT , LOOP_MINUS_ONE_LEFT } ;
+    enum AssociatedHyperParametersType {ZERO_TIME,ONE_TIME,MULTIPLE_TIMES} ;
+    
+    typedef std::vector<std::vector<GenericHyperParameter>> GroupsOfAssociatedHyperParameters;
+    
+    struct HyperParametersBlock
+    {
+        
+        // The attributes
+        std::string name;
+        
+        // The parameter at the head of a block.
+        // If it is a categorical parameters, associated variables are possible (can be none).
+        // If not a categorical parameter: there is no associated parameters (ZERO_TIME) and no neigboor type (NONE)
+        GenericHyperParameter headOfBlockHyperParameter;
+        
+        // How to obtain neigboors
+        NeighborType neighboorType;
+        
+        // Make the link between the categorical parameter and the associated parameters
+        AssociatedHyperParametersType associatedParametersType = ZERO_TIME;
+        
+        GroupsOfAssociatedHyperParameters groupsOfAssociatedHyperParameters;
+        
+        //---------------------------------------------//
+        // Utility functions follow
+        //---------------------------------------------//
+        
+        // Expansion
+        void expandAssociatedParameters(); // Used for expanding baseHyperParameter -> expandHyperParameter
+        
+        // Set the flags for dynamic fixed variables
+        void setAssociatedParametersType();
+        
+        
+        // Update the values of all the associated parameters using values in x
+        void updateAssociatedParameters( NOMAD::Point & x );
+        
+        // Get an updated group of associated hyper parameters
+        std::vector<GenericHyperParameter> updateAssociatedParameters ( std::vector<GenericHyperParameter> & fromGroup , bool isLastGroup =false, bool isFirstGroup = false  ) const;
+        
+        void expandAndUpdateAssociatedParametersWithConstraints( ); // increase to match head parameter value
+
+        
+        void reduceAssociatedParametersWithConstraints( ); // decrease to match head parameter value
+        
+        
+        std::vector<NOMAD::bb_input_type> getAssociatedTypes ( ) const;
+        std::vector<NOMAD::Double> getAssociatedValues ( valueType t ) const;
+        
+        size_t getDimension ( ) const ;
+        size_t getNumberOfGroupsAssociatedParameters ( ) const { return groupsOfAssociatedHyperParameters.size(); }
+        
+        std::vector<NOMAD::bb_input_type> getTypes(  ) const;
+        std::vector<NOMAD::Double> getValues( valueType t ) const;
+        std::vector<HyperParametersBlock> getNeighboorsOfBlock( ) const;
+        
+        void check();
+
+    };
+    
     std::vector<HyperParametersBlock> _baseHyperParameters;
+    std::vector<HyperParametersBlock> _expandedHyperParameters;
     
     std::string _databaseName;
     std::string _bbEXE;
+    vector<NOMAD::bb_output_type> _bbot;
+    size_t _maxBbEval;
+    
+    NOMAD::Point _X0;
 
     void expand();
+    
+    void check();
 public:
     
+    void operator=(const HyperParameters&) = delete; // No usual assignement is allowed --> see private constructor for assignement from blocks of hyper parameters
+    
+    HyperParameters ( const std::string & hyperParamFileName );
+    
     NOMAD::Point getValues( valueType t ) const;
-    NOMAD::Point getValues( const HyperParameters & hp , const NOMAD::Point & v ) const;
     
-    std::string getBB () const { return _bbEXE;  }
+    const std::string & getBB ( void ) const { return _bbEXE;  }
+    const vector<NOMAD::bb_output_type> & getBbOutputType ( void ) const { return _bbot; }
+    size_t getMaxBbEval( void ) const { return _maxBbEval; }
     
-    size_t getDimension() const;
+    size_t getDimension( void ) const;
     
-    std::vector<HyperParameters> getNeighboors( const NOMAD::Point & x ) ;
     std::vector<NOMAD::bb_input_type> getTypes() const;
     void update( const NOMAD::Point & x );
     
-    std::vector<size_t> getIndexFixedParams() const;
+    std::vector<std::pair<size_t,NOMAD::Double>> getFixedParams() const;
     
-    virtual void read ( const std::string & hyperParamFileName ) = 0 ;
-    
+    virtual std::vector<HyperParameters> getNeighboors( const NOMAD::Point & x ) ;
 
 private:
-    virtual void init ( void ) = 0;
+    void initBlockStructureToDefault ( void );
     
-    std::vector<HyperParametersBlock> _expandedHyperParameters;
+    HyperParameters ( const std::vector<HyperParametersBlock> & hpbs);
     
-
 };
 
 #endif

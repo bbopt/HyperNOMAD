@@ -24,7 +24,7 @@
 /*            Example of a problem with categorical variables        */
 /*-------------------------------------------------------------------*/
 #include "nomad.hpp"
-#include "hyperTorchParameters.hpp"
+#include "hyperParameters.hpp"
 #include <vector>
 
 using namespace std;
@@ -54,8 +54,8 @@ private:
 public:
     
     // constructor:
-    My_Extended_Poll ( Parameters & p , const std::shared_ptr<HyperParameters> & hyperParameters, size_t shift1 , size_t shift2):
-    Extended_Poll ( p ), _hyperParameters(hyperParameters),_shift1(shift1) , _shift2(shift2)
+    My_Extended_Poll ( Parameters & p , std::shared_ptr<HyperParameters> & hyperParameters, size_t shift1 , size_t shift2):
+    Extended_Poll ( p ), _hyperParameters(std::move(hyperParameters)),_shift1(shift1) , _shift2(shift2)
     {
     }
     
@@ -81,51 +81,49 @@ int main ( int argc , char ** argv )
     Display out ( cout );
     out.precision ( DISPLAY_PRECISION_STD );
     
+    std::string hyperParamFile="";
+    if ( argc > 1 )
+        hyperParamFile = argv[1];
+    
     try
     {
-        
-        
-        
         
         // parameters creation:
         Parameters p ( out );
         
-        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperTorchParameters>();
+        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile);
         //        if ( ! readHyperParametersFromFile(hyperParameters,argv[0]) )
         //        {
         //            std::cerr << "Problem reading hyper parameter file" << std::endl;
         //            return 0;
         //        }
-//        const double x0[]={6, 16, 3, 1, 0, 0, 32, 3, 2, 0, 0, 32, 3, 1, 0, 0, 64, 3, 1, 0, 0, 64, 3, 1, 0, 0, 128, 3, 2, 0, 0, 2, 100, 10, 64, 2, 0.001, 0.9, 0.999, 0, 0, 1};
-//        size_t dim_x0 = sizeof(x0) / sizeof(double);
-//        NOMAD::Point X0( static_cast<int>(dim_x0) );
-//        for ( int i=0 ; i < dim_x0 ; i++ )
-//            X0[i]=x0[i];
-//        hyperParameters->update(X0);
+        
+        NOMAD::Point X0 = hyperParameters->getValues( CURRENT_VALUE) ;
+        std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
+        return 0 ;
         
         
-        p.set_X0( hyperParameters->getValues( CURRENT_VALUE) );
         p.set_DIMENSION( static_cast<int>(hyperParameters->getDimension()) );
+        p.set_X0( hyperParameters->getValues( CURRENT_VALUE) );
         p.set_BB_INPUT_TYPE( hyperParameters->getTypes() );
         p.set_LOWER_BOUND( hyperParameters->getValues( LOWER_BOUND ) );
         p.set_UPPER_BOUND( hyperParameters->getValues( UPPER_BOUND ) );
-        p.set_BB_EXE( hyperParameters->getBB() );
 
-        std::vector<size_t> indexFixedParams = hyperParameters->getIndexFixedParams();
-        for ( auto i : indexFixedParams )
-            p.set_FIXED_VARIABLE( static_cast<int>(i) );
-        
-        // Single output
-        vector<NOMAD::bb_output_type> bbot={ NOMAD::OBJ };
-        p.set_BB_OUTPUT_TYPE ( bbot );
-        
-        p.set_MAX_BB_EVAL( 100 );
+// TODO
+//        std::vector<size_t> indexFixedParams = hyperParameters->getIndexFixedParams();
+//        for ( auto i : indexFixedParams )
+//            p.set_FIXED_VARIABLE( static_cast<int>(i) );
+
+        p.set_BB_EXE( hyperParameters->getBB() );
+        p.set_BB_OUTPUT_TYPE ( hyperParameters->getBbOutputType() );
+        p.set_MAX_BB_EVAL( hyperParameters->getMaxBbEval() );
+
+        p.set_EXTENDED_POLL_TRIGGER ( 10 , false );
         p.set_DISPLAY_STATS("bbe ( sol ) obj");
         
-        if ( USE_SURROGATE )
-            p.set_HAS_SGTE ( true );
+//        if ( USE_SURROGATE )
+//            p.set_HAS_SGTE ( true );
         
-        p.set_EXTENDED_POLL_TRIGGER ( 10 , false );
         
         // parameters validation:
         p.check();
@@ -164,9 +162,6 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
     // Get the neighboors of the point (an update of the hyper parameters structure is performed)
     std::vector<HyperParameters> neighboors = _hyperParameters->getNeighboors(x);
     
-    // Get the poll size of the point
-    const Point & dx = x.get_signature()->get_mesh()->get_initial_poll_size();
-    
     for ( auto & nHyperParameters : neighboors )
     {
         size_t nDim = nHyperParameters.getDimension();
@@ -176,19 +171,21 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         NOMAD::Point nUpperBound = nHyperParameters.getValues( UPPER_BOUND );
         NOMAD::Point nX =nHyperParameters.getValues( CURRENT_VALUE );
      
-        // The values of dx (from _hyperParameters) are reported to a new HyperParameters structure (nHyperParameters).
-        NOMAD::Point nDx = nHyperParameters.getValues( *_hyperParameters , dx );
+        // Create a parameter to obtain a signature for this neighboor
+        NOMAD::Parameters nP ( _p.out() );
+        nP.set_X0 ( nX );
+        nP.set_LOWER_BOUND( nLowerBound );
+        nP.set_UPPER_BOUND( nUpperBound );
+        nP.set_BB_INPUT_TYPE( nBbit );
+        nP.set_DIMENSION( static_cast<int>(nDim) );
+        // Some parameters come from the original problem definition
+        nP.set_BB_EXE( _p.get_bb_exe() );
+        nP.set_BB_OUTPUT_TYPE( _p.get_bb_output_type() );
+        // Check is need to create a valid signature
+        nP.check();
         
-        NOMAD::Signature nS (nDim,
-                            nBbit                     ,
-                            nDx                       ,
-                            nLowerBound                       ,
-                            nUpperBound                       ,
-                             _p.get_direction_types   () ,
-                             _p.get_sec_poll_dir_types() ,
-                             _p.get_int_poll_dir_types() ,
-                             _p.out()                    );
-        
+        // The signature to be registered with the neighboor point
+        NOMAD::Signature nS ( (*nP.get_signature()) );
         add_extended_poll_point ( nX , nS);
     }
     
