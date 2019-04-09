@@ -75,18 +75,30 @@ NOMAD::Point HyperParameters::getValues( valueType t) const
     return values;
 }
 
-// TODO
-std::vector<std::pair<size_t,NOMAD::Double>> HyperParameters::getFixedParams() const
+// MAYBE TODO
+//std::vector<std::pair<size_t,NOMAD::Double>> HyperParameters::getFixedParams() const
+//{
+//    std::vector<std::pair<size_t,NOMAD::Double>> fixed;
+//    return fixed;
+//}
+
+// Get the indices of fixed variables for expanded hyper parameters
+std::vector<size_t> HyperParameters::getIndexFixedParams() const
 {
-    std::vector<std::pair<size_t,NOMAD::Double>> fixed;
-    return fixed;
+    
+    size_t current_index =0;
+    std::vector<size_t> fixedParams;
+    for ( auto aBlock : _expandedHyperParameters )
+    {
+        std::vector<size_t> blockFixedParams = aBlock.getIndexFixedParams( current_index );
+        fixedParams.insert( fixedParams.begin() , blockFixedParams.begin() , blockFixedParams.end() );
+    }
+    return fixedParams;
 }
+
 
 void HyperParameters::update( const NOMAD::Point & x )
 {
-
-// TODO TAKE CARE OF FIXE PARAMS
-
     // Start over from baseHyperParameters that have not been expanded to full size
     _expandedHyperParameters = _baseHyperParameters;
     
@@ -200,77 +212,192 @@ void HyperParameters::check( void )
 void HyperParameters::initBlockStructureToDefault ( void )
 {
     //
-    // The default block structure corresponds to CIPHAR10
+    // The default block structure corresponds to MNIST
     //
-    
-    
+
+
     // FIRST HYPER PARAMETERS BLOCK (Convolutionnal layers)
-    GenericHyperParameter headOfBlock1={"Number of convolutionnal layers",NOMAD::CATEGORICAL,6,0,100};
-    
-    GenericHyperParameter hp1={"Number of output channels",NOMAD::INTEGER,16,1,1000,COPY_VALUE};
-    GenericHyperParameter hp2={"Kernel size",NOMAD::INTEGER,3,1,20,COPY_VALUE};
+    GenericHyperParameter headOfBlock1={"Number of convolutionnal layers",NOMAD::CATEGORICAL,2,0,100};
+
+    GenericHyperParameter hp1={"Number of output channels",NOMAD::INTEGER,6,1,1000,COPY_VALUE};
+    GenericHyperParameter hp2={"Kernel size",NOMAD::INTEGER,5,1,20,COPY_VALUE};
     GenericHyperParameter hp3={"Stride",NOMAD::INTEGER,1,1,3,COPY_VALUE};
     GenericHyperParameter hp4={"Padding",NOMAD::INTEGER,0,0,2,COPY_VALUE};
     GenericHyperParameter hp5={"Do a pooling",NOMAD::BINARY,0,0,1,COPY_VALUE};
     GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2,hp3,hp4,hp5}};
-    
+
     HyperParametersBlock block1={"Convolutionnal layers",headOfBlock1,PLUS_ONE_MINUS_ONE_RIGHT,MULTIPLE_TIMES,associatedHyperParameters1};
-    
-    
+
+
     // SECOND CATEGORICAL BLOCK (Full layers)
-    GenericHyperParameter headOfBlock2={"Number of full layers",NOMAD::CATEGORICAL,2,0,30};
-    
-    GenericHyperParameter hp6={"Size of a full layer",NOMAD::INTEGER,100,0,500,COPY_VALUE,FIXED_IF_IN_LAST_GROUP,NOMAD::Double(10.0) };
+    GenericHyperParameter headOfBlock2={"Number of full layers",NOMAD::CATEGORICAL,3,0,500};
+
+    GenericHyperParameter hp6={"Size of a full layer",NOMAD::INTEGER,128,1,1000,COPY_VALUE,FIXED_IF_IN_LAST_GROUP,NOMAD::Double(10.0) };
     GroupsOfAssociatedHyperParameters associatedHyperParameters2={{hp6}};
-    
+
     HyperParametersBlock block2={"Full  layers",headOfBlock2,PLUS_ONE_MINUS_ONE_LEFT,MULTIPLE_TIMES,associatedHyperParameters2};
-    
+
     // THIRD BLOCK (single regular parameter: batch size)
-    GenericHyperParameter headOfBlock3={"Batch size",NOMAD::INTEGER,64,1,500,NO_REPORT,NEVER_FIXED};
+    GenericHyperParameter headOfBlock3={"Batch size",NOMAD::INTEGER,128,1,500,NO_REPORT,NEVER_FIXED};
     HyperParametersBlock block3={"Batch size",headOfBlock3,NONE,ZERO_TIME,};
-    
+
     // FOURTH CATEGORICAL BLOCK (Optimizer select)
-    GenericHyperParameter headOfBlock4={"Choice of optimizer",NOMAD::CATEGORICAL,0,0,3};
-    
-    GenericHyperParameter hp7={"Learning rate",NOMAD::CONTINUOUS,0.001,0,1,COPY_INITIAL_VALUE};
-    GenericHyperParameter hp8={"Momentum | Beta1 | Learning rate decay ",NOMAD::CONTINUOUS,0.9,0,1,COPY_INITIAL_VALUE};
-    GenericHyperParameter hp9={"Dampening | Beta2 | Initial accumulator | alpha ",NOMAD::CONTINUOUS,0.99,0,1,COPY_INITIAL_VALUE};
-    GenericHyperParameter hp10={"Weight decay ",NOMAD::CONTINUOUS,0,0,1,COPY_INITIAL_VALUE};
+    GenericHyperParameter headOfBlock4={"Choice of optimizer",NOMAD::CATEGORICAL,3,1,4};
+
+    GenericHyperParameter hp7={"Learning rate",NOMAD::CONTINUOUS,0.1,0,1,COPY_INITIAL_VALUE};
+    GenericHyperParameter hp8={"Momentum",NOMAD::CONTINUOUS,0.9,0,1,COPY_INITIAL_VALUE};
+    GenericHyperParameter hp9={"Weight decay",NOMAD::CONTINUOUS,0.0005,0,1,COPY_INITIAL_VALUE};
+    GenericHyperParameter hp10={"Dampening",NOMAD::CONTINUOUS,0,0,1,COPY_INITIAL_VALUE};
     GroupsOfAssociatedHyperParameters associatedHyperParameters4={{hp7,hp8,hp9,hp10}};
-    
+
     HyperParametersBlock block4={"Optimizer",headOfBlock4,LOOP_PLUS_ONE_RIGHT,ONE_TIME,associatedHyperParameters4};
-    
+
     // FIFTH BLOCK (single regular parameter: Dropout rate)
-    GenericHyperParameter headOfBlock5={"Dropout rate",NOMAD::CONTINUOUS,0.5,0,1};
+    GenericHyperParameter headOfBlock5={"Dropout rate",NOMAD::CONTINUOUS,0.2,0,0.75};
     HyperParametersBlock block5={"Dropout rate",headOfBlock5,NONE,ZERO_TIME,};
 
     // SIXTH BLOCK (single regular parameter: Activation function)
-    GenericHyperParameter headOfBlock6={"Activation function",NOMAD::INTEGER,1,0,2};
+    GenericHyperParameter headOfBlock6={"Activation function",NOMAD::INTEGER,1,1,3};
     HyperParametersBlock block6={"Activation function",headOfBlock6,NONE,ZERO_TIME,};
-    
+
     // ALL BASE HYPER PARAMETERS (NOT EXPANDED)
     _baseHyperParameters = {block1,block2,block3,block4,block5,block6};
-    
-    
+
+
     // Database name
     _databaseName = " ";
-    
+
     // BB
     _bbEXE = "$python ./pytorch_bb.py";
-    
+
     // BB Output type
     _bbot={ NOMAD::OBJ };
-    
+
     // Max BB eval
     _maxBbEval = 100;
-    
-    const double x0[]={6, 16, 3, 1, 0, 0, 32, 3, 2, 0, 0, 32, 3, 1, 0, 0, 64, 3, 1, 0, 0, 64, 3, 1, 0, 0, 128, 3, 2, 0, 0, 2, 100, 10, 64, 2, 0.001, 0.9, 0.999, 0, 0, 1};
+
+    const double x0[]={2 , 6 , 5 , 1 , 0 , 1 , 16 , 5 , 1 , 0 , 1 , 3 , 128 , 84 , 10 , 128 , 3 , 0.1 , 0.9 , 5e-4 , 0 , 0.2 , 1};
     size_t dim_x0 = sizeof(x0) / sizeof(double);
     _X0.reset ( static_cast<int>(dim_x0) );
     for ( int i=0 ; i < dim_x0 ; i++ )
         _X0[i]=x0[i];
-    
+
 }
+
+
+//void HyperParameters::initBlockStructureToDefault ( void )
+//{
+//    //
+//    // This default block structure corresponds to the PORTFOLIO problem
+//    //
+//
+//
+//    // FIRST HYPER PARAMETERS BLOCK (Assets)
+//    GenericHyperParameter headOfBlock1={"Number of assets",NOMAD::CATEGORICAL,1,1,3};
+//
+//    GenericHyperParameter hp1={"Type of asset",NOMAD::INTEGER,1,0,2,COPY_VALUE};
+//    GenericHyperParameter hp2={"Value of an asset",NOMAD::CONTINUOUS,100,0,10000,COPY_VALUE};
+//    GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2}};
+//
+//    HyperParametersBlock block1={"Asset",headOfBlock1,PLUS_ONE_MINUS_ONE_RIGHT,MULTIPLE_TIMES,associatedHyperParameters1};
+//
+//    // ALL BASE HYPER PARAMETERS (NOT EXPANDED)
+//    _baseHyperParameters = {block1};
+//
+//
+//    // Database name
+//    _databaseName = " ";
+//
+//    // BB
+//    _bbEXE = "./bb.exe";
+//
+//    // BB Output type
+//    _bbot={ NOMAD::EB , NOMAD::EB , NOMAD::OBJ };
+//
+//    // Max BB eval
+//    _maxBbEval = 200;
+//
+//    const double x0[]={1,1,100};
+//    size_t dim_x0 = sizeof(x0) / sizeof(double);
+//    _X0.reset ( static_cast<int>(dim_x0) );
+//    for ( int i=0 ; i < dim_x0 ; i++ )
+//        _X0[i]=x0[i];
+//
+//}
+//void HyperParameters::initBlockStructureToDefault ( void )
+//{
+//    //
+//    // The default block structure corresponds to CIPHAR10
+//    //
+//
+//
+//    // FIRST HYPER PARAMETERS BLOCK (Convolutionnal layers)
+//    GenericHyperParameter headOfBlock1={"Number of convolutionnal layers",NOMAD::CATEGORICAL,6,0,100};
+//
+//    GenericHyperParameter hp1={"Number of output channels",NOMAD::INTEGER,16,1,1000,COPY_VALUE};
+//    GenericHyperParameter hp2={"Kernel size",NOMAD::INTEGER,3,1,20,COPY_VALUE};
+//    GenericHyperParameter hp3={"Stride",NOMAD::INTEGER,1,1,3,COPY_VALUE};
+//    GenericHyperParameter hp4={"Padding",NOMAD::INTEGER,0,0,2,COPY_VALUE};
+//    GenericHyperParameter hp5={"Do a pooling",NOMAD::BINARY,0,0,1,COPY_VALUE};
+//    GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2,hp3,hp4,hp5}};
+//
+//    HyperParametersBlock block1={"Convolutionnal layers",headOfBlock1,PLUS_ONE_MINUS_ONE_RIGHT,MULTIPLE_TIMES,associatedHyperParameters1};
+//
+//
+//    // SECOND CATEGORICAL BLOCK (Full layers)
+//    GenericHyperParameter headOfBlock2={"Number of full layers",NOMAD::CATEGORICAL,2,0,30};
+//
+//    GenericHyperParameter hp6={"Size of a full layer",NOMAD::INTEGER,100,0,500,COPY_VALUE,FIXED_IF_IN_LAST_GROUP,NOMAD::Double(10.0) };
+//    GroupsOfAssociatedHyperParameters associatedHyperParameters2={{hp6}};
+//
+//    HyperParametersBlock block2={"Full  layers",headOfBlock2,PLUS_ONE_MINUS_ONE_LEFT,MULTIPLE_TIMES,associatedHyperParameters2};
+//
+//    // THIRD BLOCK (single regular parameter: batch size)
+//    GenericHyperParameter headOfBlock3={"Batch size",NOMAD::INTEGER,64,1,500,NO_REPORT,NEVER_FIXED};
+//    HyperParametersBlock block3={"Batch size",headOfBlock3,NONE,ZERO_TIME,};
+//
+//    // FOURTH CATEGORICAL BLOCK (Optimizer select)
+//    GenericHyperParameter headOfBlock4={"Choice of optimizer",NOMAD::CATEGORICAL,0,0,3};
+//
+//    GenericHyperParameter hp7={"Learning rate",NOMAD::CONTINUOUS,0.001,0,1,COPY_INITIAL_VALUE};
+//    GenericHyperParameter hp8={"Momentum | Beta1 | Learning rate decay ",NOMAD::CONTINUOUS,0.9,0,1,COPY_INITIAL_VALUE};
+//    GenericHyperParameter hp9={"Dampening | Beta2 | Initial accumulator | alpha ",NOMAD::CONTINUOUS,0.99,0,1,COPY_INITIAL_VALUE};
+//    GenericHyperParameter hp10={"Weight decay ",NOMAD::CONTINUOUS,0,0,1,COPY_INITIAL_VALUE};
+//    GroupsOfAssociatedHyperParameters associatedHyperParameters4={{hp7,hp8,hp9,hp10}};
+//
+//    HyperParametersBlock block4={"Optimizer",headOfBlock4,LOOP_PLUS_ONE_RIGHT,ONE_TIME,associatedHyperParameters4};
+//
+//    // FIFTH BLOCK (single regular parameter: Dropout rate)
+//    GenericHyperParameter headOfBlock5={"Dropout rate",NOMAD::CONTINUOUS,0.5,0,1};
+//    HyperParametersBlock block5={"Dropout rate",headOfBlock5,NONE,ZERO_TIME,};
+//
+//    // SIXTH BLOCK (single regular parameter: Activation function)
+//    GenericHyperParameter headOfBlock6={"Activation function",NOMAD::INTEGER,1,0,2};
+//    HyperParametersBlock block6={"Activation function",headOfBlock6,NONE,ZERO_TIME,};
+//
+//    // ALL BASE HYPER PARAMETERS (NOT EXPANDED)
+//    _baseHyperParameters = {block1,block2,block3,block4,block5,block6};
+//
+//
+//    // Database name
+//    _databaseName = " ";
+//
+//    // BB
+//    _bbEXE = "$python ./pytorch_bb.py";
+//
+//    // BB Output type
+//    _bbot={ NOMAD::OBJ };
+//
+//    // Max BB eval
+//    _maxBbEval = 100;
+//
+//    const double x0[]={6, 16, 3, 1, 0, 0, 32, 3, 2, 0, 0, 32, 3, 1, 0, 0, 64, 3, 1, 0, 0, 64, 3, 1, 0, 0, 128, 3, 2, 0, 0, 2, 100, 10, 64, 2, 0.001, 0.9, 0.999, 0, 0, 1};
+//    size_t dim_x0 = sizeof(x0) / sizeof(double);
+//    _X0.reset ( static_cast<int>(dim_x0) );
+//    for ( int i=0 ; i < dim_x0 ; i++ )
+//        _X0[i]=x0[i];
+//
+//}
 
 
 // Expand in block associated parameter by copying multiple time (if type allows) the existing parameters
@@ -464,8 +591,9 @@ void HyperParameters::HyperParametersBlock::expandAndUpdateAssociatedParametersW
         //
         
         NOMAD::Double headValue = headOfBlockHyperParameter.value;
+        NOMAD::Double headUpperBound = headOfBlockHyperParameter.upperBoundValue;
         
-        if ( ! headValue.is_defined() )
+        if ( ! headValue.is_defined() || headValue > headUpperBound )
             return;
         
         // No need to expand. The number of groups >= the value in head of block
@@ -509,8 +637,9 @@ void HyperParameters::HyperParametersBlock::reduceAssociatedParametersWithConstr
 
         
         NOMAD::Double headValue = headOfBlockHyperParameter.value;
+        NOMAD::Double headLowerBound = headOfBlockHyperParameter.lowerBoundValue;
      
-        if ( ! headValue.is_defined() )
+        if ( ! headValue.is_defined() || headValue < headLowerBound )
             return;
         
         
@@ -682,6 +811,24 @@ void HyperParameters::HyperParametersBlock::check()
     }
 }
 
+std::vector<size_t> HyperParameters::HyperParametersBlock:: getIndexFixedParams( size_t & current_index ) const
+{
+    std::vector<size_t> indices;
+    if ( headOfBlockHyperParameter.isFixed )
+        indices.push_back( current_index );
+    current_index++;
+    for ( auto groupAHP : groupsOfAssociatedHyperParameters )
+    {
+        for ( auto aHP : groupAHP )
+        {
+            if ( aHP.isFixed )
+                indices.push_back( current_index );
+            current_index++;
+        }
+    }
+    return indices;
+}
+
 
 std::vector<NOMAD::bb_input_type> HyperParameters::HyperParametersBlock:: getAssociatedTypes ( ) const
 {
@@ -737,9 +884,21 @@ std::vector<NOMAD::Double> HyperParameters::HyperParametersBlock::getValues( val
     if ( t == CURRENT_VALUE )
         values.push_back( headOfBlockHyperParameter.value  );
     else if ( t == LOWER_BOUND )
-        values.push_back( headOfBlockHyperParameter.lowerBoundValue  );
+    {
+        // If head is Categorical, the provided lower bound is for limiting the possible neighboors of a point. A categorical variable does not need bounds for optimization
+        if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL )
+            values.push_back( NOMAD::Double() );
+        else
+            values.push_back( headOfBlockHyperParameter.lowerBoundValue  );
+    }
     else if ( t == UPPER_BOUND )
-        values.push_back ( headOfBlockHyperParameter.upperBoundValue  );
+    {
+        // If head is Categorical, the provided upper bound is for limiting the possible neighboors of a point. A categorical variable does not need bounds for optimization
+        if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL )
+            values.push_back( NOMAD::Double() );
+        else
+            values.push_back ( headOfBlockHyperParameter.upperBoundValue  );
+    }
     else
     {
         std::string err = "The value type of " + name + "is not known ";
