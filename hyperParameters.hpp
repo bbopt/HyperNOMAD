@@ -30,6 +30,8 @@
 
 #include "nomad.hpp"
 
+const std::string UndefinedStr="Undefined";
+
 enum valueType {  LOWER_BOUND= -1 ,CURRENT_VALUE =0, UPPER_BOUND =1 , INITIAL_VALUE };
 
 class HyperParameters {
@@ -40,8 +42,8 @@ private:
     
     struct GenericHyperParameter
     {
-        std::string name;
-        NOMAD::bb_input_type type;
+        std::string name=UndefinedStr;
+        NOMAD::bb_input_type type=NOMAD::CONTINUOUS ;
         
         NOMAD::Double value;
         
@@ -57,6 +59,9 @@ private:
         NOMAD::Double initialValue {};
 
         bool isFixed = false;
+        
+        bool isDefined () const { return name.compare(UndefinedStr) != 0 ;}
+        
     };
     
     enum NeighborType {NONE,PLUS_ONE_MINUS_ONE_RIGHT,PLUS_ONE_MINUS_ONE_LEFT, LOOP_PLUS_ONE_RIGHT, LOOP_PLUS_ONE_LEFT, LOOP_MINUS_ONE_RIGHT , LOOP_MINUS_ONE_LEFT } ;

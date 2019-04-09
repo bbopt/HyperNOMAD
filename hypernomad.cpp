@@ -94,8 +94,8 @@ int main ( int argc , char ** argv )
         //        }
         
         NOMAD::Point X0 = hyperParameters->getValues( CURRENT_VALUE) ;
-//        std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
-//        return 0 ;
+        std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
+        return 0 ;
         
         p.set_DISPLAY_DEGREE( 3 );
         
@@ -112,7 +112,7 @@ int main ( int argc , char ** argv )
         p.set_BB_OUTPUT_TYPE ( hyperParameters->getBbOutputType() );
         p.set_BB_EXE( hyperParameters->getBB() );
 
-        p.set_MAX_BB_EVAL( hyperParameters->getMaxBbEval() );
+        p.set_MAX_BB_EVAL( static_cast<int>(hyperParameters->getMaxBbEval()) );
 
         p.set_EXTENDED_POLL_TRIGGER ( 10 , false );
         p.set_DISPLAY_STATS("bbe ( sol ) obj");
