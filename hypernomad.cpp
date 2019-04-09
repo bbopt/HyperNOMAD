@@ -26,7 +26,7 @@
 #include "nomad.hpp"
 #include "hyperParameters.hpp"
 #include <vector>
-
+#include <memory>
 using namespace std;
 using namespace NOMAD;
 
