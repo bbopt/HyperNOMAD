@@ -8,6 +8,23 @@
 
 #include "hyperParameters.hpp"
 
+
+void trimLeft( NOMAD::Point & x )
+{
+    if ( x.size() == 1 )
+    {
+        x = NOMAD::Point();
+        return;
+    }
+    
+    NOMAD::Point xTrimmed ( static_cast<int>(x.size() - 1) );
+    for ( size_t i=0 ; i < xTrimmed.size(); i++ )
+    {
+        xTrimmed[i]=x[i+1];
+    }
+    x = xTrimmed;
+}
+
 std::vector<NOMAD::bb_input_type> HyperParameters::getTypes() const
 {
     if ( _expandedHyperParameters.size() == 0 )
@@ -48,7 +65,6 @@ NOMAD::Point HyperParameters::getValues( valueType t) const
 {
     
     size_t dim = getDimension();
-    NOMAD::Point values( static_cast<int>(dim) );
     
     if ( _expandedHyperParameters.size() == 0 )
     {
@@ -67,7 +83,8 @@ NOMAD::Point HyperParameters::getValues( valueType t) const
     {
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: Dimensions are incompatible");
     }
-    
+
+    NOMAD::Point values( static_cast<int>(dim) );
     for ( size_t i = 0 ; i < X0.size() ; i++ )
     {
         values[i] = X0[i];
@@ -111,7 +128,11 @@ void HyperParameters::update( const NOMAD::Point & x )
     for ( auto & block : _expandedHyperParameters )
     {
         // Update the head of block parameter
-        block.headOfBlockHyperParameter.value = xBlock[0];
+        if ( block.headOfBlockHyperParameter.isDefined() )
+        {
+            block.headOfBlockHyperParameter.value = xBlock[0];
+            trimLeft( xBlock );
+        }
         
         // Expand the block structure from updtate the head value
         // Set the flags for dynamic fixed variables
@@ -209,74 +230,115 @@ void HyperParameters::check( void )
     }
 }
 
+//void HyperParameters::initBlockStructureToDefault ( void )
+//{
+//    //
+//    // The default block structure corresponds to MNIST
+//    //
+//
+//
+//    // FIRST HYPER PARAMETERS BLOCK (Convolutionnal layers)
+//    GenericHyperParameter headOfBlock1={"Number of convolutionnal layers",NOMAD::CATEGORICAL,2,0,100};
+//
+//    GenericHyperParameter hp1={"Number of output channels",NOMAD::INTEGER,6,1,1000,COPY_VALUE};
+//    GenericHyperParameter hp2={"Kernel size",NOMAD::INTEGER,5,1,20,COPY_VALUE};
+//    GenericHyperParameter hp3={"Stride",NOMAD::INTEGER,1,1,3,COPY_VALUE};
+//    GenericHyperParameter hp4={"Padding",NOMAD::INTEGER,0,0,2,COPY_VALUE};
+//    GenericHyperParameter hp5={"Do a pooling",NOMAD::BINARY,0,0,1,COPY_VALUE};
+//    GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2,hp3,hp4,hp5}};
+//
+//    HyperParametersBlock block1={"Convolutionnal layers",headOfBlock1,PLUS_ONE_MINUS_ONE_RIGHT,MULTIPLE_TIMES,associatedHyperParameters1};
+//
+//
+//    // SECOND CATEGORICAL BLOCK (Full layers)
+//    GenericHyperParameter headOfBlock2={"Number of full layers",NOMAD::CATEGORICAL,3,0,500};
+//
+//    GenericHyperParameter hp6={"Size of a full layer",NOMAD::INTEGER,128,1,1000,COPY_VALUE,FIXED_IF_IN_LAST_GROUP,NOMAD::Double(10.0) };
+//    GroupsOfAssociatedHyperParameters associatedHyperParameters2={{hp6}};
+//
+//    HyperParametersBlock block2={"Full  layers",headOfBlock2,PLUS_ONE_MINUS_ONE_LEFT,MULTIPLE_TIMES,associatedHyperParameters2};
+//
+//    // THIRD BLOCK (single regular parameter: batch size)
+//    GenericHyperParameter headOfBlock3={"Batch size",NOMAD::INTEGER,128,1,500,NO_REPORT,NEVER_FIXED};
+//    HyperParametersBlock block3={"Batch size",headOfBlock3,NONE,ZERO_TIME,};
+//
+//    // FOURTH CATEGORICAL BLOCK (Optimizer select)
+//    GenericHyperParameter headOfBlock4={"Choice of optimizer",NOMAD::CATEGORICAL,3,1,4};
+//
+//    GenericHyperParameter hp7={"Learning rate",NOMAD::CONTINUOUS,0.1,0,1,COPY_INITIAL_VALUE};
+//    GenericHyperParameter hp8={"Momentum",NOMAD::CONTINUOUS,0.9,0,1,COPY_INITIAL_VALUE};
+//    GenericHyperParameter hp9={"Weight decay",NOMAD::CONTINUOUS,0.0005,0,1,COPY_INITIAL_VALUE};
+//    GenericHyperParameter hp10={"Dampening",NOMAD::CONTINUOUS,0,0,1,COPY_INITIAL_VALUE};
+//    GroupsOfAssociatedHyperParameters associatedHyperParameters4={{hp7,hp8,hp9,hp10}};
+//
+//    HyperParametersBlock block4={"Optimizer",headOfBlock4,LOOP_PLUS_ONE_RIGHT,ONE_TIME,associatedHyperParameters4};
+//
+//    // FIFTH BLOCK (single regular parameter: Dropout rate)
+//    GenericHyperParameter headOfBlock5={"Dropout rate",NOMAD::CONTINUOUS,0.2,0,0.75};
+//    HyperParametersBlock block5={"Dropout rate",headOfBlock5,NONE,ZERO_TIME,};
+//
+//    // SIXTH BLOCK (single regular parameter: Activation function)
+//    GenericHyperParameter headOfBlock6={"Activation function",NOMAD::INTEGER,1,1,3};
+//    HyperParametersBlock block6={"Activation function",headOfBlock6,NONE,ZERO_TIME,};
+//
+//    // ALL BASE HYPER PARAMETERS (NOT EXPANDED)
+//    _baseHyperParameters = {block1,block2,block3,block4,block5,block6};
+//
+//
+//    // Database name
+//    _databaseName = " ";
+//
+//    // BB
+//    _bbEXE = "$python ./pytorch_bb.py";
+//
+//    // BB Output type
+//    _bbot={ NOMAD::OBJ };
+//
+//    // Max BB eval
+//    _maxBbEval = 100;
+//
+//    const double x0[]={2 , 6 , 5 , 1 , 0 , 1 , 16 , 5 , 1 , 0 , 1 , 3 , 128 , 84 , 10 , 128 , 3 , 0.1 , 0.9 , 5e-4 , 0 , 0.2 , 1};
+//    size_t dim_x0 = sizeof(x0) / sizeof(double);
+//    _X0.reset ( static_cast<int>(dim_x0) );
+//    for ( int i=0 ; i < dim_x0 ; i++ )
+//        _X0[i]=x0[i];
+//
+//}
+
+
 void HyperParameters::initBlockStructureToDefault ( void )
 {
     //
-    // The default block structure corresponds to MNIST
+    // This default block structure corresponds to the PORTFOLIO problem
     //
 
 
-    // FIRST HYPER PARAMETERS BLOCK (Convolutionnal layers)
-    GenericHyperParameter headOfBlock1={"Number of convolutionnal layers",NOMAD::CATEGORICAL,2,0,100};
+    // FIRST HYPER PARAMETERS BLOCK (Assets)
+    GenericHyperParameter headOfBlock1={"Number of assets",NOMAD::CATEGORICAL,1,1,3};
+    
+    GenericHyperParameter hp1={"Type of asset",NOMAD::INTEGER,1,0,2,COPY_VALUE};
+    GenericHyperParameter hp2={"Value of an asset",NOMAD::CONTINUOUS,100,0,10000,COPY_VALUE};
+    GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2}};
 
-    GenericHyperParameter hp1={"Number of output channels",NOMAD::INTEGER,6,1,1000,COPY_VALUE};
-    GenericHyperParameter hp2={"Kernel size",NOMAD::INTEGER,5,1,20,COPY_VALUE};
-    GenericHyperParameter hp3={"Stride",NOMAD::INTEGER,1,1,3,COPY_VALUE};
-    GenericHyperParameter hp4={"Padding",NOMAD::INTEGER,0,0,2,COPY_VALUE};
-    GenericHyperParameter hp5={"Do a pooling",NOMAD::BINARY,0,0,1,COPY_VALUE};
-    GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2,hp3,hp4,hp5}};
-
-    HyperParametersBlock block1={"Convolutionnal layers",headOfBlock1,PLUS_ONE_MINUS_ONE_RIGHT,MULTIPLE_TIMES,associatedHyperParameters1};
-
-
-    // SECOND CATEGORICAL BLOCK (Full layers)
-    GenericHyperParameter headOfBlock2={"Number of full layers",NOMAD::CATEGORICAL,3,0,500};
-
-    GenericHyperParameter hp6={"Size of a full layer",NOMAD::INTEGER,128,1,1000,COPY_VALUE,FIXED_IF_IN_LAST_GROUP,NOMAD::Double(10.0) };
-    GroupsOfAssociatedHyperParameters associatedHyperParameters2={{hp6}};
-
-    HyperParametersBlock block2={"Full  layers",headOfBlock2,PLUS_ONE_MINUS_ONE_LEFT,MULTIPLE_TIMES,associatedHyperParameters2};
-
-    // THIRD BLOCK (single regular parameter: batch size)
-    GenericHyperParameter headOfBlock3={"Batch size",NOMAD::INTEGER,128,1,500,NO_REPORT,NEVER_FIXED};
-    HyperParametersBlock block3={"Batch size",headOfBlock3,NONE,ZERO_TIME,};
-
-    // FOURTH CATEGORICAL BLOCK (Optimizer select)
-    GenericHyperParameter headOfBlock4={"Choice of optimizer",NOMAD::CATEGORICAL,3,1,4};
-
-    GenericHyperParameter hp7={"Learning rate",NOMAD::CONTINUOUS,0.1,0,1,COPY_INITIAL_VALUE};
-    GenericHyperParameter hp8={"Momentum",NOMAD::CONTINUOUS,0.9,0,1,COPY_INITIAL_VALUE};
-    GenericHyperParameter hp9={"Weight decay",NOMAD::CONTINUOUS,0.0005,0,1,COPY_INITIAL_VALUE};
-    GenericHyperParameter hp10={"Dampening",NOMAD::CONTINUOUS,0,0,1,COPY_INITIAL_VALUE};
-    GroupsOfAssociatedHyperParameters associatedHyperParameters4={{hp7,hp8,hp9,hp10}};
-
-    HyperParametersBlock block4={"Optimizer",headOfBlock4,LOOP_PLUS_ONE_RIGHT,ONE_TIME,associatedHyperParameters4};
-
-    // FIFTH BLOCK (single regular parameter: Dropout rate)
-    GenericHyperParameter headOfBlock5={"Dropout rate",NOMAD::CONTINUOUS,0.2,0,0.75};
-    HyperParametersBlock block5={"Dropout rate",headOfBlock5,NONE,ZERO_TIME,};
-
-    // SIXTH BLOCK (single regular parameter: Activation function)
-    GenericHyperParameter headOfBlock6={"Activation function",NOMAD::INTEGER,1,1,3};
-    HyperParametersBlock block6={"Activation function",headOfBlock6,NONE,ZERO_TIME,};
+    HyperParametersBlock block1={"Asset",headOfBlock1,PLUS_ONE_MINUS_ONE_RIGHT,MULTIPLE_TIMES,associatedHyperParameters1};
 
     // ALL BASE HYPER PARAMETERS (NOT EXPANDED)
-    _baseHyperParameters = {block1,block2,block3,block4,block5,block6};
+    _baseHyperParameters = {block1};
 
 
     // Database name
     _databaseName = " ";
 
     // BB
-    _bbEXE = "$python ./pytorch_bb.py";
+    _bbEXE = "./bb.exe";
 
     // BB Output type
-    _bbot={ NOMAD::OBJ };
+    _bbot={ NOMAD::EB , NOMAD::EB , NOMAD::OBJ };
 
     // Max BB eval
-    _maxBbEval = 100;
+    _maxBbEval = 200;
 
-    const double x0[]={2 , 6 , 5 , 1 , 0 , 1 , 16 , 5 , 1 , 0 , 1 , 3 , 128 , 84 , 10 , 128 , 3 , 0.1 , 0.9 , 5e-4 , 0 , 0.2 , 1};
+    const double x0[]={1,1,100};
     size_t dim_x0 = sizeof(x0) / sizeof(double);
     _X0.reset ( static_cast<int>(dim_x0) );
     for ( int i=0 ; i < dim_x0 ; i++ )
@@ -285,45 +347,6 @@ void HyperParameters::initBlockStructureToDefault ( void )
 }
 
 
-//void HyperParameters::initBlockStructureToDefault ( void )
-//{
-//    //
-//    // This default block structure corresponds to the PORTFOLIO problem
-//    //
-//
-//
-//    // FIRST HYPER PARAMETERS BLOCK (Assets)
-//    GenericHyperParameter headOfBlock1={"Number of assets",NOMAD::CATEGORICAL,1,1,3};
-//
-//    GenericHyperParameter hp1={"Type of asset",NOMAD::INTEGER,1,0,2,COPY_VALUE};
-//    GenericHyperParameter hp2={"Value of an asset",NOMAD::CONTINUOUS,100,0,10000,COPY_VALUE};
-//    GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2}};
-//
-//    HyperParametersBlock block1={"Asset",headOfBlock1,PLUS_ONE_MINUS_ONE_RIGHT,MULTIPLE_TIMES,associatedHyperParameters1};
-//
-//    // ALL BASE HYPER PARAMETERS (NOT EXPANDED)
-//    _baseHyperParameters = {block1};
-//
-//
-//    // Database name
-//    _databaseName = " ";
-//
-//    // BB
-//    _bbEXE = "./bb.exe";
-//
-//    // BB Output type
-//    _bbot={ NOMAD::EB , NOMAD::EB , NOMAD::OBJ };
-//
-//    // Max BB eval
-//    _maxBbEval = 200;
-//
-//    const double x0[]={1,1,100};
-//    size_t dim_x0 = sizeof(x0) / sizeof(double);
-//    _X0.reset ( static_cast<int>(dim_x0) );
-//    for ( int i=0 ; i < dim_x0 ; i++ )
-//        _X0[i]=x0[i];
-//
-//}
 //void HyperParameters::initBlockStructureToDefault ( void )
 //{
 //    //
@@ -457,7 +480,7 @@ void HyperParameters::HyperParametersBlock::expandAssociatedParameters()
 void HyperParameters::HyperParametersBlock::setAssociatedParametersType()
 {
     NOMAD::Double headValue = headOfBlockHyperParameter.value;
-    if ( associatedParametersType == MULTIPLE_TIMES && groupsOfAssociatedHyperParameters.size() != headValue.round() )
+    if ( headValue.is_defined() && associatedParametersType == MULTIPLE_TIMES && groupsOfAssociatedHyperParameters.size() != headValue.round() )
     {
         std::string err = "The number of groups of associated parameters is inconsistent with the head value for " + name ;
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
@@ -669,8 +692,11 @@ void HyperParameters::HyperParametersBlock::reduceAssociatedParametersWithConstr
 
 size_t HyperParameters::HyperParametersBlock::getDimension ( ) const
 {
-    size_t s = 1;
+    size_t s = 0;
 
+    if ( headOfBlockHyperParameter.isDefined() )
+        s++;
+    
     for ( auto group : groupsOfAssociatedHyperParameters )
         s += group.size();
     
@@ -679,21 +705,14 @@ size_t HyperParameters::HyperParametersBlock::getDimension ( ) const
 
 void HyperParameters::HyperParametersBlock::updateAssociatedParameters( NOMAD::Point & x )
 {
-    
-    
-    if ( x.size() < getDimension() )
-    {
-        std::string err = "Cannot update the associated parameter with a point of insufficient dimension (head parameter " + headOfBlockHyperParameter.name + ").";
-        throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
-    }
+
     
     // update associated parameters from x
-    size_t shift=1;
     for ( auto & aGroupAHP : groupsOfAssociatedHyperParameters )
     {
         for ( auto & aHP : aGroupAHP )
         {
-            if ( shift > x.size() )
+            if ( ! x.is_defined() )
             {
                 std::string err = "Cannot update with a point of insufficient size. Block name: " + name + ".";
                 throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
@@ -706,58 +725,56 @@ void HyperParameters::HyperParametersBlock::updateAssociatedParameters( NOMAD::P
             }
             
             // Update the value
-            aHP.value = x[shift++];
+            aHP.value = x[0];
+            
+            // Trim x from the used value
+            trimLeft( x );
             
             if ( aHP.isFixed && aHP.value != aHP.fixedValue )
             {
                 std::string err = "Cannot set the fixed variable " + aHP.name + " to a value different than the provided fixedValue.";
                 throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
             }
-            
         }
     }
     
-    // std::cout << x << std::endl;
-    
-    NOMAD::Point xTrimmed ( static_cast<int>(x.size() - shift) );
-    for ( size_t i=0 ; i < xTrimmed.size(); i++ )
-    {
-        xTrimmed[i]=x[i+shift];
-    }
-    x = xTrimmed;
     // std::cout << x << std::endl;
     
 }
 
 void HyperParameters::HyperParametersBlock::check()
 {
-    if ( ! headOfBlockHyperParameter.value.is_defined() )
-    {
-        std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " has no value defined.";
-        throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
-    }
-    if (  headOfBlockHyperParameter.initialValue.is_defined() )
-    {
-        std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " already has an init value. Initial value should be set only once";
-        throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
-    }
     
-    if (  headOfBlockHyperParameter.fixedParamType == ALWAYS_FIXED && headOfBlockHyperParameter.fixedValue.is_defined() && headOfBlockHyperParameter.value != headOfBlockHyperParameter.fixedValue )
+    if ( headOfBlockHyperParameter.isDefined() )
     {
-        std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " is always fixed but has an init value not consistent with the fixed value";
-        throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
-    }
-    headOfBlockHyperParameter.initialValue = headOfBlockHyperParameter.value;
-    
-    if ( headOfBlockHyperParameter.lowerBoundValue.is_defined() && headOfBlockHyperParameter.value < headOfBlockHyperParameter.lowerBoundValue )
-    {
-        std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " has a lower bound not consistent with the initial value";
-        throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
-    }
-    if ( headOfBlockHyperParameter.upperBoundValue.is_defined() && headOfBlockHyperParameter.value > headOfBlockHyperParameter.upperBoundValue )
-    {
-        std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " has an upper bound not consistent with the initial value";
-        throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+        if ( ! headOfBlockHyperParameter.value.is_defined() )
+        {
+            std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " has no value defined.";
+            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+        }
+        if (  headOfBlockHyperParameter.initialValue.is_defined() )
+        {
+            std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " already has an init value. Initial value should be set only once";
+            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+        }
+        
+        if (  headOfBlockHyperParameter.fixedParamType == ALWAYS_FIXED && headOfBlockHyperParameter.fixedValue.is_defined() && headOfBlockHyperParameter.value != headOfBlockHyperParameter.fixedValue )
+        {
+            std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " is always fixed but has an init value not consistent with the fixed value";
+            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+        }
+        headOfBlockHyperParameter.initialValue = headOfBlockHyperParameter.value;
+        
+        if ( headOfBlockHyperParameter.lowerBoundValue.is_defined() && headOfBlockHyperParameter.value < headOfBlockHyperParameter.lowerBoundValue )
+        {
+            std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " has a lower bound not consistent with the initial value";
+            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+        }
+        if ( headOfBlockHyperParameter.upperBoundValue.is_defined() && headOfBlockHyperParameter.value > headOfBlockHyperParameter.upperBoundValue )
+        {
+            std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " has an upper bound not consistent with the initial value";
+            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+        }
     }
         
     for ( auto & groupAHP : groupsOfAssociatedHyperParameters )
@@ -881,28 +898,32 @@ std::vector<NOMAD::Double> HyperParameters::HyperParametersBlock::getValues( val
 {
     
     std::vector<NOMAD::Double> values;
-    if ( t == CURRENT_VALUE )
-        values.push_back( headOfBlockHyperParameter.value  );
-    else if ( t == LOWER_BOUND )
+    
+    if ( headOfBlockHyperParameter.isDefined() )
     {
-        // If head is Categorical, the provided lower bound is for limiting the possible neighboors of a point. A categorical variable does not need bounds for optimization
-        if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL )
-            values.push_back( NOMAD::Double() );
+        if ( t == CURRENT_VALUE )
+            values.push_back( headOfBlockHyperParameter.value  );
+        else if ( t == LOWER_BOUND )
+        {
+            // If head is Categorical, the provided lower bound is for limiting the possible neighboors of a point. A categorical variable does not need bounds for optimization
+            if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL )
+                values.push_back( NOMAD::Double() );
+            else
+                values.push_back( headOfBlockHyperParameter.lowerBoundValue  );
+        }
+        else if ( t == UPPER_BOUND )
+        {
+            // If head is Categorical, the provided upper bound is for limiting the possible neighboors of a point. A categorical variable does not need bounds for optimization
+            if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL )
+                values.push_back( NOMAD::Double() );
+            else
+                values.push_back ( headOfBlockHyperParameter.upperBoundValue  );
+        }
         else
-            values.push_back( headOfBlockHyperParameter.lowerBoundValue  );
-    }
-    else if ( t == UPPER_BOUND )
-    {
-        // If head is Categorical, the provided upper bound is for limiting the possible neighboors of a point. A categorical variable does not need bounds for optimization
-        if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL )
-            values.push_back( NOMAD::Double() );
-        else
-            values.push_back ( headOfBlockHyperParameter.upperBoundValue  );
-    }
-    else
-    {
-        std::string err = "The value type of " + name + "is not known ";
-        throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+        {
+            std::string err = "The value type of " + name + "is not known ";
+            throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+        }
     }
     
     std::vector<NOMAD::Double> valuesAssociatedParameters = getAssociatedValues( t );
