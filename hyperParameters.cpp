@@ -297,7 +297,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // Max BB eval
     _maxBbEval = 100;
 
-    const double x0[]={2 , 6 , 5 , 1 , 0 , 1 , 16 , 5 , 1 , 0 , 1 , 3 , 128 , 84 , 10 , 128 , 3 , 0.1 , 0.9 , 5e-4 , 0 , 0.2 , 1};
+    const double x0[]={10 , 1000 , 3  , 1  , 2 , 0 , 104 , 4 , 1 , 1 , 0 , 128 , 4 , 2 , 2 , 0 , 158 , 2 , 1 , 1 , 0 , 246 , 4 , 1 , 0 , 0 , 256 , 2 , 1 , 0 , 0 , 522 , 5 , 1 , 2 , 0 , 512 , 3 , 2 , 0 , 1 , 512 , 6 , 1 , 2 , 1 , 512 , 1 , 1 , 0 , 0 , 1 , 10 , 138 , 1 , 0.001,  0.9 , 0.0005 , 0 , 0.75, 1};
     size_t dim_x0 = sizeof(x0) / sizeof(double);
     _X0.reset ( static_cast<int>(dim_x0) );
     for ( int i=0 ; i < dim_x0 ; i++ )
@@ -684,7 +684,8 @@ void HyperParameters::HyperParametersBlock::reduceAssociatedParametersWithConstr
             while ( groupsOfAssociatedHyperParameters.size() > headValue.round() )
             {
                 groupsOfAssociatedHyperParameters.erase( groupsOfAssociatedHyperParameters.begin() ) ;
-                updateAssociatedParameters ( groupsOfAssociatedHyperParameters[0] , false , true );
+                if ( groupsOfAssociatedHyperParameters.size() > 0 )
+                    updateAssociatedParameters ( groupsOfAssociatedHyperParameters[0] , false , true );
             }
         }
     }
