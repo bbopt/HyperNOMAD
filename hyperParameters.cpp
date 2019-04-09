@@ -457,7 +457,7 @@ void HyperParameters::HyperParametersBlock::expandAssociatedParameters()
 void HyperParameters::HyperParametersBlock::setAssociatedParametersType()
 {
     NOMAD::Double headValue = headOfBlockHyperParameter.value;
-    if ( neighboorType == MULTIPLE_TIMES && groupsOfAssociatedHyperParameters.size() != headValue.round() )
+    if ( associatedParametersType == MULTIPLE_TIMES && groupsOfAssociatedHyperParameters.size() != headValue.round() )
     {
         std::string err = "The number of groups of associated parameters is inconsistent with the head value for " + name ;
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
