@@ -87,23 +87,18 @@ int main ( int argc , char ** argv )
         Parameters p ( out );
         
         std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile);
-        //        if ( ! readHyperParametersFromFile(hyperParameters,argv[0]) )
-        //        {
-        //            std::cerr << "Problem reading hyper parameter file" << std::endl;
-        //            return 0;
-        //        }
         
-        NOMAD::Point X0 = hyperParameters->getValues( CURRENT_VALUE) ;
+        NOMAD::Point X0 = hyperParameters->getValues( ValueType::CURRENT_VALUE) ;
         std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
         return 0 ;
         
         p.set_DISPLAY_DEGREE( 3 );
         
         p.set_DIMENSION( static_cast<int>(hyperParameters->getDimension()) );
-        p.set_X0( hyperParameters->getValues( CURRENT_VALUE) );
+        p.set_X0( hyperParameters->getValues( ValueType::CURRENT_VALUE) );
         p.set_BB_INPUT_TYPE( hyperParameters->getTypes() );
-        p.set_LOWER_BOUND( hyperParameters->getValues( LOWER_BOUND ) );
-        p.set_UPPER_BOUND( hyperParameters->getValues( UPPER_BOUND ) );
+        p.set_LOWER_BOUND( hyperParameters->getValues( ValueType::LOWER_BOUND ) );
+        p.set_UPPER_BOUND( hyperParameters->getValues( ValueType::UPPER_BOUND ) );
 
         std::vector<size_t> indexFixedParams = hyperParameters->getIndexFixedParams();
         for ( auto i : indexFixedParams )
@@ -159,9 +154,9 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         size_t nDim = nHyperParameters.getDimension();
         vector<bb_input_type> nBbit = nHyperParameters.getTypes();
 
-        NOMAD::Point nLowerBound = nHyperParameters.getValues( LOWER_BOUND );
-        NOMAD::Point nUpperBound = nHyperParameters.getValues( UPPER_BOUND );
-        NOMAD::Point nX = nHyperParameters.getValues( CURRENT_VALUE );
+        NOMAD::Point nLowerBound = nHyperParameters.getValues( ValueType::LOWER_BOUND );
+        NOMAD::Point nUpperBound = nHyperParameters.getValues( ValueType::UPPER_BOUND );
+        NOMAD::Point nX = nHyperParameters.getValues( ValueType::CURRENT_VALUE );
 
         // Create a parameter to obtain a signature for this neighboor
         NOMAD::Parameters nP ( _p.out() );

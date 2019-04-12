@@ -32,28 +32,28 @@
 
 const std::string UndefinedStr="Undefined";
 
-enum valueType {  LOWER_BOUND= -1 ,CURRENT_VALUE =0, UPPER_BOUND =1 , INITIAL_VALUE };
+enum class ValueType { LOWER_BOUND ,CURRENT_VALUE , UPPER_BOUND , INITIAL_VALUE };
 
 class HyperParameters {
 private:
     
-    enum ReportValueType { NO_REPORT, COPY_VALUE, COPY_INITIAL_VALUE } ;
-    enum FixedParameterType { NEVER_FIXED, ALWAYS_FIXED, FIXED_IF_IN_LAST_GROUP, FIXED_IF_IN_FIRST_GROUP };
+    enum class ReportValueType { NO_REPORT, COPY_VALUE, COPY_INITIAL_VALUE } ;
+    enum class FixedParameterType { NEVER, ALWAYS, IF_IN_LAST_GROUP, IF_IN_FIRST_GROUP };
     
     struct GenericHyperParameter
     {
         std::string name=UndefinedStr;
         NOMAD::bb_input_type type=NOMAD::CONTINUOUS ;
         
-        NOMAD::Double value;
+        NOMAD::Double value {};
         
         NOMAD::Double lowerBoundValue;
         NOMAD::Double upperBoundValue;
         
         // Remaining attributes do not need to be set during initialization.
-        ReportValueType reportValueType = NO_REPORT ;
+        ReportValueType reportValueType = ReportValueType::NO_REPORT ;
         
-        FixedParameterType fixedParamType = NEVER_FIXED;
+        FixedParameterType fixedParamType = FixedParameterType::NEVER;
         
         NOMAD::Double fixedValue {};
         NOMAD::Double initialValue {};
@@ -64,8 +64,8 @@ private:
         
     };
     
-    enum NeighborType {NONE,PLUS_ONE_MINUS_ONE_RIGHT,PLUS_ONE_MINUS_ONE_LEFT, LOOP_PLUS_ONE_RIGHT, LOOP_PLUS_ONE_LEFT, LOOP_MINUS_ONE_RIGHT , LOOP_MINUS_ONE_LEFT } ;
-    enum AssociatedHyperParametersType {ZERO_TIME,ONE_TIME,MULTIPLE_TIMES} ;
+    enum class NeighborType {NONE,PLUS_ONE_MINUS_ONE_RIGHT,PLUS_ONE_MINUS_ONE_LEFT, LOOP_PLUS_ONE_RIGHT, LOOP_PLUS_ONE_LEFT, LOOP_MINUS_ONE_RIGHT , LOOP_MINUS_ONE_LEFT } ;
+    enum class AssociatedHyperParametersType {ZERO_TIME,ONE_TIME,MULTIPLE_TIMES} ;
     
     typedef std::vector<std::vector<GenericHyperParameter>> GroupsOfAssociatedHyperParameters;
     
@@ -81,10 +81,10 @@ private:
         GenericHyperParameter headOfBlockHyperParameter;
         
         // How to obtain neigboors
-        NeighborType neighboorType;
+        NeighborType neighborType;
         
         // Make the link between the categorical parameter and the associated parameters
-        AssociatedHyperParametersType associatedParametersType = ZERO_TIME;
+        AssociatedHyperParametersType associatedParametersType = AssociatedHyperParametersType::ZERO_TIME;
         
         GroupsOfAssociatedHyperParameters groupsOfAssociatedHyperParameters;
         
@@ -112,14 +112,14 @@ private:
         
         
         std::vector<NOMAD::bb_input_type> getAssociatedTypes ( ) const;
-        std::vector<NOMAD::Double> getAssociatedValues ( valueType t ) const;
+        std::vector<NOMAD::Double> getAssociatedValues ( ValueType t ) const;
         std::vector<size_t> getIndexFixedParams( size_t & current_index ) const ;
         
         size_t getDimension ( ) const ;
         size_t getNumberOfGroupsAssociatedParameters ( ) const { return groupsOfAssociatedHyperParameters.size(); }
         
         std::vector<NOMAD::bb_input_type> getTypes(  ) const;
-        std::vector<NOMAD::Double> getValues( valueType t ) const;
+        std::vector<NOMAD::Double> getValues( ValueType t ) const;
         std::vector<HyperParametersBlock> getNeighboorsOfBlock( ) const;
         
         void check();
@@ -139,13 +139,21 @@ private:
     void expand();
     
     void check();
+    
+    void initBlockStructureToDefault ( void );
+    
+    HyperParameters ( const std::vector<HyperParametersBlock> & hpbs);
+
+    
+    
+    
 public:
     
     void operator=(const HyperParameters&) = delete; // No usual assignement is allowed --> see private constructor for assignement from blocks of hyper parameters
     
     HyperParameters ( const std::string & hyperParamFileName );
     
-    NOMAD::Point getValues( valueType t ) const;
+    NOMAD::Point getValues( ValueType t ) const;
     
     const std::string & getBB ( void ) const { return _bbEXE;  }
     const vector<NOMAD::bb_output_type> & getBbOutputType ( void ) const { return _bbot; }
@@ -160,13 +168,8 @@ public:
     // std::vector<std::pair<size_t,NOMAD::Double>> getFixedParams() const;
     std::vector<size_t> getIndexFixedParams() const;
     
-    virtual std::vector<HyperParameters> getNeighboors( const NOMAD::Point & x ) ;
+    std::vector<HyperParameters> getNeighboors( const NOMAD::Point & x ) ;
 
-private:
-    void initBlockStructureToDefault ( void );
-    
-    HyperParameters ( const std::vector<HyperParametersBlock> & hpbs);
-    
 };
 
 #endif
