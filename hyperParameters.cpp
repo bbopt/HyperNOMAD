@@ -16,7 +16,7 @@ void trimLeft( NOMAD::Point & x )
         x = NOMAD::Point();
         return;
     }
-    
+
     NOMAD::Point xTrimmed ( static_cast<int>(x.size() - 1) );
     for ( size_t i=0 ; i < xTrimmed.size(); i++ )
     {
@@ -31,9 +31,9 @@ std::vector<NOMAD::bb_input_type> HyperParameters::getTypes() const
     {
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: Cannot get dimension because the hyper parameters structure has not been expanded");
     }
-    
+
     std::vector<NOMAD::bb_input_type> bbi;
-    
+
     for ( auto const & block : _expandedHyperParameters )
     {
         std::vector<NOMAD::bb_input_type> blockBBI= block.getTypes( );
@@ -45,40 +45,40 @@ std::vector<NOMAD::bb_input_type> HyperParameters::getTypes() const
 size_t HyperParameters::getDimension() const
 {
     size_t dim=0;
-    
+
     if ( _expandedHyperParameters.size() == 0 )
     {
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: Cannot get dimension because the hyper parameters structure has not been expanded");
     }
 
-    
+
     for ( auto const & block : _expandedHyperParameters )
     {
         dim += block.getDimension( );
     }
-    
+
     return dim;
 }
 
 
 NOMAD::Point HyperParameters::getValues( valueType t) const
 {
-    
+
     size_t dim = getDimension();
-    
+
     if ( _expandedHyperParameters.size() == 0 )
     {
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: Cannot get values because the hyper parameters structure has not been expanded");
     }
 
-    
+
     std::vector<NOMAD::Double> X0;
     for ( auto const & block : _expandedHyperParameters )
     {
         std::vector<NOMAD::Double> blockValues = block.getValues( t );
         X0.insert(X0.end(), std::begin(blockValues), std::end(blockValues));
     }
-    
+
     if ( X0.size() != dim )
     {
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: Dimensions are incompatible");
@@ -102,7 +102,7 @@ NOMAD::Point HyperParameters::getValues( valueType t) const
 // Get the indices of fixed variables for expanded hyper parameters
 std::vector<size_t> HyperParameters::getIndexFixedParams() const
 {
-    
+
     size_t current_index =0;
     std::vector<size_t> fixedParams;
     for ( auto aBlock : _expandedHyperParameters )
@@ -118,7 +118,7 @@ void HyperParameters::update( const NOMAD::Point & x )
 {
     // Start over from baseHyperParameters that have not been expanded to full size
     _expandedHyperParameters = _baseHyperParameters;
-    
+
     if ( _expandedHyperParameters.size() == 0 )
     {
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: Cannot update because the hyper parameters structure has not been expanded" );
@@ -133,7 +133,7 @@ void HyperParameters::update( const NOMAD::Point & x )
             block.headOfBlockHyperParameter.value = xBlock[0];
             trimLeft( xBlock );
         }
-        
+
         // Expand the block structure from updtate the head value
         // Set the flags for dynamic fixed variables
         // update the associated parameters with xBlock value and trim xBlock for next block
@@ -145,7 +145,7 @@ void HyperParameters::update( const NOMAD::Point & x )
     {
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: Cannot update because the structure of hyper parameters is not consistent with the size of the point." );
     }
-    
+
 }
 
 void HyperParameters::expand ()
@@ -161,21 +161,21 @@ void HyperParameters::expand ()
 std::vector<HyperParameters> HyperParameters::getNeighboors( const NOMAD::Point & x )
 {
     std::vector<HyperParameters> neighboors;
-    
+
     // Update the HyperParameters from x --> _expandedHyperParameters is up to date
     update(x);
-    
+
     for ( size_t i=0; i < _expandedHyperParameters.size() ; i++ )
     {
-        
+
         // Get the neighboors for a given block of hyper parameters
         // The neighboors are expanded
         std::vector<HyperParametersBlock> nBlocks= _expandedHyperParameters[i].getNeighboorsOfBlock ( );
-        
+
         // For each neighboor block: insert base blocks of hyper parameters before and after
         for ( auto & aNBlock : nBlocks )
         {
-            
+
             std::vector<HyperParametersBlock> allBlocksForCompleteHyperParameters;
             // Push_back are used to fill the vector from begining to end with current blocks and neighboor block
             // All blocks are supposed to be expanded
@@ -204,14 +204,14 @@ HyperParameters::HyperParameters ( const std::string & hyperParamFileName )
     else
         // Need to expand the HyperParams to have all attributes set
         expand();
-    
+
     // Perform check on hyper parameters and set initial value for both base and expander
     check();
 }
 
 HyperParameters::HyperParameters ( const std::vector<HyperParametersBlock> & hyperParamBlocks )
 {
-    
+
     // The vector of blocks is an expanded structure put into the object
     // This is equivalent to an assignement
     for ( const auto & block : hyperParamBlocks )
@@ -259,7 +259,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     HyperParametersBlock block2={"Full  layers",headOfBlock2,PLUS_ONE_MINUS_ONE_LEFT,MULTIPLE_TIMES,associatedHyperParameters2};
 
     // THIRD BLOCK (single regular parameter: batch size)
-    GenericHyperParameter headOfBlock3={"Batch size",NOMAD::INTEGER,128,1,500,NO_REPORT,NEVER_FIXED};
+    GenericHyperParameter headOfBlock3={"Batch size",NOMAD::INTEGER,128,1,400,NO_REPORT,NEVER_FIXED};
     HyperParametersBlock block3={"Batch size",headOfBlock3,NONE,ZERO_TIME,};
 
     // FOURTH CATEGORICAL BLOCK (Optimizer select)
@@ -297,10 +297,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // Max BB eval
     _maxBbEval = 100;
 
-//     const double x0[]={10 , 1000 , 3  , 1  , 2 , 0 , 104 , 4 , 1 , 1 , 0 , 128 , 4 , 2 , 2 , 0 , 158 , 2 , 1 , 1 , 0 , 246 , 4 , 1 , 0 , 0 , 256 , 2 , 1 , 0 , 0 , 522 , 5 , 1 , 2 , 0 , 512 , 3 , 2 , 0 , 1 , 512 , 6 , 1 , 2 , 1 , 512 , 1 , 1 , 0 , 0 , 1 , 10 , 138 , 1 , 0.001,  0.9 , 0.0005 , 0 , 0.75, 1};
-    
-    const double x0[]={10 , 64 , 3 , 1 , 2 , 0 , 64 , 4 , 1 , 1 , 0 , 128 , 4 , 2 , 2 , 0 , 128 , 2 , 1 , 1 , 0 , 256 , 4 , 1 , 0 , 0 , 256 , 2 , 1 , 0 , 0 , 512 , 5 , 1 , 2 , 0 , 512 , 3 , 2 , 0 , 1 , 512 , 6 , 1 , 2 , 1 , 512 , 1 , 1 , 0 , 0 , 1 , 10 , 128 , 1 , 0.001 , 0.9,  0.0005,  0 , 0.75, 1};
-    
+    const double x0[]={10 , 1000 , 3  , 1  , 2 , 0 , 104 , 4 , 1 , 1 , 0 , 128 , 4 , 2 , 2 , 0 , 158 , 2 , 1 , 1 , 0 , 246 , 4 , 1 , 0 , 0 , 256 , 2 , 1 , 0 , 0 , 522 , 5 , 1 , 2 , 0 , 512 , 3 , 2 , 0 , 1 , 512 , 6 , 1 , 2 , 1 , 512 , 1 , 1 , 0 , 0 , 1 , 10 , 300 , 1 , 0.001,  0.9 , 0.0005 , 0 , 0.75, 1};
     size_t dim_x0 = sizeof(x0) / sizeof(double);
     _X0.reset ( static_cast<int>(dim_x0) );
     for ( int i=0 ; i < dim_x0 ; i++ )
@@ -318,7 +315,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
 
     // FIRST HYPER PARAMETERS BLOCK (Assets)
     GenericHyperParameter headOfBlock1={"Number of assets",NOMAD::CATEGORICAL,1,1,3};
-    
+
     GenericHyperParameter hp1={"Type of asset",NOMAD::INTEGER,1,0,2,COPY_VALUE};
     GenericHyperParameter hp2={"Value of an asset",NOMAD::CONTINUOUS,100,0,10000,COPY_VALUE};
     GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2}};
@@ -434,13 +431,13 @@ void HyperParameters::HyperParametersBlock::expandAssociatedParameters()
         std::string err = "More than one group of associated hyper parameters. The expansion in block " +  name + " has already been done.";
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
     }
-    
+
     if ( associatedParametersType == ZERO_TIME && groupsOfAssociatedHyperParameters.size() > 0 )
     {
         std::string err = "There is a group of associated hyper parameters for "+name+" but the type is defined as ZERO_TIME.";
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
     }
-    
+
     if ( headOfBlockHyperParameter.type != NOMAD::CATEGORICAL && neighboorType != NONE )
     {
         std::string err = "Only categorical variables can have a neighboor type different than NONE. Head parameter " + headOfBlockHyperParameter.name + " is invalid ";
@@ -452,24 +449,24 @@ void HyperParameters::HyperParametersBlock::expandAssociatedParameters()
         std::string err = "Categorical variables must have a neighboor type different than NONE. Head parameter " + headOfBlockHyperParameter.name + " is invalid ";
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
     }
-    
+
     // The expansion is performed only for MULTIPLE_TIMES associated parameters
     if ( headOfBlockHyperParameter.type == NOMAD::CATEGORICAL && associatedParametersType == MULTIPLE_TIMES ) // The head parameter of block has associated parameters
     {
         NOMAD::Double headValue = headOfBlockHyperParameter.value;
-        
+
         if ( ! headValue.is_defined() || ! headValue.is_integer() || headValue < 0 )
         {
             std::string err = "The dimension of an hyper parameter block (head parameter " + headOfBlockHyperParameter.name + ") is invalid ";
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
         }
-        
+
         if ( groupsOfAssociatedHyperParameters.empty() )
         {
             std::string err = "Cannot copy associated parameters in block " +  name + " because it is empty ";
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
         }
-        
+
         std::vector<GenericHyperParameter> tmpAssociatedHyperParameters = groupsOfAssociatedHyperParameters[0];
         // Expand the associated parameters by copying multiple times at the end of first group
         for ( size_t i= 1 ; i < headValue.round() ; i++ )
@@ -488,7 +485,7 @@ void HyperParameters::HyperParametersBlock::setAssociatedParametersType()
         std::string err = "The number of groups of associated parameters is inconsistent with the head value for " + name ;
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
     }
-    
+
     for ( auto & aGroupAHP : groupsOfAssociatedHyperParameters )
     {
         for ( auto & aHP : aGroupAHP )
@@ -515,7 +512,7 @@ void HyperParameters::HyperParametersBlock::setAssociatedParametersType()
                 }
                 aHP.value = aHP.fixedValue;
             }
-            
+
             if ( aHP.fixedParamType == ALWAYS_FIXED )
             {
                 aHP.isFixed = true;
@@ -539,16 +536,16 @@ std::vector<HyperParameters::GenericHyperParameter> HyperParameters::HyperParame
         std::string err = "Impossible to be in first and last group at the same time (" +  name +")";
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
     }
-    
+
     if ( fromGroup.empty() )
     {
         std::string err = "Impossible to update associated parameters (" +  name +")";
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
     }
-        
+
     // By default all the values are copied ---> case aHP.reportValueType = COPY_VALUE
     std::vector<GenericHyperParameter> copiedGroup(fromGroup);
-    
+
     // UPDATE THE COPIED GROUP ACCORDING TO CONSTRAINTS FOR FIXING / REPORTING VALUE
     for ( auto & aHP : copiedGroup )
     {
@@ -576,7 +573,7 @@ std::vector<HyperParameters::GenericHyperParameter> HyperParameters::HyperParame
             continue;
         }
     }
-    
+
     // UPDATE THE FROM GROUP ACCORDING TO CONSTRAINTS FOR FIXING
     for ( auto & aHP : fromGroup )
     {
@@ -599,8 +596,8 @@ std::vector<HyperParameters::GenericHyperParameter> HyperParameters::HyperParame
         }
     }
 
-    
-    
+
+
     return copiedGroup;
 }
 
@@ -609,23 +606,23 @@ void HyperParameters::HyperParametersBlock::expandAndUpdateAssociatedParametersW
 {
     if ( neighboorType == NONE )
         return;
-    
+
     if ( associatedParametersType == MULTIPLE_TIMES ) // The head parameter of block has associated parameters
     {
         //
         // Expand the groups of associated parameters to head value without considering the upper bound
         //
-        
+
         NOMAD::Double headValue = headOfBlockHyperParameter.value;
         NOMAD::Double headUpperBound = headOfBlockHyperParameter.upperBoundValue;
-        
+
         if ( ! headValue.is_defined() || headValue > headUpperBound )
             return;
-        
+
         // No need to expand. The number of groups >= the value in head of block
         if ( groupsOfAssociatedHyperParameters.size() >= headValue.round() )
             return;
-        
+
         // Cases with PLUS ONE at RIGHT
         if ( neighboorType == PLUS_ONE_MINUS_ONE_RIGHT || neighboorType == LOOP_PLUS_ONE_RIGHT )
         {
@@ -636,7 +633,7 @@ void HyperParameters::HyperParametersBlock::expandAndUpdateAssociatedParametersW
                 groupsOfAssociatedHyperParameters.push_back( tmpAssociatedHyperParameters ) ;
             }
         }
-        
+
         // Cases with PLUS ONE at LEFT
         if ( neighboorType == PLUS_ONE_MINUS_ONE_LEFT || neighboorType == LOOP_PLUS_ONE_LEFT )
         {
@@ -661,14 +658,14 @@ void HyperParameters::HyperParametersBlock::reduceAssociatedParametersWithConstr
         // Reduce the groups of associated parameters to head value without considering the lower bound
         //
 
-        
+
         NOMAD::Double headValue = headOfBlockHyperParameter.value;
         NOMAD::Double headLowerBound = headOfBlockHyperParameter.lowerBoundValue;
-     
+
         if ( ! headValue.is_defined() || headValue < headLowerBound )
             return;
-        
-        
+
+
         // Cases with MINUS ONE at RIGHT
         if ( neighboorType == PLUS_ONE_MINUS_ONE_RIGHT || neighboorType == LOOP_MINUS_ONE_RIGHT )
         {
@@ -679,7 +676,7 @@ void HyperParameters::HyperParametersBlock::reduceAssociatedParametersWithConstr
                 updateAssociatedParameters ( groupsOfAssociatedHyperParameters.back() , true , false );
             }
         }
-        
+
         // Cases with MINUS ONE at LEFT
         if ( neighboorType == PLUS_ONE_MINUS_ONE_LEFT || neighboorType == LOOP_MINUS_ONE_LEFT )
         {
@@ -700,17 +697,17 @@ size_t HyperParameters::HyperParametersBlock::getDimension ( ) const
 
     if ( headOfBlockHyperParameter.isDefined() )
         s++;
-    
+
     for ( auto group : groupsOfAssociatedHyperParameters )
         s += group.size();
-    
+
     return s;
 }
 
 void HyperParameters::HyperParametersBlock::updateAssociatedParameters( NOMAD::Point & x )
 {
 
-    
+
     // update associated parameters from x
     for ( auto & aGroupAHP : groupsOfAssociatedHyperParameters )
     {
@@ -721,19 +718,19 @@ void HyperParameters::HyperParametersBlock::updateAssociatedParameters( NOMAD::P
                 std::string err = "Cannot update with a point of insufficient size. Block name: " + name + ".";
                 throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
             }
-                
+
             if ( aHP.type == NOMAD::CATEGORICAL )
             {
                 std::string err = "Only head parameter can be of type CATEGORICAL. Invalid parameter " + aHP.name + ".";
                 throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
             }
-            
+
             // Update the value
             aHP.value = x[0];
-            
+
             // Trim x from the used value
             trimLeft( x );
-            
+
             if ( aHP.isFixed && aHP.value != aHP.fixedValue )
             {
                 std::string err = "Cannot set the fixed variable " + aHP.name + " to a value different than the provided fixedValue.";
@@ -741,14 +738,14 @@ void HyperParameters::HyperParametersBlock::updateAssociatedParameters( NOMAD::P
             }
         }
     }
-    
+
     // std::cout << x << std::endl;
-    
+
 }
 
 void HyperParameters::HyperParametersBlock::check()
 {
-    
+
     if ( headOfBlockHyperParameter.isDefined() )
     {
         if ( ! headOfBlockHyperParameter.value.is_defined() )
@@ -761,14 +758,14 @@ void HyperParameters::HyperParametersBlock::check()
             std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " already has an init value. Initial value should be set only once";
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
         }
-        
+
         if (  headOfBlockHyperParameter.fixedParamType == ALWAYS_FIXED && headOfBlockHyperParameter.fixedValue.is_defined() && headOfBlockHyperParameter.value != headOfBlockHyperParameter.fixedValue )
         {
             std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " is always fixed but has an init value not consistent with the fixed value";
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
         }
         headOfBlockHyperParameter.initialValue = headOfBlockHyperParameter.value;
-        
+
         if ( headOfBlockHyperParameter.lowerBoundValue.is_defined() && headOfBlockHyperParameter.value < headOfBlockHyperParameter.lowerBoundValue )
         {
             std::string err = "The hyper parameter " + headOfBlockHyperParameter.name + " has a lower bound not consistent with the initial value";
@@ -780,7 +777,7 @@ void HyperParameters::HyperParametersBlock::check()
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
         }
     }
-        
+
     for ( auto & groupAHP : groupsOfAssociatedHyperParameters )
     {
         for ( auto & aHP : groupAHP )
@@ -790,13 +787,13 @@ void HyperParameters::HyperParametersBlock::check()
                 std::string err = "The hyper parameter " + aHP.name + " has no value defined.";
                 throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
             }
-            
+
             if (  aHP.initialValue.is_defined() )
             {
                 std::string err = "The hyper parameter " + aHP.name + " already has an init value. Initial value should be set only once";
                 throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
             }
-            
+
             if ( aHP.fixedParamType == ALWAYS_FIXED && aHP.fixedValue.is_defined() && aHP.value != aHP.fixedValue )
             {
                 std::string err = "The hyper parameter " + aHP.name + " has an init value not consistent with the fixed value";
@@ -807,25 +804,25 @@ void HyperParameters::HyperParametersBlock::check()
                 std::string err = "The hyper parameter " + aHP.name + " is fixed but has no fixed value";
                 throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
             }
-            
+
             if ( aHP.isFixed && aHP.fixedParamType == NEVER_FIXED )
             {
                 std::string err = "The hyper parameter " + aHP.name + " is fixed but has no fixed value";
                 throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
             }
-            
+
             if ( aHP.fixedParamType == ALWAYS_FIXED )
             {
                 aHP.isFixed = true;
                 aHP.fixedValue = aHP.value;
             }
-            
+
             if ( aHP.isFixed )
             {
                 aHP.fixedParamType = ALWAYS_FIXED;
                 aHP.fixedValue = aHP.value;
             }
-            
+
             // Set initial value from value given during initialization
             aHP.initialValue = aHP.value;
         }
@@ -894,15 +891,15 @@ std::vector<NOMAD::bb_input_type> HyperParameters::HyperParametersBlock::getType
     std::vector<NOMAD::bb_input_type> bbi{headOfBlockHyperParameter.type };
     std::vector<NOMAD::bb_input_type> bbiAssociatedParameters = getAssociatedTypes( );
     bbi.insert(bbi.end(),std::begin(bbiAssociatedParameters), std::end(bbiAssociatedParameters));
-    
+
     return bbi;
 }
 
 std::vector<NOMAD::Double> HyperParameters::HyperParametersBlock::getValues( valueType t ) const
 {
-    
+
     std::vector<NOMAD::Double> values;
-    
+
     if ( headOfBlockHyperParameter.isDefined() )
     {
         if ( t == CURRENT_VALUE )
@@ -929,7 +926,7 @@ std::vector<NOMAD::Double> HyperParameters::HyperParametersBlock::getValues( val
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
         }
     }
-    
+
     std::vector<NOMAD::Double> valuesAssociatedParameters = getAssociatedValues( t );
     values.insert(values.end(),std::begin(valuesAssociatedParameters), std::end(valuesAssociatedParameters));
     return values;
@@ -939,25 +936,25 @@ std::vector<NOMAD::Double> HyperParameters::HyperParametersBlock::getValues( val
 std::vector<HyperParameters::HyperParametersBlock> HyperParameters::HyperParametersBlock::getNeighboorsOfBlock( ) const
 {
     std::vector<HyperParametersBlock> neighboorsOfBlock;
-    
+
     // Neighboors are created only when the head of block is categorical
     if ( neighboorType == NONE || headOfBlockHyperParameter.type != NOMAD::CATEGORICAL )
         return neighboorsOfBlock;
-    
+
     // Make a Plus One and Minus copy of the block ( put in the neighboors only if options allow it )
     HyperParametersBlock newBlockPlusOne (*this);
     HyperParametersBlock newBlockMinusOne (*this);
-    
+
     // Plus one on the head
     newBlockPlusOne.headOfBlockHyperParameter.value ++;
     newBlockMinusOne.headOfBlockHyperParameter.value --;
-    
+
     // Perform a partial expansion (if not zero_time)
     newBlockPlusOne.expandAndUpdateAssociatedParametersWithConstraints();
-    
+
     // Perform a partial reduction (if not zero_time)
     newBlockMinusOne.reduceAssociatedParametersWithConstraints();
-    
+
     // Add plus one neighboor
     if ( neighboorType == PLUS_ONE_MINUS_ONE_RIGHT || neighboorType == PLUS_ONE_MINUS_ONE_LEFT )
     {
@@ -967,7 +964,7 @@ std::vector<HyperParameters::HyperParametersBlock> HyperParameters::HyperParamet
             // Add the new expanded block to the neighboors
             neighboorsOfBlock.push_back( newBlockPlusOne );
         }
-        
+
         // Add MinusOne only if not on lower bound
         if (  ! headOfBlockHyperParameter.lowerBoundValue.is_defined() || ( headOfBlockHyperParameter.lowerBoundValue.is_defined() && headOfBlockHyperParameter.value > headOfBlockHyperParameter.lowerBoundValue ) )
         {
@@ -975,7 +972,7 @@ std::vector<HyperParameters::HyperParametersBlock> HyperParameters::HyperParamet
             neighboorsOfBlock.push_back( newBlockMinusOne );
         }
     }
-    
+
     if ( neighboorType == LOOP_PLUS_ONE_LEFT
         || neighboorType == LOOP_PLUS_ONE_RIGHT )
     {
@@ -988,15 +985,15 @@ std::vector<HyperParameters::HyperParametersBlock> HyperParameters::HyperParamet
         {
             // Put the head hyper parameter value to the lower bound
             HyperParametersBlock newBlockOnLowerBound (*this);
-            
+
             newBlockOnLowerBound.headOfBlockHyperParameter.value = newBlockOnLowerBound.headOfBlockHyperParameter.lowerBoundValue;
-            
+
             newBlockOnLowerBound.reduceAssociatedParametersWithConstraints();
-            
+
             neighboorsOfBlock.push_back( newBlockOnLowerBound );
         }
     }
-    
+
     if ( neighboorType == LOOP_MINUS_ONE_LEFT
         || neighboorType == LOOP_MINUS_ONE_RIGHT )
     {
@@ -1009,16 +1006,14 @@ std::vector<HyperParameters::HyperParametersBlock> HyperParameters::HyperParamet
         {
             // Put the head hyper parameter value to the upper bound
             HyperParametersBlock newBlockOnUpperBound (*this);
-            
+
             newBlockOnUpperBound.headOfBlockHyperParameter.value = newBlockOnUpperBound.headOfBlockHyperParameter.lowerBoundValue;
-            
+
             newBlockOnUpperBound.expandAndUpdateAssociatedParametersWithConstraints();
-            
+
             neighboorsOfBlock.push_back( newBlockOnUpperBound );
         }
     }
-    
+
     return neighboorsOfBlock;
 }
-
-
