@@ -109,6 +109,11 @@ int main ( int argc , char ** argv )
         for ( auto i : indexFixedParams )
             p.set_FIXED_VARIABLE( static_cast<int>(i) );
         
+        // Each block forms a VARIABLE GROUP in Nomad
+        std::vector<std::set<int>> variableGroupsIndices = hyperParameters->getVariableGroupsIndices();
+        for ( auto aGroupIndices : variableGroupsIndices )
+            p.set_VARIABLE_GROUP( aGroupIndices );
+        
         p.set_BB_OUTPUT_TYPE ( hyperParameters->getBbOutputType() );
         p.set_BB_EXE( hyperParameters->getBB() );
 
@@ -117,7 +122,7 @@ int main ( int argc , char ** argv )
         p.set_EXTENDED_POLL_TRIGGER ( 10 , false );
         p.set_DISPLAY_STATS("bbe ( sol ) obj");
         p.set_STATS_FILE("stats.txt","bbe ( sol ) obj");
-	p.set_HISTORY_FILE("history.txt");
+        // p.set_HISTORY_FILE("history.txt");
         
 //        if ( USE_SURROGATE )
 //            p.set_HAS_SGTE ( true );
@@ -178,6 +183,12 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         std::vector<size_t> indexFixed = _hyperParameters->getIndexFixedParams();
         for ( auto i : indexFixed )
             nP.set_FIXED_VARIABLE( static_cast<int>(i) );
+        
+        // Each block forms a VARIABLE GROUP in Nomad
+        std::vector<std::set<int>> variableGroupsIndices = _hyperParameters->getVariableGroupsIndices();
+        for ( auto aGroupIndices : variableGroupsIndices )
+            nP.set_VARIABLE_GROUP( aGroupIndices );
+        
 
         // Some parameters come from the original problem definition
         nP.set_BB_OUTPUT_TYPE( _p.get_bb_output_type() );

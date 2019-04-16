@@ -113,6 +113,31 @@ std::vector<size_t> HyperParameters::getIndexFixedParams() const
     return fixedParams;
 }
 
+std::vector<std::set<int>> HyperParameters:: getVariableGroupsIndices() const
+{
+    int current_index =0;
+    std::vector<std::set<int>> indices;
+    for ( auto aBlock : _expandedHyperParameters )
+    {
+        std::set<int> aGroupIndices;
+        if ( aBlock.headOfBlockHyperParameter.type != NOMAD::CATEGORICAL )
+            aGroupIndices.insert( current_index++ );
+        else
+            current_index++;
+        
+        std::vector<NOMAD::bb_input_type> bbit = aBlock.getAssociatedTypes ( );
+        for ( size_t i = 0 ; i < bbit.size() ; i++, current_index++ )
+        {
+            if ( bbit[i] != NOMAD::CATEGORICAL )
+                aGroupIndices.insert(current_index);
+        }
+        if ( aGroupIndices.size() > 1 )
+            indices.push_back( aGroupIndices );
+    }
+    return indices;
+}
+
+
 
 void HyperParameters::update( const NOMAD::Point & x )
 {
@@ -289,8 +314,9 @@ void HyperParameters::initBlockStructureToDefault ( void )
     _databaseName = " ";
 
     // BB
-    _bbEXE = "$python ./pytorch_bb.py";
-
+    // _bbEXE = "$python ./pytorch_bb.py";
+    _bbEXE = "$perl ./bbFromHistory.pl";
+    
     // BB Output type
     _bbot={ NOMAD::OBJ };
 
@@ -846,6 +872,8 @@ std::vector<size_t> HyperParameters::HyperParametersBlock:: getIndexFixedParams(
     }
     return indices;
 }
+
+
 
 
 std::vector<NOMAD::bb_input_type> HyperParameters::HyperParametersBlock:: getAssociatedTypes ( ) const

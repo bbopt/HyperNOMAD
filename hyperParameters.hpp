@@ -114,6 +114,8 @@ private:
         std::vector<NOMAD::bb_input_type> getAssociatedTypes ( ) const;
         std::vector<NOMAD::Double> getAssociatedValues ( valueType t ) const;
         std::vector<size_t> getIndexFixedParams( size_t & current_index ) const ;
+
+        std::set<int> getVariableGroup( size_t & current_index ) const ;
         
         size_t getDimension ( ) const ;
         size_t getNumberOfGroupsAssociatedParameters ( ) const { return groupsOfAssociatedHyperParameters.size(); }
@@ -156,9 +158,8 @@ public:
     std::vector<NOMAD::bb_input_type> getTypes() const;
     void update( const NOMAD::Point & x );
     
-    // MAYBE TODO
-    // std::vector<std::pair<size_t,NOMAD::Double>> getFixedParams() const;
     std::vector<size_t> getIndexFixedParams() const;
+    std::vector<std::set<int>> getVariableGroupsIndices() const;
     
     virtual std::vector<HyperParameters> getNeighboors( const NOMAD::Point & x ) ;
 
