@@ -93,9 +93,9 @@ int main ( int argc , char ** argv )
         //            return 0;
         //        }
         
-        NOMAD::Point X0 = hyperParameters->getValues( CURRENT_VALUE) ;
-        std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
-        return 0 ;
+//        NOMAD::Point X0 = hyperParameters->getValues( CURRENT_VALUE) ;
+//        std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
+//        return 0 ;
         
         p.set_DISPLAY_DEGREE( 3 );
         
@@ -116,6 +116,8 @@ int main ( int argc , char ** argv )
 
         p.set_EXTENDED_POLL_TRIGGER ( 10 , false );
         p.set_DISPLAY_STATS("bbe ( sol ) obj");
+        p.set_STATS_FILE("stats.txt","bbe ( sol ) obj");
+	p.set_HISTORY_FILE("history.txt");
         
 //        if ( USE_SURROGATE )
 //            p.set_HAS_SGTE ( true );

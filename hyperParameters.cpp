@@ -259,7 +259,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     HyperParametersBlock block2={"Full  layers",headOfBlock2,PLUS_ONE_MINUS_ONE_LEFT,MULTIPLE_TIMES,associatedHyperParameters2};
 
     // THIRD BLOCK (single regular parameter: batch size)
-    GenericHyperParameter headOfBlock3={"Batch size",NOMAD::INTEGER,128,1,500,NO_REPORT,NEVER_FIXED};
+    GenericHyperParameter headOfBlock3={"Batch size",NOMAD::INTEGER,128,1,400,NO_REPORT,NEVER_FIXED};
     HyperParametersBlock block3={"Batch size",headOfBlock3,NONE,ZERO_TIME,};
 
     // FOURTH CATEGORICAL BLOCK (Optimizer select)
@@ -297,7 +297,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // Max BB eval
     _maxBbEval = 100;
 
-    const double x0[]={10 , 1000 , 3  , 1  , 2 , 0 , 104 , 4 , 1 , 1 , 0 , 128 , 4 , 2 , 2 , 0 , 158 , 2 , 1 , 1 , 0 , 246 , 4 , 1 , 0 , 0 , 256 , 2 , 1 , 0 , 0 , 522 , 5 , 1 , 2 , 0 , 512 , 3 , 2 , 0 , 1 , 512 , 6 , 1 , 2 , 1 , 512 , 1 , 1 , 0 , 0 , 1 , 10 , 138 , 1 , 0.001,  0.9 , 0.0005 , 0 , 0.75, 1};
+    const double x0[]={10 , 1000 , 3  , 1  , 2 , 0 , 104 , 4 , 1 , 1 , 0 , 128 , 4 , 2 , 2 , 0 , 158 , 2 , 1 , 1 , 0 , 246 , 4 , 1 , 0 , 0 , 256 , 2 , 1 , 0 , 0 , 522 , 5 , 1 , 2 , 0 , 512 , 3 , 2 , 0 , 1 , 512 , 6 , 1 , 2 , 1 , 512 , 1 , 1 , 0 , 0 , 1 , 10 , 300 , 1 , 0.001,  0.9 , 0.0005 , 0 , 0.75, 1};
     size_t dim_x0 = sizeof(x0) / sizeof(double);
     _X0.reset ( static_cast<int>(dim_x0) );
     for ( int i=0 ; i < dim_x0 ; i++ )
