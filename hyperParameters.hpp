@@ -47,6 +47,7 @@ private:
         
         NOMAD::Double value;
         
+        // The bounds can have undefined NOMAD::Double
         NOMAD::Double lowerBoundValue;
         NOMAD::Double upperBoundValue;
         
@@ -110,6 +111,7 @@ private:
         
         void reduceAssociatedParametersWithConstraints( ); // decrease to match head parameter value
         
+        const GenericHyperParameter & getHyperParameter ( size_t index ) const ;
         
         std::vector<NOMAD::bb_input_type> getAssociatedTypes ( ) const;
         std::vector<NOMAD::Double> getAssociatedValues ( valueType t ) const;

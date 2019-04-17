@@ -180,12 +180,12 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         nP.set_BB_INPUT_TYPE( nBbit );
         nP.set_MESH_TYPE( NOMAD::XMESH );  // Need to force set XMesh
 
-        std::vector<size_t> indexFixed = _hyperParameters->getIndexFixedParams();
+        std::vector<size_t> indexFixed = nHyperParameters.getIndexFixedParams();
         for ( auto i : indexFixed )
             nP.set_FIXED_VARIABLE( static_cast<int>(i) );
         
         // Each block forms a VARIABLE GROUP in Nomad
-        std::vector<std::set<int>> variableGroupsIndices = _hyperParameters->getVariableGroupsIndices();
+        std::vector<std::set<int>> variableGroupsIndices = nHyperParameters.getVariableGroupsIndices();
         for ( auto aGroupIndices : variableGroupsIndices )
             nP.set_VARIABLE_GROUP( aGroupIndices );
         

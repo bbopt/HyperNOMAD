@@ -119,16 +119,13 @@ std::vector<std::set<int>> HyperParameters:: getVariableGroupsIndices() const
     std::vector<std::set<int>> indices;
     for ( auto aBlock : _expandedHyperParameters )
     {
-        std::set<int> aGroupIndices;
-        if ( aBlock.headOfBlockHyperParameter.type != NOMAD::CATEGORICAL )
-            aGroupIndices.insert( current_index++ );
-        else
-            current_index++;
-        
-        std::vector<NOMAD::bb_input_type> bbit = aBlock.getAssociatedTypes ( );
+        std::set<int> aGroupIndices;        
+        std::vector<NOMAD::bb_input_type> bbit = aBlock.getTypes ( );
         for ( size_t i = 0 ; i < bbit.size() ; i++, current_index++ )
         {
-            if ( bbit[i] != NOMAD::CATEGORICAL )
+            // Fixed and categorical hyperparameters cannot be part of a Nomad group of variables
+            //
+            if ( bbit[i] != NOMAD::CATEGORICAL && ! aBlock.getHyperParameter(i).isFixed )
                 aGroupIndices.insert(current_index);
         }
         if ( aGroupIndices.size() > 1 )
@@ -873,10 +870,28 @@ std::vector<size_t> HyperParameters::HyperParametersBlock:: getIndexFixedParams(
     return indices;
 }
 
+const HyperParameters::GenericHyperParameter & HyperParameters::HyperParametersBlock::getHyperParameter ( size_t index ) const
+{
+    if ( index == 0 )
+        return headOfBlockHyperParameter;
+    
+    // We suppose that the groups may have a different size. So we simply go through all groups until reaching the targetd index
+    size_t i = 1 ;  // The first hyperparameter of the group has index=1 (0 is for head)
+    for ( auto groupAHP : groupsOfAssociatedHyperParameters )
+    {
+        for ( const auto & aHP : groupAHP )
+        {
+            if ( i == index )
+                return aHP;
+            i++;
+        }
+    }
+    std::string err = "Not enough hyperparameters";
+    throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
+}
 
 
-
-std::vector<NOMAD::bb_input_type> HyperParameters::HyperParametersBlock:: getAssociatedTypes ( ) const
+std::vector<NOMAD::bb_input_type> HyperParameters::HyperParametersBlock::getAssociatedTypes ( ) const
 {
     std::vector<NOMAD::bb_input_type> bbi;
     for ( auto groupAHP : groupsOfAssociatedHyperParameters )
