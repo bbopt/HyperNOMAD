@@ -38,29 +38,29 @@ using namespace NOMAD;
 /*--------------------------------------------------*/
 class My_Extended_Poll : public Extended_Poll
 {
-    
+
 private:
-    
+
     // vector of signatures
     int _extended_poll_call;
     std::shared_ptr<HyperParameters> _hyperParameters;
-    
-    
+
+
 public:
-    
+
     // constructor:
     My_Extended_Poll ( Parameters & p , std::shared_ptr<HyperParameters> & hyperParameters ):
     Extended_Poll ( p ), _hyperParameters(std::move(hyperParameters))
     {
     }
-    
+
     // destructor:
     virtual ~My_Extended_Poll ( void ) {}
-    
+
     // construct the extended poll points:
     virtual void construct_extended_points ( const Eval_Point &);
-    
-}; 
+
+};
 
 
 /*------------------------------------------*/
@@ -71,49 +71,44 @@ int main ( int argc , char ** argv )
 
     // NOMAD initializations:
     begin ( argc , argv );
-    
+
     // display:
     Display out ( cout );
     out.precision ( DISPLAY_PRECISION_STD );
-    
+
     std::string hyperParamFile="";
     if ( argc > 1 )
         hyperParamFile = argv[1];
-    
+
     try
     {
-        
+
         // parameters creation:
         Parameters p ( out );
-        
+
         std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile);
-        //        if ( ! readHyperParametersFromFile(hyperParameters,argv[0]) )
-        //        {
-        //            std::cerr << "Problem reading hyper parameter file" << std::endl;
-        //            return 0;
-        //        }
-        
+
 //        NOMAD::Point X0 = hyperParameters->getValues( CURRENT_VALUE) ;
 //        std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
 //        return 0 ;
-        
+
         p.set_DISPLAY_DEGREE( 3 );
-        
+
         p.set_DIMENSION( static_cast<int>(hyperParameters->getDimension()) );
-        p.set_X0( hyperParameters->getValues( CURRENT_VALUE) );
+        p.set_X0( hyperParameters->getValues( ValueType::CURRENT_VALUE) );
         p.set_BB_INPUT_TYPE( hyperParameters->getTypes() );
-        p.set_LOWER_BOUND( hyperParameters->getValues( LOWER_BOUND ) );
-        p.set_UPPER_BOUND( hyperParameters->getValues( UPPER_BOUND ) );
+        p.set_LOWER_BOUND( hyperParameters->getValues( ValueType::LOWER_BOUND ) );
+        p.set_UPPER_BOUND( hyperParameters->getValues( ValueType::UPPER_BOUND ) );
 
         std::vector<size_t> indexFixedParams = hyperParameters->getIndexFixedParams();
         for ( auto i : indexFixedParams )
             p.set_FIXED_VARIABLE( static_cast<int>(i) );
-        
+
         // Each block forms a VARIABLE GROUP in Nomad
         std::vector<std::set<int>> variableGroupsIndices = hyperParameters->getVariableGroupsIndices();
         for ( auto aGroupIndices : variableGroupsIndices )
             p.set_VARIABLE_GROUP( aGroupIndices );
-        
+
         p.set_BB_OUTPUT_TYPE ( hyperParameters->getBbOutputType() );
         p.set_BB_EXE( hyperParameters->getBB() );
 
@@ -123,17 +118,17 @@ int main ( int argc , char ** argv )
         p.set_DISPLAY_STATS("bbe ( sol ) obj");
         p.set_STATS_FILE("stats.txt","bbe ( sol ) obj");
         // p.set_HISTORY_FILE("history.txt");
-        
+
 //        if ( USE_SURROGATE )
 //            p.set_HAS_SGTE ( true );
-        
-        
+
+
         // parameters validation:
         p.check();
-        
+
         // extended poll:
         My_Extended_Poll ep ( p , hyperParameters );
-        
+
         // algorithm creation and execution:
         Mads mads ( p , NULL , &ep , NULL , NULL );
         mads.run();
@@ -143,11 +138,11 @@ int main ( int argc , char ** argv )
         if ( Slave::is_master() )
             cerr << endl << error << endl << endl;
     }
-    
-    
+
+
     Slave::stop_slaves ( out );
     end();
-    
+
     return EXIT_SUCCESS;
 }
 
@@ -157,7 +152,7 @@ int main ( int argc , char ** argv )
 /*--------------------------------------*/
 void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
 {
-    
+
     // Get the neighboors of the point (an update of the hyper parameters structure is performed)
     std::vector<HyperParameters> neighboors = _hyperParameters->getNeighboors(x);
 
@@ -166,9 +161,9 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         size_t nDim = nHyperParameters.getDimension();
         vector<bb_input_type> nBbit = nHyperParameters.getTypes();
 
-        NOMAD::Point nLowerBound = nHyperParameters.getValues( LOWER_BOUND );
-        NOMAD::Point nUpperBound = nHyperParameters.getValues( UPPER_BOUND );
-        NOMAD::Point nX = nHyperParameters.getValues( CURRENT_VALUE );
+        NOMAD::Point nLowerBound = nHyperParameters.getValues( ValueType::LOWER_BOUND );
+        NOMAD::Point nUpperBound = nHyperParameters.getValues( ValueType::UPPER_BOUND );
+        NOMAD::Point nX = nHyperParameters.getValues( ValueType::CURRENT_VALUE );
 
         // Create a parameter to obtain a signature for this neighboor
         NOMAD::Parameters nP ( _p.out() );
@@ -183,12 +178,12 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         std::vector<size_t> indexFixed = nHyperParameters.getIndexFixedParams();
         for ( auto i : indexFixed )
             nP.set_FIXED_VARIABLE( static_cast<int>(i) );
-        
+
         // Each block forms a VARIABLE GROUP in Nomad
         std::vector<std::set<int>> variableGroupsIndices = nHyperParameters.getVariableGroupsIndices();
         for ( auto aGroupIndices : variableGroupsIndices )
             nP.set_VARIABLE_GROUP( aGroupIndices );
-        
+
 
         // Some parameters come from the original problem definition
         nP.set_BB_OUTPUT_TYPE( _p.get_bb_output_type() );
@@ -199,7 +194,7 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         // The signature to be registered with the neighboor point
         add_extended_poll_point ( nX , *(nP.get_signature()) );
     }
-    
+
 //    // number of convolutional layers
 //    int n = static_cast<int> (x[0].value());
 //
@@ -464,5 +459,3 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
 //        // cerr << endl << " Done with 4th neighbor." << endl << endl;
 //     }
 }
-
-
