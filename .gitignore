@@ -1,0 +1,7 @@
+XCode/*
+*.o
+*.exe
+out.txt
+__pycache__
+data
+best_model.pth
