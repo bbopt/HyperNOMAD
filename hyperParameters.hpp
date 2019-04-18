@@ -42,7 +42,9 @@ private:
     
     struct GenericHyperParameter
     {
-        std::string name=UndefinedStr;
+        std::string searchName=UndefinedStr;
+        std::string fullName;
+        
         NOMAD::bb_input_type type=NOMAD::CONTINUOUS ;
         
         NOMAD::Double value {};
@@ -61,7 +63,7 @@ private:
 
         bool isFixed = false;
         
-        bool isDefined () const { return name.compare(UndefinedStr) != 0 ;}
+        bool isDefined () const { return searchName.compare(UndefinedStr) != 0 && searchName.size() != 0 ;}
         
     };
     
@@ -126,12 +128,20 @@ private:
         std::vector<NOMAD::Double> getValues( ValueType t ) const;
         std::vector<HyperParametersBlock> getNeighboorsOfBlock( ) const;
         
+        std::vector<std::string> getSearchNames() const;
+        
+        
+        // Get an hyper parameter to perform modification
+        GenericHyperParameter* getHyperParameter( const std::string & searchName ) ;
+        
         void check();
 
     };
     
     std::vector<HyperParametersBlock> _baseHyperParameters;
     std::vector<HyperParametersBlock> _expandedHyperParameters;
+    
+    std::vector<std::string> _allSearchNames;
     
     std::string _databaseName;
     std::string _bbEXE;
@@ -144,11 +154,16 @@ private:
     
     void check();
     
+    void registerSearchNames();
+    
+    GenericHyperParameter * getHyperParameter( const std::string & searchName ) ;
+    
     void initBlockStructureToDefault ( void );
     
     HyperParameters ( const std::vector<HyperParametersBlock> & hpbs);
 
-    
+    void read ( const std::string & hyperParamFileName );
+    void interpretPoint( ValueType type,  std::vector<NOMAD::Double> & tmp , NOMAD::Parameter_Entries * entries ) const ;
     
     
 public:
