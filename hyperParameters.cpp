@@ -515,11 +515,9 @@ void HyperParameters::registerSearchNames()
 {
     _allSearchNames.clear();
     
-    // Check base definition of hyper parameters
+    // get search name from base definition of hyper parameters
     for ( auto & aHyperParameterBlock : _baseHyperParameters )
     {
-        aHyperParameterBlock.check();
-        
         // Get all search names used in a block and verify that there is no duplicate name
         std::vector<std::string> blockSearchNames = aHyperParameterBlock.getSearchNames();
         _allSearchNames.insert(_allSearchNames.end(),blockSearchNames.begin(),blockSearchNames.end());
@@ -624,10 +622,6 @@ void HyperParameters::initBlockStructureToDefault ( void )
 
 
     // Database name
-    _databaseName = "MNIST";
-
-    // BB
-    _bbEXE = "$python ./pytorch_bb.py";
 
     // BB Output type
     _bbot={ NOMAD::OBJ };
@@ -635,6 +629,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // Max BB eval
     _maxBbEval = 100;
 
+    
     const double x0[]={10 , 1000 , 3  , 1  , 2 , 0 , 104 , 4 , 1 , 1 , 0 , 128 , 4 , 2 , 2 , 0 , 158 , 2 , 1 , 1 , 0 , 246 , 4 , 1 , 0 , 0 , 256 , 2 , 1 , 0 , 0 , 522 , 5 , 1 , 2 , 0 , 512 , 3 , 2 , 0 , 1 , 512 , 6 , 1 , 2 , 1 , 512 , 1 , 1 , 0 , 0 , 1 , 10 , 300 , 1 , 0.001,  0.9 , 0.0005 , 0 , 0.75, 1};
     size_t dim_x0 = sizeof(x0) / sizeof(double);
     _X0.reset ( static_cast<int>(dim_x0) );
