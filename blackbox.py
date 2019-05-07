@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
 #  HYPERNOMAD - Hyper-parameter optimization of deep neural networks with
-#		NOMAD.
+#               NOMAD.
 #
 #
 #
@@ -26,10 +26,10 @@ import torch.utils.data
 import torch.backends.cudnn as cudnn
 import os
 import sys
-from neural_net import *
-from datahandler import *
+from datahandler import DataHandler
 from evaluator import *
 from utils import *
+from neural_net_new import NeuralNet
 
 
 # Read the inputs sent from HYPERNOMAD
@@ -51,28 +51,32 @@ for i in range(num_conv_layers):
     list_param_conv_layers += [conv_layer_param]
     shift += 5
 
-num_full_layers = int(sys.argv[3 + shift])
+last_index = shift + 2
+num_full_layers = int(sys.argv[last_index + 1])
 list_param_full_layers = []
 for i in range(num_full_layers):
-    list_param_full_layers += [int(sys.argv[4 + shift + i])]
+    list_param_full_layers += [int(sys.argv[last_index + 2 + i])]
 
-batch_size = int(sys.argv[4 + shift + i + 1])
+# First 2 : blackbox.py, dataset
+classes_index = 2 + (2 + num_conv_layers*5 + num_full_layers)
+number_of_classes = int(sys.argv[classes_index])
+batch_size = int(sys.argv[classes_index + 1])
 
 # HPs
-optimizer_choice = int(sys.argv[4 + shift + i + 2])
-arg1 = float(sys.argv[4 + shift + i + 3])               # lr
-arg2 = float(sys.argv[4 + shift + i + 4])               # momentum
-arg3 = float(sys.argv[4 + shift + i + 5])               # weight decay
-arg4 = float(sys.argv[4 + shift + i + 6])               # dampening
-dropout_rate = float(sys.argv[4 + shift + i + 7])
-activation = int(sys.argv[4 + shift + i + 8])
+optimizer_choice = int(sys.argv[classes_index + 2])
+arg1 = float(sys.argv[classes_index + 3])               # lr
+arg2 = float(sys.argv[classes_index + 4])               # momentum
+arg3 = float(sys.argv[classes_index + 5])               # weight decay
+arg4 = float(sys.argv[classes_index + 6])               # dampening
+dropout_rate = float(sys.argv[classes_index + 7])
+activation = int(sys.argv[classes_index + 8])
 
 # Load the data
 print('> Preparing the data..')
 
 if dataset is not 'CUSTOM':
     dataloader = DataHandler(dataset, batch_size)
-    image_size, total_number_classes= dataloader.get_info_data
+    image_size, total_number_classes = dataloader.get_info_data
     trainloader, validloader, testloader = dataloader.get_loaders()
 else:
     # Add here the adequate information
@@ -94,8 +98,7 @@ num_input_channels = image_size[0]
 print('> Constructing the network')
 # construct the network
 cnn = NeuralNet(num_conv_layers, num_full_layers, list_param_conv_layers, list_param_full_layers,
-                dropout_rate, activation, initial_image_size=image_size[1], total_classes=total_number_classes,
-                number_input_channels=num_input_channels)
+                dropout_rate, activation, image_size[1], total_number_classes, num_input_channels)
 
 cnn.to(device)
 
@@ -113,6 +116,8 @@ try:
 except ValueError:
     print('optimizer got an empty list')
     exit(0)
+
+print(cnn)
 
 # The evaluator trains and tests the network
 evaluator = Evaluator(device, cnn, trainloader, validloader, testloader, optimizer, batch_size)
