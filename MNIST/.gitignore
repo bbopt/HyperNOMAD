@@ -1,6 +1,0 @@
-out.txt
-data
-best_model.pth
-__pycache__
-*.o
-*.exe
