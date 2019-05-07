@@ -24,19 +24,23 @@
 import os
 import sys
 
-fin = open(sys.argv[1], 'r')
+if (len(sys.argv) != 3):
+    print ('Usage of pytorch_bb.py: DATABASE_NAME X.txt')
+    exit()
+
+fin = open(sys.argv[2], 'r')
 Lin = fin.readlines()
 Xin = Lin[0].split()
 fin.close()
 
-syst_cmd = 'OMP_NUM_THREADS=4 python cifar10.py '
-# syst_cmd = 'OMP_NUM_THREADS=3 python mnist_pytorch.py '
+syst_cmd = 'OMP_NUM_THREADS=3 python blackbox.py '+ sys.argv[1] +' '
 for i in range(len(Xin)):
     syst_cmd += str(Xin[i]) + ' '
 
 syst_cmd += '> out.txt 2>&1'
 os.system(syst_cmd)
 
+# print( syst_cmd )
 
 fout = open('out.txt', 'r')
 Lout = fout.readlines()

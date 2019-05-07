@@ -87,6 +87,12 @@ int main ( int argc , char ** argv )
 
         std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile);
 
+// For testing getNeighboors
+        NOMAD::Point X0 = hyperParameters->getValues( ValueType::CURRENT_VALUE);
+        std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
+        for ( const auto & n : neighboors )
+            n.display();
+        
         p.set_DISPLAY_DEGREE( 3 );
 
         p.set_DIMENSION( static_cast<int>(hyperParameters->getDimension()) );
@@ -123,6 +129,11 @@ int main ( int argc , char ** argv )
 
         // algorithm creation and execution:
         Mads mads ( p , NULL , &ep , NULL , NULL );
+        
+        std::cout << "===================================================" << std::endl;
+        std::cout << "            STARTING NOMAD OPTIMIZATION            " << std::endl;
+        std::cout << "===================================================" << std::endl << std::endl;
+        
         mads.run();
     }
     catch ( exception & e ) {
@@ -171,7 +182,7 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         for ( auto i : indexFixed )
             nP.set_FIXED_VARIABLE( static_cast<int>(i) );
 
-        // Each block forms a VARIABLE GROUP in Nomad
+        // Each block forms a NOMAD VARIABLE GROUP
         std::vector<std::set<int>> variableGroupsIndices = nHyperParameters.getVariableGroupsIndices();
         for ( auto aGroupIndices : variableGroupsIndices )
             nP.set_VARIABLE_GROUP( aGroupIndices );

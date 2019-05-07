@@ -50,8 +50,8 @@ class NeuralNet(nn.Module):
 
         assert num_conv_layers == len(list_param_conv_layers), 'len(list_param_conv_layers) != num_conv_layers'
         for i in range(num_conv_layers):
-            assert len(list_param_conv_layers[i]) == 5, 'Pb with number of parameters of the convolutional layer num ' \
-                                                        '%r' % i
+            assert len(list_param_conv_layers[i]) == 5, 'Problem with number of parameters of the convolutional layer ' \
+                                                        'num %r' % i
         assert num_full_layers == len(list_param_full_layers), 'num_full_layers != len(list_param_full_layers)'
         assert list_param_full_layers[-1] == total_classes, 'The number of output of the last full layer should be %r' \
                                                             % total_classes

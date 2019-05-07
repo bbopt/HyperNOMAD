@@ -32,13 +32,12 @@
 
 const std::string UndefinedStr="Undefined";
 
-enum class ValueType { LOWER_BOUND ,CURRENT_VALUE , UPPER_BOUND , INITIAL_VALUE };
+enum class ValueType { LOWER_BOUND ,CURRENT_VALUE , UPPER_BOUND , INITIAL_VALUE , FIXED_VARIABLE };
 
 class HyperParameters {
 private:
     
     enum class ReportValueType { NO_REPORT, COPY_VALUE, COPY_INITIAL_VALUE } ;
-    enum class FixedParameterType { NEVER, ALWAYS, IF_IN_LAST_GROUP, IF_IN_FIRST_GROUP };
     
     struct GenericHyperParameter
     {
@@ -53,17 +52,20 @@ private:
         NOMAD::Double lowerBoundValue;
         NOMAD::Double upperBoundValue;
         
-        // Remaining attributes do not need to be set during initialization.
+        // Remaining attributes do not need to be set during initialization because they have default.
         ReportValueType reportValueType = ReportValueType::NO_REPORT ;
         
-        FixedParameterType fixedParamType = FixedParameterType::NEVER;
-        
-        NOMAD::Double fixedValue {};
+        bool isFixed = false;
+
         NOMAD::Double initialValue {};
 
-        bool isFixed = false;
+        
+        // This for managing when a value is set with X0, LOWER_BOUND, UPPER_BOUND keywords in HyperParam file or by setting hyper param individually (for ex.: DROPOUT_RATE 0.2 - - VAR).
+        bool settingByName = false;
         
         bool isDefined () const { return searchName.compare(UndefinedStr) != 0 && searchName.size() != 0 ;}
+        
+        void display () const;
         
     };
     
@@ -96,17 +98,13 @@ private:
         //---------------------------------------------//
         
         // Expansion
-        void expandAssociatedParameters(); // Used for expanding baseHyperParameter -> expandHyperParameter
-        
-        // Set the flags for dynamic fixed variables
-        void setAssociatedParametersType();
-        
+        void expandAssociatedParameters(); // Expanding baseHyperParameter -> expandHyperParameter
         
         // Update the values of all the associated parameters using values in x
-        void updateAssociatedParameters( NOMAD::Point & x );
+        void updateAssociatedParameters( NOMAD::Point & x , NOMAD::Point & lb , NOMAD::Point & ub , bool manageBounds );
         
         // Get an updated group of associated hyper parameters
-        std::vector<GenericHyperParameter> updateAssociatedParameters ( std::vector<GenericHyperParameter> & fromGroup , bool isLastGroup =false, bool isFirstGroup = false  ) const;
+        std::vector<GenericHyperParameter> updateAssociatedParameters ( std::vector<GenericHyperParameter> & fromGroup  ) const;
         
         void expandAndUpdateAssociatedParametersWithConstraints( ); // increase to match head parameter value
 
@@ -135,6 +133,8 @@ private:
         GenericHyperParameter* getHyperParameter( const std::string & searchName ) ;
         
         void check();
+        
+        void display() const;
 
     };
     
@@ -143,12 +143,19 @@ private:
     
     std::vector<std::string> _allSearchNames;
     
-    std::string _databaseName;
+    std::string _dataset;
     std::string _bbEXE;
-    vector<NOMAD::bb_output_type> _bbot;
+    std::vector<NOMAD::bb_output_type> _bbot;
     size_t _maxBbEval;
+    std::map<std::string,NOMAD::Double> _datasetAndNumberOfClasses;
+    bool _explicitelyProvidedNumberOfClasses;
+    NOMAD::Double _numberOfClasses;
     
-    NOMAD::Point _X0;
+    NOMAD::Point _X0, _lowerBound, _upperBound , _fixedVariables;
+    
+    static bool _explicitelySetLowerBounds;
+    static bool _explicitelySetUpperBounds;
+    static bool _explicitelySetX0;
 
     void expand();
     
@@ -156,6 +163,8 @@ private:
     
     void registerSearchNames();
     
+    
+    // for _baseHyperParameters only
     GenericHyperParameter * getHyperParameter( const std::string & searchName ) ;
     
     void initBlockStructureToDefault ( void );
@@ -163,8 +172,12 @@ private:
     HyperParameters ( const std::vector<HyperParametersBlock> & hpbs);
 
     void read ( const std::string & hyperParamFileName );
-    void interpretPoint( ValueType type,  std::vector<NOMAD::Double> & tmp , NOMAD::Parameter_Entries * entries ) const ;
     
+    void updateAndCheckAfterReading();
+    
+    void interpretX0( NOMAD::Parameter_Entries * entries ) ;
+    
+    void interpretBoundsAndFixed( const std::string & paramName , const NOMAD::Parameter_Entries & entries , NOMAD::Point & param ) ;
     
 public:
     
@@ -181,12 +194,14 @@ public:
     size_t getDimension( void ) const;
     
     std::vector<NOMAD::bb_input_type> getTypes() const;
-    void update( const NOMAD::Point & x );
+    void updateBaseAndPerformExpansion( const NOMAD::Point & x , bool manageBounds = false );
     
     std::vector<size_t> getIndexFixedParams() const;
     std::vector<std::set<int>> getVariableGroupsIndices() const;
     
     std::vector<HyperParameters> getNeighboors( const NOMAD::Point & x ) ;
+    
+    void display() const;
 
 };
 
