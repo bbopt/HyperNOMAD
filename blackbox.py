@@ -29,7 +29,7 @@ import sys
 from datahandler import DataHandler
 from evaluator import *
 from utils import *
-from neural_net_new import NeuralNet
+from neural_net import NeuralNet
 
 
 # Read the inputs sent from HYPERNOMAD
