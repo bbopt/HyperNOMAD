@@ -1,97 +1,48 @@
 # A tutorial on hyper-parameter optimization of deep neural networks with HYPERNOMAD
 
-The following tutorial presents a step-by-step guide in order to build a project for optimizing the hyper-parameters of a deep neural network using NOMAD, a derivative-free optimization software designed for constrained, single objective blackbox problems. In particular, NOMAD has the capacity to handle problems with real, integer and categorical variables.
-
-
+HYPERNOMAD is a Python package dedicated to the hyperparameter optimization of deep neural networks. The package contains a blackbox specifically designed for this problematic and provides a link with the NOMAD software used for the optimization. The blackbox takes as inputs a list of hyperparameters, builds a corresponding deep neural network in order to train, validate and test it on a specific data set before returning the test error as a mesure of performance. NOMAD is then used to minimize this error. The following appendix provides an overview of how to use the HYPERNOMAD package.
 
 ## Prerequisites
 
-First, start with installing the latest version of:
+In order to run HYPERNOMAD correctly, please make sure to have:
 
-* [NOMAD](https://www.gerad.ca/nomad/)
-
-Reading the [user guide](https://www.gerad.ca/nomad/Downloads/user_guide.pdf) is strongly recommended to familiarize with this software along with the examples given with the NOMAD package.
-
-In order to execute the examples, you will also need:
-
+* A compiled version of [NOMAD](https://www.gerad.ca/nomad/). Reading the [user guide](https://www.gerad.ca/nomad/Downloads/user_guide.pdf) is strongly recommended to familiarize with this software along with the examples given with the NOMAD package.
+* Python > 3.6
 * [PyTorch](https://pytorch.org/)
+* GCC > 3.8
+
 
 ## Getting Started
 
-### Creating the blackbox
-
-The blackbox is the file that will take the hyper-parameters as inputs, and will return the value of the objective and/or constraints as outputs.
-
-In order to make the blackbox compatible with NOMAD, you have to make sure that you can execute the following command:
-
-```
-.\bb.py param_1 param_2 ... param_n
-```
-
-Where 
-
-* bb.py is the blackbox. Note that you can also code it in C++.
-* param_1 .. param_n are the hyper-parameters you want to optimize.
-
-### Link with NOMAD
-
-With the blackbox done, it is now time to link it to NOMAD.
-
-First, we start with the file 'parameter_file.txt' where you need to indicate the blackbox you want to optimize. The following line sais that the blackbox is written in Python and the file is 'pytorch_bb.py'.
-
-```
-BB_EXE "$python ./pytorch_bb.py"
-```
-
-The entry 'BB_INPUT_TYPE' defines the type of each variable.
-
-* C : categorical variables.
-* I : integar variables.
-* R : real variables.
-
-The rest of the entries specify the following informations:
-
-* 'DIMENSION' : dimension of the optimization problem.
-* 'x0' : the starting point.
-* 'lower_bound' and 'upper_bound'.
-* 'BB_OUTPUT_TYPE' : the output of the blackbox. Here, the blackbox returns one value corresponding to the objective function.
-* 'MAX_BB_EVAL' : maximum number of blackbox evaluations.
-
-
-### Dealing with categorical variables
-
-One of the advantages of NOMAD is its ability to deal with categorical variables. NOMAD also allows to defines a neighborhood structure for each categorical variable. These neighbohrs can be located in a different search space than the current point, and it is up to the user to define the neighbors and their search spaces for each categorical variable. This is done in the file 'pytorch_cat.cpp' with the function: 
-
-```
-void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
-```
-
-In our example, each convolutional layer is defined with 5 variables:
-
-* The number of output channels.
-* The kernel size.
-* The stride.
-* The padding.
-* Whether to do a pooling operation or not.
-
-Therefore, adding a convolutional layer means adding 5 other variables thus changing the dimension of the problem and the search space. 
-
-The same idea applies to the number of fully connected layers. These two values correspond to the only 2 categorical variables in our example.
-
-## Running an optimization
-
-First build the executable.
+First build the executable by running the following command.
 
 ```
 make
 ```
 
-The optimization starts by executing the command 
+The next phase of to create a parameter file that contains the necessary informations to specify the classification problem, the search space and the initial starting point. Here is an example of a parameter file designed for the MNIST problem:
+
 
 ```
-./hypernomad.exe
+# Mandatory information
+DATASET  		    MNIST
+MAX_BB_EVAL 		100
+
+# Optional information
+NUM_CON_LAYERS 		5  -  -  FIXED
+KERNELS 		      3
+NUM_FULL_LAYERS		6
+ACTIVATION 		    2
+DROUPOUT_RATE 		0.6  0.3 0.8
 ```
 
-The stats are displayed according to the 'DISPLAY_DEGREE' chosen within the parameter file. It can be increased to 3 for more details about the steps of NOMAD. The details of the execution can also be saved in the file specified for the tag 'HISTORY_FILE'.
+## Running an optimization
+
+The optimization starts by executing the command:
+
+```
+./hypernomad.exe parameter_file.txt
+```
+
 
 
