@@ -6,7 +6,7 @@ HYPERNOMAD is a Python package dedicated to the hyperparameter optimization of d
 
    
 
-.. image:: hypernomad_picture.png
+.. image:: hypernomad_picture.jpg
    :scale: 50 %
    :alt: alternate text
    :align: center
