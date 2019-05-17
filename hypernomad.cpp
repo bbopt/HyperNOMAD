@@ -31,8 +31,11 @@ using namespace std;
 using namespace NOMAD;
 
 
+bool flagDisplayNeighboors = false;
+const std::string hyperNomadName = "hyperNomad.exe";
+const std::string hyperNomadVersion = "1.0";
 
-#define USE_SURROGATE false
+
 /*--------------------------------------------------*/
 /*  user class to define categorical neighborhoods  */
 /*--------------------------------------------------*/
@@ -61,6 +64,36 @@ public:
 
 };
 
+void display_hyperusage()
+{
+    cout << std::endl
+    << "Run           : " << hyperNomadName << " hyperparameters_file"     << std::endl
+    << "Info          : " << hyperNomadName << " -i"                       << std::endl
+    << "Help          : " << hyperNomadName << " -h"                       << std::endl
+    << "Version       : " << hyperNomadName << " -v"                       << std::endl
+    << "Usage         : " << hyperNomadName << " -u"                       << std::endl
+    << "Neighboors    : " << hyperNomadName << " -n hyperparameters_file"  << std::endl
+    << std::endl;
+}
+
+void display_hyperversion()
+{
+    // Display nomad version
+    cout << " -----------------------------------------------" << std::endl;
+    cout << "  NOMAD - version " << NOMAD::VERSION << " - www.gerad.ca/nomad" << std::endl ;
+    cout << " -----------------------------------------------" << std::endl;
+    cout << "  HyperNomad - version " << hyperNomadVersion << std::endl;
+    cout << " -----------------------------------------------" << std::endl << std::endl;
+}
+
+void display_hyperinfo()
+{
+    
+    display_hyperversion();
+    display_hyperusage();
+}
+
+
 
 /*------------------------------------------*/
 /*            NOMAD main function           */
@@ -77,7 +110,46 @@ int main ( int argc , char ** argv )
 
     std::string hyperParamFile="";
     if ( argc > 1 )
-        hyperParamFile = argv[1];
+    {
+        std::string mainArg = argv[1];
+        if ( mainArg.substr(0,1).compare("-") == 0 )
+        {
+            switch ( mainArg.at(1))
+            {
+                case 'i':
+                    display_hyperinfo();
+                    return 0;
+                    break;
+                case 'h':
+                    display_hyperinfo();
+                    return 0;
+                    break;
+                case 'v':
+                    display_hyperversion();
+                    return 0;
+                    break;
+                case 'n':
+                    flagDisplayNeighboors = true;
+                    if ( argc == 3 )
+                        hyperParamFile = argv[2];
+                    else
+                    {
+                        display_hyperusage();
+                        return 0;
+                    }
+                    break;
+                default:
+                    display_hyperusage();
+                    return 0;
+            }
+        }
+        else
+            hyperParamFile = argv[1];
+    }
+    else
+    {
+        display_hyperusage();
+    }
 
     try
     {
@@ -88,10 +160,15 @@ int main ( int argc , char ** argv )
         std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile);
 
 // For testing getNeighboors
-        NOMAD::Point X0 = hyperParameters->getValues( ValueType::CURRENT_VALUE);
-        std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
-        for ( const auto & n : neighboors )
-            n.display();
+        if ( flagDisplayNeighboors )
+        {
+            
+            NOMAD::Point X0 = hyperParameters->getValues( ValueType::CURRENT_VALUE);
+            std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
+            for ( const auto & n : neighboors )
+                n.display();
+            return 0;
+        }
         
         p.set_DISPLAY_DEGREE( 3 );
 
@@ -198,3 +275,5 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         add_extended_poll_point ( nX , *(nP.get_signature()) );
     }
 }
+
+
