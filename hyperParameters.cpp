@@ -394,7 +394,6 @@ void HyperParameters::read (const std::string & hyperParamFileName )
     
     // DATASET:
     // -------
-    bool explicitelyProvidedDataset = false;
     {
         pe = entries.find ( "DATASET" );
         if ( pe )
@@ -413,8 +412,6 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                                                             "number of DATASET (>1)." );
             }
             pe->set_has_been_interpreted();
-            explicitelyProvidedDataset = true;
-            
         }
     }
     
@@ -442,9 +439,6 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                                                             "NUMBER_OF_CLASSES has too many arguments (>1)." );
             }
             pe->set_has_been_interpreted();
-            if ( ! explicitelyProvidedDataset )
-                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "When NUMBER_OF_CLASSES is provided the DATASET must also be explicited." );
         }
     }
     
@@ -689,10 +683,16 @@ void HyperParameters::read (const std::string & hyperParamFileName )
 
 void HyperParameters::updateAndCheckAfterReading ( void )
 {
+    if ( _dataset.empty() )
+    {
+        throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: The DATASET name must be provided" );
+    }
+    
+    
     // Check that the dataset name is registered
     if ( _datasetAndNumberOfClasses.find( _dataset ) == _datasetAndNumberOfClasses.end() )
     {
-        std::cout << "WARNING: the dataset name " << _dataset << " is not registered in the current list of available dataset. This requires to modify the blackbox." << std::endl;
+        std::cout << "WARNING: the DATASET name " << _dataset << " is not registered in the current list of available dataset. This requires to modify the blackbox." << std::endl;
         if ( ! _explicitelyProvidedNumberOfClasses )
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: If a DATASET not in the registered list is provided, the NUMBER_OF_CLASSES must be explicitely provided in the hyperparam.txt file." );
     }
@@ -971,16 +971,11 @@ void HyperParameters::initBlockStructureToDefault ( void )
     //
     
     // Pytorch dataset available by default --> link with number of classes
-    _datasetAndNumberOfClasses = { {"MNIST",NOMAD::Double(10)},{"Fashion-MNIST",NOMAD::Double(10)},{"EMNIST",NOMAD::Double(10)}, {"KMNIST",NOMAD::Double(10)} , {"CIFAR-10",NOMAD::Double(10)} , {"CIFAR-100",NOMAD::Double(100)} , {"STL-10",NOMAD::Double(10)}, {"SVHN",NOMAD::Double(10)} };
+    _datasetAndNumberOfClasses = { {"MNIST",NOMAD::Double(10)},{"Fashion-MNIST",NOMAD::Double(10)},{"EMNIST",NOMAD::Double(10)}, {"KMNIST",NOMAD::Double(10)} , {"CIFAR10",NOMAD::Double(10)} , {"CIFAR100",NOMAD::Double(100)} , {"STL10",NOMAD::Double(10)}, {"SVHN",NOMAD::Double(10)} };
     
-    // dataset name (default)
-    _dataset = "MNIST";
-    
-    // Registered number of classes
-    if ( _datasetAndNumberOfClasses.find(_dataset) == _datasetAndNumberOfClasses.end() )
-        throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: Unknown dataset name " + _dataset );
-    
-    _numberOfClasses = _datasetAndNumberOfClasses.find(_dataset)->second;
+    // dataset name no default
+    _dataset = "";
+    _numberOfClasses = 0;
     
     // At this point the number of classes is NOT explicitely provided (maybe when done when reading the hyperparameter file) and the value registered is used
     _explicitelyProvidedNumberOfClasses = false;
