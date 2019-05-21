@@ -96,12 +96,12 @@ class Evaluator(object):
         epochs = []
 
         # plots
-        # fig = plt.figure()
-        # ax1 = fig.add_subplot(111)
-        # ax1.set_title('Training and validation accuracies')
-        # ax1.set_xlabel('Number of epochs')
-        # ax1.set_ylabel('Accuracies')
-        # plt.ion()
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111)
+        ax1.set_title('Training and validation accuracies')
+        ax1.set_xlabel('Number of epochs')
+        ax1.set_ylabel('Accuracies')
+        plt.ion()
 
         while (not stop) and (epoch < 500):
             self.cnn.train()
@@ -145,15 +145,15 @@ class Evaluator(object):
 
             epochs.append(epoch)
 
-            # ax1.plot(epochs, l_train_acc, color='r', label='Training accuracy')
-            # ax1.plot(epochs, l_val_acc, color='b', label='Validation accuracy')
-            # handles, labels = ax1.get_legend_handles_labels()
-            # handle_list, label_list = [], []
-            # for handle, label in zip(handles, labels):
-            #     if label not in label_list:
-            #         handle_list.append(handle)
-            #         label_list.append(label)
-            # ax1.legend(handle_list, label_list, loc='best')
+            ax1.plot(epochs, l_train_acc, color='r', label='Training accuracy')
+            ax1.plot(epochs, l_val_acc, color='b', label='Validation accuracy')
+            handles, labels = ax1.get_legend_handles_labels()
+            handle_list, label_list = [], []
+            for handle, label in zip(handles, labels):
+                if label not in label_list:
+                    handle_list.append(handle)
+                    label_list.append(label)
+            ax1.legend(handle_list, label_list, loc='best')
             # ax1.legend(loc='best')
 
             plt.pause(1e-6)
