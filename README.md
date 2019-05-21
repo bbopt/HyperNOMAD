@@ -48,3 +48,16 @@ The optimization starts by executing the command:
 ./hypernomad.exe parameter_file.txt
 ```
 
+Two examples of paramter files are provided in the folder examples. One uses CIFAR-10 starting from the default starting point and the second uses MNIST with the specifications detailed in the previous section.
+
+To use this files, the cammand is:
+
+```
+./hypernomad.exe examples/parameter_file_cifar10.txt
+```
+or 
+
+
+```
+./hypernomad.exe examples/parameter_file_mnist.txt
+```
