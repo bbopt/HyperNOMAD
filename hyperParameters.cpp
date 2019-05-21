@@ -409,10 +409,14 @@ void HyperParameters::read (const std::string & hyperParamFileName )
             else
             {
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "number of DATASET (>1)." );
+                                                            "DATASET must be provided only once." );
             }
             pe->set_has_been_interpreted();
         }
+        else
+            throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                        "DATASET must be provided." );
+            
     }
     
     // NUMBER_OF_CLASSES:

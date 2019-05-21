@@ -79,11 +79,11 @@ void display_hyperusage()
 void display_hyperversion()
 {
     // Display nomad version
-    cout << " -----------------------------------------------" << std::endl;
-    cout << "  NOMAD - version " << NOMAD::VERSION << " - www.gerad.ca/nomad" << std::endl ;
-    cout << " -----------------------------------------------" << std::endl;
+    cout << " --------------------------------------------------" << std::endl;
     cout << "  HyperNomad - version " << hyperNomadVersion << std::endl;
-    cout << " -----------------------------------------------" << std::endl << std::endl;
+    cout << " --------------------------------------------------" << std::endl << std::endl;
+    cout << "  Using Nomad version " << NOMAD::VERSION << " - www.gerad.ca/nomad" << std::endl ;
+    cout << " --------------------------------------------------" << std::endl;
 }
 
 void display_hyperinfo()
@@ -93,6 +93,12 @@ void display_hyperinfo()
     display_hyperusage();
 }
 
+void display_hyperhelp()
+{
+// TODO Put the complete help here
+    display_hyperversion();
+    display_hyperusage();
+}
 
 
 /*------------------------------------------*/
@@ -121,7 +127,7 @@ int main ( int argc , char ** argv )
                     return 0;
                     break;
                 case 'h':
-                    display_hyperinfo();
+                    display_hyperhelp();
                     return 0;
                     break;
                 case 'v':
