@@ -342,6 +342,7 @@ void HyperParameters::display () const
     }
     else if ( _hyperDisplay == 1 )
     {
+        std::cout << " Dataset: " << _dataset  << std::endl;
         std::cout  << NOMAD::open_block (" X0 ") ;
         for ( auto & block : _expandedHyperParameters )
         {
@@ -789,6 +790,9 @@ void HyperParameters::updateAndCheckAfterReading ( void )
         _numberOfClasses = _datasetAndNumberOfClasses.find( _dataset )->second ;
     }
     
+    // Set the number of classes in the base hyperparameters
+    getHyperParameter("NUMBER_OF_CLASSES")->value = _numberOfClasses;
+    
     // Complete the line for the blackbox with the dataset name (ex.: python pytorch_bb.py MNIST)
     _bbEXE += " " + _dataset;
     
@@ -1050,7 +1054,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // Pytorch dataset available by default --> link with number of classes
     _datasetAndNumberOfClasses = { {"MNIST",NOMAD::Double(10)},{"Fashion-MNIST",NOMAD::Double(10)},{"EMNIST",NOMAD::Double(10)}, {"KMNIST",NOMAD::Double(10)} , {"CIFAR10",NOMAD::Double(10)} , {"CIFAR100",NOMAD::Double(100)} , {"STL10",NOMAD::Double(10)}, {"SVHN",NOMAD::Double(10)} };
     
-    // dataset name no default
+    // dataset name and the corresponding number of classes have no default
     _dataset = "";
     _numberOfClasses = 0;
     
@@ -1129,7 +1133,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
         2 , // Number of adjsutable full layers
         128,
         84 ,
-        _numberOfClasses.value() , // Number of classes taken from the dataset
+        0, // Number of classes will be set later from the dataset
         128 ,  // Batch size
         3,  0.1 ,0.9 , 0.0005,  0 , // Choice of optimizer + optimizer setting
         0.2, // Dropout rate
