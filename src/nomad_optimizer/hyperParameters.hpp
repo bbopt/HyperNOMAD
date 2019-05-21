@@ -65,7 +65,7 @@ private:
         
         bool isDefined () const { return searchName.compare(UndefinedStr) != 0 && searchName.size() != 0 ;}
         
-        void display () const;
+        void display ( bool detailedDisplay ) const;
         
     };
     
@@ -134,7 +134,7 @@ private:
         
         void check();
         
-        void display() const;
+        void display( bool detailedDisplay ) const;
 
     };
     
@@ -152,6 +152,10 @@ private:
     NOMAD::Double _numberOfClasses;
     
     NOMAD::Point _X0, _lowerBound, _upperBound , _fixedVariables;
+    
+    size_t _hyperDisplay;
+    
+    size_t _lhIterationSearch;
     
     bool _explicitSetLowerBounds;
     bool _explicitSetUpperBounds;
@@ -201,6 +205,11 @@ public:
     std::vector<std::set<int>> getVariableGroupsIndices() const;
     
     std::vector<HyperParameters> getNeighboors( const NOMAD::Point & x ) ;
+    
+    void setHyperDisplay ( size_t d ) { _hyperDisplay = d; }
+    size_t getHyperDisplay() const { return _hyperDisplay ;}
+    
+    size_t getLhIterationSearch () const { return _lhIterationSearch ;}
     
     void display() const;
 

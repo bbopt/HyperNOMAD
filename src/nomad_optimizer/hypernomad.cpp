@@ -31,8 +31,11 @@ using namespace std;
 using namespace NOMAD;
 
 
+bool flagDisplayNeighboors = false;
+const std::string hyperNomadName = "hyperNomad.exe";
+const std::string hyperNomadVersion = "1.0";
 
-#define USE_SURROGATE false
+
 /*--------------------------------------------------*/
 /*  user class to define categorical neighborhoods  */
 /*--------------------------------------------------*/
@@ -61,6 +64,88 @@ public:
 
 };
 
+void display_hyperusage()
+{
+    cout << std::endl
+    << "Run           : " << hyperNomadName << " hyperparameters_file"     << std::endl
+    << "Info          : " << hyperNomadName << " -i"                       << std::endl
+    << "Help          : " << hyperNomadName << " -h"                       << std::endl
+    << "Version       : " << hyperNomadName << " -v"                       << std::endl
+    << "Usage         : " << hyperNomadName << " -u"                       << std::endl
+    << "Neighboors    : " << hyperNomadName << " -n hyperparameters_file"  << std::endl
+    << std::endl;
+}
+
+void display_hyperversion()
+{
+    // Display nomad version
+    cout << "--------------------------------------------------" << std::endl;
+    cout << "  HyperNomad - version " << hyperNomadVersion << std::endl;
+    cout << "--------------------------------------------------" << std::endl ;
+    cout << "  Using Nomad version " << NOMAD::VERSION << " - www.gerad.ca/nomad" << std::endl ;
+    cout << "--------------------------------------------------" << std::endl << std::endl ;
+}
+
+void display_hyperinfo()
+{
+    
+    display_hyperversion();
+    display_hyperusage();
+}
+
+void display_hyperhelp()
+{
+// TODO Put the complete help here
+    display_hyperversion();
+    display_hyperusage();
+    
+    std::cout << NOMAD::open_block("DATASET") << std::endl;
+    std::cout << " Default: MNIST" << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("MAX_BB_EVAL") << std::endl;
+    std::cout << " Default: 100" << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("NUMBER_OF_CLASSES") << std::endl;
+    std::cout << " Default: 10" << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("BB_EXE") << std::endl;
+    std::cout << " Default: $python ./pytorch_bb.py " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+
+    std::cout << NOMAD::open_block("HYPER_DISPLAY") << std::endl;
+    std::cout << " Default: 1 " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("LH_ITERATION_SEARCH") << std::endl;
+    std::cout << " Default: 0 " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+
+    std::cout << NOMAD::open_block("X0") << std::endl;
+    std::cout << " Default:  " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+
+    std::cout << NOMAD::open_block("LOWER_BOUND") << std::endl;
+    std::cout << " Default:  " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("UPPER_BOUND") << std::endl;
+    std::cout << " Default:  " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("HYPERPARAM_NAME in {}") << std::endl;
+    std::cout << " Default:  " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("REMAINING_HYPERPARAMETERS") << std::endl;
+    std::cout << " Default: VAR " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    
+}
+
 
 /*------------------------------------------*/
 /*            NOMAD main function           */
@@ -77,7 +162,46 @@ int main ( int argc , char ** argv )
 
     std::string hyperParamFile="";
     if ( argc > 1 )
-        hyperParamFile = argv[1];
+    {
+        std::string mainArg = argv[1];
+        if ( mainArg.substr(0,1).compare("-") == 0 )
+        {
+            switch ( mainArg.at(1))
+            {
+                case 'i':
+                    display_hyperinfo();
+                    return 0;
+                    break;
+                case 'h':
+                    display_hyperhelp();
+                    return 0;
+                    break;
+                case 'v':
+                    display_hyperversion();
+                    return 0;
+                    break;
+                case 'n':
+                    flagDisplayNeighboors = true;
+                    if ( argc == 3 )
+                        hyperParamFile = argv[2];
+                    else
+                    {
+                        display_hyperusage();
+                        return 0;
+                    }
+                    break;
+                default:
+                    display_hyperusage();
+                    return 0;
+            }
+        }
+        else
+            hyperParamFile = argv[1];
+    }
+    else
+    {
+        display_hyperusage();
+    }
 
     try
     {
@@ -88,12 +212,20 @@ int main ( int argc , char ** argv )
         std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile);
 
 // For testing getNeighboors
-        NOMAD::Point X0 = hyperParameters->getValues( ValueType::CURRENT_VALUE);
-        std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
-        // for ( const auto & n : neighboors )
-        //     n.display();
+        if ( flagDisplayNeighboors )
+        {
+            // Switch to full display
+            hyperParameters->setHyperDisplay(3);
+            
+            NOMAD::Point X0 = hyperParameters->getValues( ValueType::CURRENT_VALUE);
+            std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
+            for ( const auto & n : neighboors )
+                n.display();
+            return 0;
+        }
         
-        p.set_DISPLAY_DEGREE( 3 );
+        
+        p.set_DISPLAY_DEGREE( static_cast<int>( hyperParameters->getHyperDisplay() ) );
 
         p.set_DIMENSION( static_cast<int>(hyperParameters->getDimension()) );
         p.set_X0( hyperParameters->getValues( ValueType::CURRENT_VALUE) );
@@ -107,14 +239,17 @@ int main ( int argc , char ** argv )
 
         // Each block forms a VARIABLE GROUP in Nomad
         std::vector<std::set<int>> variableGroupsIndices = hyperParameters->getVariableGroupsIndices();
+        
         for ( auto aGroupIndices : variableGroupsIndices )
             p.set_VARIABLE_GROUP( aGroupIndices );
 
         p.set_BB_OUTPUT_TYPE ( hyperParameters->getBbOutputType() );
         p.set_BB_EXE( hyperParameters->getBB() );
+        
+        p.set_LH_SEARCH(0 , static_cast<int>( hyperParameters->getLhIterationSearch() ) );
 
-        p.set_MAX_BB_EVAL( static_cast<int>(hyperParameters->getMaxBbEval()) );
-        p.set_LH_SEARCH(0, 5);
+        p.set_MAX_BB_EVAL( static_cast<int>( hyperParameters->getMaxBbEval()) );
+
         p.set_EXTENDED_POLL_TRIGGER ( 10 , false );
         
         p.set_DISPLAY_STATS("bbe ( sol ) obj");
@@ -123,16 +258,23 @@ int main ( int argc , char ** argv )
 
         // parameters validation:
         p.check();
+        
+        if ( hyperParameters->getHyperDisplay() > 2 )
+        {
+            display_hyperversion();
+            
+            std::cout << std::endl
+                << NOMAD::open_block ( "Nomad parameters" ) << std::endl
+                << p
+                << NOMAD::close_block();
+            
+        }
 
         // extended poll:
         My_Extended_Poll ep ( p , hyperParameters );
 
         // algorithm creation and execution:
         Mads mads ( p , NULL , &ep , NULL , NULL );
-        
-        std::cout << "===================================================" << std::endl;
-        std::cout << "            STARTING NOMAD OPTIMIZATION            " << std::endl;
-        std::cout << "===================================================" << std::endl << std::endl;
         
         mads.run();
     }
@@ -198,3 +340,5 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         add_extended_poll_point ( nX , *(nP.get_signature()) );
     }
 }
+
+

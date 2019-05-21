@@ -120,7 +120,7 @@ std::vector<std::set<int>> HyperParameters:: getVariableGroupsIndices() const
             if ( bbit[i] != NOMAD::CATEGORICAL && ! aBlock.getHyperParameter(i).isFixed )
                 aGroupIndices.insert(current_index);
         }
-        if ( aGroupIndices.size() > 1 )
+        if ( aGroupIndices.size() > 0 )
             indices.push_back( aGroupIndices );
     }
     return indices;
@@ -239,6 +239,9 @@ std::vector<HyperParameters> HyperParameters::getNeighboors( const NOMAD::Point 
 
 HyperParameters::HyperParameters ( const std::string & hyperParamFileName )
 {
+    // Default display
+    _hyperDisplay = 1;
+    _lhIterationSearch = 0;
     
     initBlockStructureToDefault();
     
@@ -265,56 +268,91 @@ HyperParameters::HyperParameters ( const std::string & hyperParamFileName )
     display();
 }
 
-void HyperParameters::HyperParametersBlock::display () const
+void HyperParameters::HyperParametersBlock::display ( bool detailedDisplay ) const
 {
     // Head of block
-    std::cout << "\t Head of block ";
-    headOfBlockHyperParameter.display();
-    
-    switch ( associatedParametersType )
+    if ( detailedDisplay )
     {
-        case AssociatedHyperParametersType::ZERO_TIME :
-            std::cout << "\t No associated hyperparameters " << std::endl;
-            break;
-        case AssociatedHyperParametersType::ONE_TIME :
-            std::cout << "\t One time associated hyperparameters (always 1 group)" << std::endl;
-            break;
-        case AssociatedHyperParametersType::MULTIPLE_TIMES :
-            std::cout << "\t Multiple times associated hyperparameters: " << groupsOfAssociatedHyperParameters.size() << " groups" << std::endl;
-            break;
+        std::cout << "\t Head of block ";
+        headOfBlockHyperParameter.display( detailedDisplay );
+    }
+    else
+    {
+        std::cout << headOfBlockHyperParameter.searchName << " " << headOfBlockHyperParameter.value << " " ;
+    }
+    
+    if ( detailedDisplay )
+    {
+        switch ( associatedParametersType )
+        {
+            case AssociatedHyperParametersType::ZERO_TIME :
+                std::cout << "\t No associated hyperparameters " << std::endl;
+                break;
+            case AssociatedHyperParametersType::ONE_TIME :
+                std::cout << "\t One time associated hyperparameters (always 1 group)" << std::endl;
+                break;
+            case AssociatedHyperParametersType::MULTIPLE_TIMES :
+                std::cout << "\t Multiple times associated hyperparameters: " << groupsOfAssociatedHyperParameters.size() << " groups" << std::endl;
+                break;
+        }
     }
     
     size_t index = 0;
     for ( const auto & aGAH : groupsOfAssociatedHyperParameters )
     {
-        std::cout << "\t Group #" << index++ << std::endl;
+        if ( detailedDisplay )
+            std::cout << "\t Group #" << index++ << std::endl;
+        else
+            std::cout << "[ " ;
+        
         for ( const auto & aAP : aGAH )
         {
             std::cout << "\t\t " ;
-            aAP.display();
+            aAP.display( detailedDisplay );
         }
+        if ( ! detailedDisplay )
+            std::cout << " ] " ;
     }
 }
 
-void HyperParameters::GenericHyperParameter::display () const
+void HyperParameters::GenericHyperParameter::display ( bool detailedDisplay ) const
 {
-    std::cout << searchName << " -> x0=" << value << ", lb=" << lowerBoundValue << ", ub=" << upperBoundValue << ((isFixed) ? ", is FIXED":", is VARIABLE") << std::endl;
+    if ( detailedDisplay )
+        std::cout << searchName << " -> x0=" << value << ", lb=" << lowerBoundValue << ", ub=" << upperBoundValue << ((isFixed) ? ", is FIXED":", is VARIABLE") << std::endl;
+    else
+        std::cout << value ;
 }
 
 void HyperParameters::display () const
 {
-    std::cout << "===================================================" << std::endl;
-    std::cout << "             BLOCKS OF HYPERPARAMETERS             " << std::endl;
-    std::cout << " Each block has a head hyperparameters and possibly" << std::endl;
-    std::cout << " several groups of associated hyperameters."         << std::endl ;
-    std::cout << "===================================================" << std::endl<< std::endl ;
-    
-    for ( auto & block : _expandedHyperParameters )
+    if ( _hyperDisplay > 1 )
     {
-        std::cout << "-------------------------"  << block.name << "----------------------------" << std::endl;
-        block.display();
-        std::cout << "-----------------------------------------------------------------------" << std::endl << std::endl;
+        std::cout << "===================================================" << std::endl;
+        std::cout << "             BLOCKS OF HYPERPARAMETERS             " << std::endl;
+        std::cout << " Each block has a head hyperparameters and possibly" << std::endl;
+        std::cout << " several groups of associated hyperameters."         << std::endl ;
+        std::cout << "===================================================" << std::endl<< std::endl ;
+        
+        for ( auto & block : _expandedHyperParameters )
+        {
+            std::cout  << NOMAD::open_block ( block.name ) << std::endl;
+            block.display( true );
+            std::cout << NOMAD::close_block() << " }" << std::endl << std::endl;
+        }
     }
+    else if ( _hyperDisplay == 1 )
+    {
+        std::cout << " Dataset: " << _dataset  << std::endl;
+        std::cout  << NOMAD::open_block (" X0 ") ;
+        for ( auto & block : _expandedHyperParameters )
+        {
+            std::cout << "\n\t [ ";
+            block.display( false );
+            std::cout << "] ";
+        }
+        std::cout << NOMAD::close_block() << " }" << std::endl;
+    }
+        
 }
 
 
@@ -394,7 +432,6 @@ void HyperParameters::read (const std::string & hyperParamFileName )
     
     // DATASET:
     // -------
-    bool explicitelyProvidedDataset = false;
     {
         pe = entries.find ( "DATASET" );
         if ( pe )
@@ -410,12 +447,14 @@ void HyperParameters::read (const std::string & hyperParamFileName )
             else
             {
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "number of DATASET (>1)." );
+                                                            "DATASET must be provided only once." );
             }
             pe->set_has_been_interpreted();
-            explicitelyProvidedDataset = true;
-            
         }
+        else
+            throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                        "DATASET must be provided." );
+            
     }
     
     // NUMBER_OF_CLASSES:
@@ -442,9 +481,6 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                                                             "NUMBER_OF_CLASSES has too many arguments (>1)." );
             }
             pe->set_has_been_interpreted();
-            if ( ! explicitelyProvidedDataset )
-                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "When NUMBER_OF_CLASSES is provided the DATASET must also be explicited." );
         }
     }
     
@@ -487,6 +523,42 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                                                             "MAX_BB_EVAL" );
             pe->set_has_been_interpreted();
             _maxBbEval = i;
+        }
+    }
+    
+    // HYPER_DISPLAY
+    // ------------
+    {
+        int i;
+        pe = entries.find ( "HYPER_DISPLAY" );
+        if ( pe )
+        {
+            if ( !pe->is_unique() )
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "HYPER_DISPLAY not unique" );
+            if ( pe->get_nb_values() != 1 || !NOMAD::atoi (*(pe->get_values().begin()) , i) || i < 0 )
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "HYPER_DISPLAY" );
+            pe->set_has_been_interpreted();
+            _hyperDisplay = i;
+        }
+    }
+    
+    // LH_ITERATION_SEARCH
+    // ------------
+    {
+        int i;
+        pe = entries.find ( "LH_ITERATION_SEARCH" );
+        if ( pe )
+        {
+            if ( !pe->is_unique() )
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "HYPER_DISPLAY not unique" );
+            if ( pe->get_nb_values() != 1 || !NOMAD::atoi (*(pe->get_values().begin()) , i) || i < 0 )
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "HYPER_DISPLAY" );
+            pe->set_has_been_interpreted();
+            _lhIterationSearch = i;
         }
     }
     
@@ -543,7 +615,7 @@ void HyperParameters::read (const std::string & hyperParamFileName )
             pe = entries.find ( searchName );
             if ( pe )
             {
-                if ( !alreadyDisplayedMessage && ( _explicitSetLowerBounds || _explicitSetUpperBounds || _explicitSetX0 ) )
+                if ( _hyperDisplay> 1 && !alreadyDisplayedMessage && ( _explicitSetLowerBounds || _explicitSetUpperBounds || _explicitSetX0 ) )
                 {
                     alreadyDisplayedMessage  = true;
                     std::cout << "===============================================================" << std::endl;
@@ -622,7 +694,7 @@ void HyperParameters::read (const std::string & hyperParamFileName )
         }
     }
     
-    // REMAINING_VARIABLES:
+    // REMAINING_HYPERPARAMETERS:
     // ------------
     {
         pe = entries.find ( "REMAINING_HYPERPARAMETERS" );
@@ -689,15 +761,21 @@ void HyperParameters::read (const std::string & hyperParamFileName )
 
 void HyperParameters::updateAndCheckAfterReading ( void )
 {
+    if ( _dataset.empty() )
+    {
+        throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: The DATASET name must be provided" );
+    }
+    
+    
     // Check that the dataset name is registered
     if ( _datasetAndNumberOfClasses.find( _dataset ) == _datasetAndNumberOfClasses.end() )
     {
-        std::cout << "WARNING: the dataset name " << _dataset << " is not registered in the current list of available dataset. This requires to modify the blackbox." << std::endl;
+        std::cout << "WARNING: the DATASET name " << _dataset << " is not registered in the current list of available dataset. This requires to modify the blackbox." << std::endl;
         if ( ! _explicitelyProvidedNumberOfClasses )
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: If a DATASET not in the registered list is provided, the NUMBER_OF_CLASSES must be explicitely provided in the hyperparam.txt file." );
     }
     
-    // Set the number of classes
+    // Set the number of classes carefully
     if ( _explicitelyProvidedNumberOfClasses )
     {
         // The registered default number of classes for the dataset is NOT used
@@ -711,6 +789,9 @@ void HyperParameters::updateAndCheckAfterReading ( void )
     {  // The registered default number of classes for the dataset is used
         _numberOfClasses = _datasetAndNumberOfClasses.find( _dataset )->second ;
     }
+    
+    // Set the number of classes in the base hyperparameters
+    getHyperParameter("NUMBER_OF_CLASSES")->value = _numberOfClasses;
     
     // Complete the line for the blackbox with the dataset name (ex.: python pytorch_bb.py MNIST)
     _bbEXE += " " + _dataset;
@@ -932,6 +1013,10 @@ void HyperParameters::registerSearchNames()
 
 void HyperParameters::check( void )
 {
+
+    
+    
+    
     // Check base definition of hyperparameters
     for ( auto & aHyperParameterBlock : _baseHyperParameters )
     {
@@ -941,6 +1026,12 @@ void HyperParameters::check( void )
     // Check expanded
     for ( auto & aHyperParameterBlock : _expandedHyperParameters )
     {
+        // Check for NUMBER_OF_CLASSES
+        GenericHyperParameter & aHP = aHyperParameterBlock.headOfBlockHyperParameter;
+        if ( aHP.searchName.compare("NUMBER_OF_CLASSES") == 0 &&
+             aHP.value != _numberOfClasses )
+                throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: the NUMBER_OF_CLASSES is not properly set (probable error in X0)");
+        
         aHyperParameterBlock.check();
     }
 }
@@ -973,14 +1064,9 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // Pytorch dataset available by default --> link with number of classes
     _datasetAndNumberOfClasses = { {"MNIST",NOMAD::Double(10)},{"FashionMNIST",NOMAD::Double(10)},{"EMNIST",NOMAD::Double(10)}, {"KMNIST",NOMAD::Double(10)} , {"CIFAR10",NOMAD::Double(10)} , {"CIFAR100",NOMAD::Double(100)} , {"STL10",NOMAD::Double(10)}, {"SVHN",NOMAD::Double(10)} };
     
-    // dataset name (default)
-    _dataset = "MNIST";
-    
-    // Registered number of classes
-    if ( _datasetAndNumberOfClasses.find(_dataset) == _datasetAndNumberOfClasses.end() )
-        throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: Unknown dataset name " + _dataset );
-    
-    _numberOfClasses = _datasetAndNumberOfClasses.find(_dataset)->second;
+    // dataset name and the corresponding number of classes have no default
+    _dataset = "";
+    _numberOfClasses = 0;
     
     // At this point the number of classes is NOT explicitely provided (maybe when done when reading the hyperparameter file) and the value registered is used
     _explicitelyProvidedNumberOfClasses = false;
@@ -1057,7 +1143,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
         2 , // Number of adjsutable full layers
         128,
         84 ,
-        _numberOfClasses.value() , // Number of classes taken from the dataset
+        0, // Number of classes will be set later from the dataset
         128 ,  // Batch size
         3,  0.1 ,0.9 , 0.0005,  0 , // Choice of optimizer + optimizer setting
         0.2, // Dropout rate
@@ -1289,9 +1375,9 @@ void HyperParameters::HyperParametersBlock::updateAssociatedParameters( NOMAD::P
 
 void HyperParameters::HyperParametersBlock::check()
 {
-    
     if ( headOfBlockHyperParameter.isDefined() )
     {
+        
         if ( ! headOfBlockHyperParameter.value.is_defined() )
         {
             std::string err = "The hyperparameter " + headOfBlockHyperParameter.searchName + " has no value defined.";
