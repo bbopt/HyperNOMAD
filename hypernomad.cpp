@@ -107,10 +107,6 @@ void display_hyperhelp()
     std::cout << " Default: 100" << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
     
-    std::cout << NOMAD::open_block("NUMBER_OF_CLASSES") << std::endl;
-    std::cout << " Default: 10" << std::endl;
-    std::cout << NOMAD::close_block() << std::endl;
-    
     std::cout << NOMAD::open_block("BB_EXE") << std::endl;
     std::cout << " Default: $python ./pytorch_bb.py " << std::endl;
     std::cout << NOMAD::close_block() << std::endl;

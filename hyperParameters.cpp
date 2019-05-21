@@ -457,33 +457,6 @@ void HyperParameters::read (const std::string & hyperParamFileName )
             
     }
     
-    // NUMBER_OF_CLASSES:
-    // -----------------
-    {
-        pe = entries.find ( "NUMBER_OF_CLASSES" );
-        if ( pe )
-        {
-            if ( !pe->is_unique() )
-                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "NUMBER_OF_CLASSES not unique" );
-            
-            m = pe->get_nb_values();
-            
-            if ( m == 1 )
-            {
-                if ( !_numberOfClasses.atof(*pe->get_values().begin()) )
-                    throw NOMAD::Parameters::Invalid_Parameter ( "In hyperparameter file " , pe->get_line() ,                                                                " cannot read value of NUMBER_OF_CLASSES" );
-                _explicitelyProvidedNumberOfClasses = true;
-            }
-            else
-            {
-                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "NUMBER_OF_CLASSES has too many arguments (>1)." );
-            }
-            pe->set_has_been_interpreted();
-        }
-    }
-    
     // BB_EXE:
     // -------
     {
@@ -766,32 +739,12 @@ void HyperParameters::updateAndCheckAfterReading ( void )
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: The DATASET name must be provided" );
     }
     
-    
     // Check that the dataset name is registered
-    if ( _datasetAndNumberOfClasses.find( _dataset ) == _datasetAndNumberOfClasses.end() )
+    if ( std::find( _registeredDataset.begin(), _registeredDataset.end(), _dataset ) == _registeredDataset.end() )
     {
         std::cout << "WARNING: the DATASET name " << _dataset << " is not registered in the current list of available dataset. This requires to modify the blackbox." << std::endl;
-        if ( ! _explicitelyProvidedNumberOfClasses )
-            throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: If a DATASET not in the registered list is provided, the NUMBER_OF_CLASSES must be explicitely provided in the hyperparam.txt file." );
     }
     
-    // Set the number of classes carefully
-    if ( _explicitelyProvidedNumberOfClasses )
-    {
-        // The registered default number of classes for the dataset is NOT used
-        // A value was explicitely provided ---> manage inconsistancy
-        if ( _datasetAndNumberOfClasses.find( _dataset )->second != _numberOfClasses )
-        {
-            throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: the default number of classes for the dataset is incompatible with the provided value using NUMBER_OF_CLASSES.");
-        }
-    }
-    else
-    {  // The registered default number of classes for the dataset is used
-        _numberOfClasses = _datasetAndNumberOfClasses.find( _dataset )->second ;
-    }
-    
-    // Set the number of classes in the base hyperparameters
-    getHyperParameter("NUMBER_OF_CLASSES")->value = _numberOfClasses;
     
     // Complete the line for the blackbox with the dataset name (ex.: python pytorch_bb.py MNIST)
     _bbEXE += " " + _dataset;
@@ -1026,12 +979,6 @@ void HyperParameters::check( void )
     // Check expanded
     for ( auto & aHyperParameterBlock : _expandedHyperParameters )
     {
-        // Check for NUMBER_OF_CLASSES
-        GenericHyperParameter & aHP = aHyperParameterBlock.headOfBlockHyperParameter;
-        if ( aHP.searchName.compare("NUMBER_OF_CLASSES") == 0 &&
-             aHP.value != _numberOfClasses )
-                throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: the NUMBER_OF_CLASSES is not properly set (probable error in X0)");
-        
         aHyperParameterBlock.check();
     }
 }
@@ -1061,16 +1008,11 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // The block structure (with some default values) for Pytorch
     //
     
-    // Pytorch dataset available by default --> link with number of classes
-    _datasetAndNumberOfClasses = { {"MNIST",NOMAD::Double(10)},{"Fashion-MNIST",NOMAD::Double(10)},{"EMNIST",NOMAD::Double(10)}, {"KMNIST",NOMAD::Double(10)} , {"CIFAR10",NOMAD::Double(10)} , {"CIFAR100",NOMAD::Double(100)} , {"STL10",NOMAD::Double(10)}, {"SVHN",NOMAD::Double(10)} };
+    // Pytorch dataset available by default
+    _registeredDataset = { "MNIST","Fashion-MNIST","EMNIST","KMNIST","CIFAR10","CIFAR100","STL10","SVHN"};
     
     // dataset name and the corresponding number of classes have no default
     _dataset = "";
-    _numberOfClasses = 0;
-    
-    // At this point the number of classes is NOT explicitely provided (maybe when done when reading the hyperparameter file) and the value registered is used
-    _explicitelyProvidedNumberOfClasses = false;
-    
     
     // FIRST HYPER PARAMETERS BLOCK (Convolutionnal layers)
     GenericHyperParameter headOfBlock1={"NUM_CON_LAYERS","Number of convolutionnal layers",NOMAD::CATEGORICAL,2,0,100};
@@ -1095,17 +1037,12 @@ void HyperParameters::initBlockStructureToDefault ( void )
     HyperParametersBlock block2={"Full layers",headOfBlock2, NeighborType::PLUS_ONE_MINUS_ONE_LEFT, AssociatedHyperParametersType::MULTIPLE_TIMES, associatedHyperParameters2};
     
     
-    // THIRD BLOCK (single regular parameter: number of classes ALWAYS FIXED)
-    GenericHyperParameter headOfBlock3={"NUMBER_OF_CLASSES","Number of classes",NOMAD::INTEGER,_numberOfClasses,NOMAD::Double(),NOMAD::Double(),ReportValueType::NO_REPORT, true /*isFixed=true*/};
-    HyperParametersBlock block3={"Number of classes",headOfBlock3,NeighborType::NONE,AssociatedHyperParametersType::ZERO_TIME,};
+    // THIRD BLOCK (single regular parameter: batch size)
+    GenericHyperParameter headOfBlock3={"BATCH_SIZE","Batch size",NOMAD::INTEGER,128,1,400};
+    HyperParametersBlock block3={"Batch size",headOfBlock3,NeighborType::NONE,AssociatedHyperParametersType::ZERO_TIME,};
     
-    
-    // FOURTH BLOCK (single regular parameter: batch size)
-    GenericHyperParameter headOfBlock4={"BATCH_SIZE","Batch size",NOMAD::INTEGER,128,1,400};
-    HyperParametersBlock block4={"Batch size",headOfBlock4,NeighborType::NONE,AssociatedHyperParametersType::ZERO_TIME,};
-    
-    // FIFTH CATEGORICAL BLOCK (Optimizer select)
-    GenericHyperParameter headOfBlock5={"OPTIMIZER_CHOICE","Choice of optimizer",NOMAD::CATEGORICAL,3,1,4};
+    // FOURTH CATEGORICAL BLOCK (Optimizer select)
+    GenericHyperParameter headOfBlock4={"OPTIMIZER_CHOICE","Choice of optimizer",NOMAD::CATEGORICAL,3,1,4};
     
     GenericHyperParameter hp7={"OPT_PARAM_1","Learning rate",NOMAD::CONTINUOUS,0.1,0,1, ReportValueType::COPY_INITIAL_VALUE};
     GenericHyperParameter hp8={"OPT_PARAM_2","Momentum",NOMAD::CONTINUOUS,0.9,0,1, ReportValueType::COPY_INITIAL_VALUE};
@@ -1113,18 +1050,18 @@ void HyperParameters::initBlockStructureToDefault ( void )
     GenericHyperParameter hp10={"OPT_PARAM_4","Dampening",NOMAD::CONTINUOUS,0,0,1, ReportValueType::COPY_INITIAL_VALUE};
     GroupsOfAssociatedHyperParameters associatedHyperParameters5={{hp7,hp8,hp9,hp10}};
     
-    HyperParametersBlock block5={"Optimizer",headOfBlock5, NeighborType::LOOP_PLUS_ONE_RIGHT, AssociatedHyperParametersType::ONE_TIME, associatedHyperParameters5};
+    HyperParametersBlock block4={"Optimizer",headOfBlock4, NeighborType::LOOP_PLUS_ONE_RIGHT, AssociatedHyperParametersType::ONE_TIME, associatedHyperParameters5};
     
-    // SIXTH BLOCK (single regular parameter: Dropout rate)
-    GenericHyperParameter headOfBlock6={"DROPOUT_RATE","Dropout rate",NOMAD::CONTINUOUS,0.2,0,0.75};
-    HyperParametersBlock block6={"Dropout rate",headOfBlock6, NeighborType::NONE, AssociatedHyperParametersType::ZERO_TIME,};
+    // FITH BLOCK (single regular parameter: Dropout rate)
+    GenericHyperParameter headOfBlock5={"DROPOUT_RATE","Dropout rate",NOMAD::CONTINUOUS,0.2,0,0.75};
+    HyperParametersBlock block5={"Dropout rate",headOfBlock5, NeighborType::NONE, AssociatedHyperParametersType::ZERO_TIME,};
     
     // SIXTH BLOCK (single regular parameter: Activation function)
-    GenericHyperParameter headOfBlock7={"ACTIVATION_FUNCTION","Activation function",NOMAD::INTEGER,1,1,3};
-    HyperParametersBlock block7={"Activation function",headOfBlock7, NeighborType::NONE, AssociatedHyperParametersType::ZERO_TIME,};
+    GenericHyperParameter headOfBlock6={"ACTIVATION_FUNCTION","Activation function",NOMAD::INTEGER,1,1,3};
+    HyperParametersBlock block6={"Activation function",headOfBlock6, NeighborType::NONE, AssociatedHyperParametersType::ZERO_TIME,};
     
     // ALL BASE HYPER PARAMETERS (NOT EXPANDED)
-    _baseHyperParameters = {block1,block2,block3,block4,block5,block6,block7};
+    _baseHyperParameters = {block1,block2,block3,block4,block5,block6};
     
     
     // BB Output type
@@ -1143,7 +1080,6 @@ void HyperParameters::initBlockStructureToDefault ( void )
         2 , // Number of adjsutable full layers
         128,
         84 ,
-        0, // Number of classes will be set later from the dataset
         128 ,  // Batch size
         3,  0.1 ,0.9 , 0.0005,  0 , // Choice of optimizer + optimizer setting
         0.2, // Dropout rate

@@ -147,9 +147,8 @@ private:
     std::string _bbEXE;
     std::vector<NOMAD::bb_output_type> _bbot;
     size_t _maxBbEval;
-    std::map<std::string,NOMAD::Double> _datasetAndNumberOfClasses;
-    bool _explicitelyProvidedNumberOfClasses;
-    NOMAD::Double _numberOfClasses;
+    std::list<std::string> _registeredDataset;
+
     
     NOMAD::Point _X0, _lowerBound, _upperBound , _fixedVariables;
     
