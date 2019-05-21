@@ -155,6 +155,8 @@ private:
     
     size_t _hyperDisplay;
     
+    size_t _lhIterationSearch;
+    
     bool _explicitSetLowerBounds;
     bool _explicitSetUpperBounds;
     bool _explicitSetX0;
@@ -206,6 +208,8 @@ public:
     
     void setHyperDisplay ( size_t d ) { _hyperDisplay = d; }
     size_t getHyperDisplay() const { return _hyperDisplay ;}
+    
+    size_t getLhIterationSearch () const { return _lhIterationSearch ;}
     
     void display() const;
 

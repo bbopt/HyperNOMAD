@@ -241,6 +241,7 @@ HyperParameters::HyperParameters ( const std::string & hyperParamFileName )
 {
     // Default display
     _hyperDisplay = 1;
+    _lhIterationSearch = 0;
     
     initBlockStructureToDefault();
     
@@ -341,14 +342,14 @@ void HyperParameters::display () const
     }
     else if ( _hyperDisplay == 1 )
     {
-        std::cout << " X0 = " ;
+        std::cout << " X0 = "  << std::endl;
         for ( auto & block : _expandedHyperParameters )
         {
             std::cout << " [ ";
             block.display( false );
-            std::cout << "] " ;
+            std::cout << "] " << std::endl;
         }
-        std::cout << " ]" << endl;
+        std::cout << " ]" << std::endl << std::endl ;
     }
         
 }
@@ -525,7 +526,6 @@ void HyperParameters::read (const std::string & hyperParamFileName )
     }
     
     // HYPER_DISPLAY
-    // MAX_BB_EVAL:
     // ------------
     {
         int i;
@@ -540,6 +540,24 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                                                             "HYPER_DISPLAY" );
             pe->set_has_been_interpreted();
             _hyperDisplay = i;
+        }
+    }
+    
+    // LH_ITERATION_SEARCH
+    // ------------
+    {
+        int i;
+        pe = entries.find ( "LH_ITERATION_SEARCH" );
+        if ( pe )
+        {
+            if ( !pe->is_unique() )
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "HYPER_DISPLAY not unique" );
+            if ( pe->get_nb_values() != 1 || !NOMAD::atoi (*(pe->get_values().begin()) , i) || i < 0 )
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "HYPER_DISPLAY" );
+            pe->set_has_been_interpreted();
+            _lhIterationSearch = i;
         }
     }
     

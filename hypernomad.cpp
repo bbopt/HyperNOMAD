@@ -198,8 +198,10 @@ int main ( int argc , char ** argv )
 
         p.set_BB_OUTPUT_TYPE ( hyperParameters->getBbOutputType() );
         p.set_BB_EXE( hyperParameters->getBB() );
+        
+        p.set_LH_SEARCH(0 , static_cast<int>( hyperParameters->getLhIterationSearch() ) );
 
-        p.set_MAX_BB_EVAL( static_cast<int>(hyperParameters->getMaxBbEval()) );
+        p.set_MAX_BB_EVAL( static_cast<int>( hyperParameters->getMaxBbEval()) );
 
         p.set_EXTENDED_POLL_TRIGGER ( 10 , false );
         
@@ -209,16 +211,19 @@ int main ( int argc , char ** argv )
 
         // parameters validation:
         p.check();
+        
+        if ( hyperParameters->getHyperDisplay() > 2 )
+        {
+            std::cout << "===================================================" << std::endl;
+            std::cout << "            STARTING NOMAD OPTIMIZATION            " << std::endl;
+            std::cout << "===================================================" << std::endl << std::endl;
+        }
 
         // extended poll:
         My_Extended_Poll ep ( p , hyperParameters );
 
         // algorithm creation and execution:
         Mads mads ( p , NULL , &ep , NULL , NULL );
-        
-        std::cout << "===================================================" << std::endl;
-        std::cout << "            STARTING NOMAD OPTIMIZATION            " << std::endl;
-        std::cout << "===================================================" << std::endl << std::endl;
         
         mads.run();
     }
