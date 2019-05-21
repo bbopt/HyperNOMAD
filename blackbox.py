@@ -28,7 +28,6 @@ import os
 import sys
 from datahandler import DataHandler
 from evaluator import *
-from utils import *
 from neural_net import NeuralNet
 
 
@@ -38,7 +37,6 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print('> Reading the inputs..')
 # get the dataset
 dataset = str(sys.argv[1])
-print(dataset)
 
 # Architecture
 num_conv_layers = int(sys.argv[2])
@@ -58,30 +56,29 @@ for i in range(num_full_layers):
     list_param_full_layers += [int(sys.argv[last_index + 2 + i])]
 
 # First 2 : blackbox.py, dataset
-classes_index = 2 + (2 + num_conv_layers*5 + num_full_layers)
-number_of_classes = int(sys.argv[classes_index])
-batch_size = int(sys.argv[classes_index + 1])
+batch_size_index = 2 + (2 + num_conv_layers*5 + num_full_layers)
+batch_size = int(sys.argv[batch_size_index])
 
 # HPs
-optimizer_choice = int(sys.argv[classes_index + 2])
-arg1 = float(sys.argv[classes_index + 3])               # lr
-arg2 = float(sys.argv[classes_index + 4])               # momentum
-arg3 = float(sys.argv[classes_index + 5])               # weight decay
-arg4 = float(sys.argv[classes_index + 6])               # dampening
-dropout_rate = float(sys.argv[classes_index + 7])
-activation = int(sys.argv[classes_index + 8])
+optimizer_choice = int(sys.argv[batch_size_index + 1])
+arg1 = float(sys.argv[batch_size_index + 2])               # lr
+arg2 = float(sys.argv[batch_size_index + 3])               # momentum
+arg3 = float(sys.argv[batch_size_index + 4])               # weight decay
+arg4 = float(sys.argv[batch_size_index + 5])               # dampening
+dropout_rate = float(sys.argv[batch_size_index + 6])
+activation = int(sys.argv[batch_size_index + 7])
 
 # Load the data
 print('> Preparing the data..')
 
 if dataset is not 'CUSTOM':
     dataloader = DataHandler(dataset, batch_size)
-    image_size, total_number_classes = dataloader.get_info_data
+    image_size, number_classes = dataloader.get_info_data
     trainloader, validloader, testloader = dataloader.get_loaders()
 else:
     # Add here the adequate information
     image_size = None
-    total_number_classes = None
+    number_classes = None
     trainloader = None
     validloader = None
     testloader = None
@@ -91,14 +88,14 @@ assert isinstance(trainloader, torch.utils.data.dataloader.DataLoader), 'Trainlo
 assert isinstance(validloader, torch.utils.data.dataloader.DataLoader), 'Validloader given is not of class DataLoader'
 assert isinstance(testloader, torch.utils.data.dataloader.DataLoader), 'Testloader given is not of class DataLoader'
 assert image_size is not None, 'Image size can not be None'
-assert total_number_classes is not None, 'Total number of classes can not be None'
+assert number_classes is not None, 'Total number of classes can not be None'
 
 num_input_channels = image_size[0]
 
 print('> Constructing the network')
 # construct the network
 cnn = NeuralNet(num_conv_layers, num_full_layers, list_param_conv_layers, list_param_full_layers,
-                dropout_rate, activation, image_size[1], total_number_classes, num_input_channels)
+                dropout_rate, activation, image_size[1], number_classes, num_input_channels)
 
 cnn.to(device)
 
