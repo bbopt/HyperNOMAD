@@ -79,11 +79,11 @@ void display_hyperusage()
 void display_hyperversion()
 {
     // Display nomad version
-    cout << " --------------------------------------------------" << std::endl;
+    cout << "--------------------------------------------------" << std::endl;
     cout << "  HyperNomad - version " << hyperNomadVersion << std::endl;
-    cout << " --------------------------------------------------" << std::endl << std::endl;
+    cout << "--------------------------------------------------" << std::endl ;
     cout << "  Using Nomad version " << NOMAD::VERSION << " - www.gerad.ca/nomad" << std::endl ;
-    cout << " --------------------------------------------------" << std::endl;
+    cout << "--------------------------------------------------" << std::endl << std::endl ;
 }
 
 void display_hyperinfo()
@@ -98,6 +98,52 @@ void display_hyperhelp()
 // TODO Put the complete help here
     display_hyperversion();
     display_hyperusage();
+    
+    std::cout << NOMAD::open_block("DATASET") << std::endl;
+    std::cout << " Default: MNIST" << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("MAX_BB_EVAL") << std::endl;
+    std::cout << " Default: 100" << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("NUMBER_OF_CLASSES") << std::endl;
+    std::cout << " Default: 10" << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("BB_EXE") << std::endl;
+    std::cout << " Default: $python ./pytorch_bb.py " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+
+    std::cout << NOMAD::open_block("HYPER_DISPLAY") << std::endl;
+    std::cout << " Default: 1 " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("LH_ITERATION_SEARCH") << std::endl;
+    std::cout << " Default: 0 " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+
+    std::cout << NOMAD::open_block("X0") << std::endl;
+    std::cout << " Default:  " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+
+    std::cout << NOMAD::open_block("LOWER_BOUND") << std::endl;
+    std::cout << " Default:  " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("UPPER_BOUND") << std::endl;
+    std::cout << " Default:  " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("HYPERPARAM_NAME in {}") << std::endl;
+    std::cout << " Default:  " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    std::cout << NOMAD::open_block("REMAINING_HYPERPARAMETERS") << std::endl;
+    std::cout << " Default: VAR " << std::endl;
+    std::cout << NOMAD::close_block() << std::endl;
+    
+    
 }
 
 
@@ -193,6 +239,7 @@ int main ( int argc , char ** argv )
 
         // Each block forms a VARIABLE GROUP in Nomad
         std::vector<std::set<int>> variableGroupsIndices = hyperParameters->getVariableGroupsIndices();
+        
         for ( auto aGroupIndices : variableGroupsIndices )
             p.set_VARIABLE_GROUP( aGroupIndices );
 
@@ -214,9 +261,13 @@ int main ( int argc , char ** argv )
         
         if ( hyperParameters->getHyperDisplay() > 2 )
         {
-            std::cout << "===================================================" << std::endl;
-            std::cout << "            STARTING NOMAD OPTIMIZATION            " << std::endl;
-            std::cout << "===================================================" << std::endl << std::endl;
+            display_hyperversion();
+            
+            std::cout << std::endl
+                << NOMAD::open_block ( "Nomad parameters" ) << std::endl
+                << p
+                << NOMAD::close_block();
+            
         }
 
         // extended poll:

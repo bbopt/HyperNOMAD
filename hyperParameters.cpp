@@ -120,7 +120,7 @@ std::vector<std::set<int>> HyperParameters:: getVariableGroupsIndices() const
             if ( bbit[i] != NOMAD::CATEGORICAL && ! aBlock.getHyperParameter(i).isFixed )
                 aGroupIndices.insert(current_index);
         }
-        if ( aGroupIndices.size() > 1 )
+        if ( aGroupIndices.size() > 0 )
             indices.push_back( aGroupIndices );
     }
     return indices;
@@ -335,21 +335,21 @@ void HyperParameters::display () const
         
         for ( auto & block : _expandedHyperParameters )
         {
-            std::cout << "-------------------------"  << block.name << "----------------------------" << std::endl;
+            std::cout  << NOMAD::open_block ( block.name ) << std::endl;
             block.display( true );
-            std::cout << "-----------------------------------------------------------------------" << std::endl << std::endl;
+            std::cout << NOMAD::close_block() << " }" << std::endl << std::endl;
         }
     }
     else if ( _hyperDisplay == 1 )
     {
-        std::cout << " X0 = "  << std::endl;
+        std::cout  << NOMAD::open_block (" X0 ") ;
         for ( auto & block : _expandedHyperParameters )
         {
-            std::cout << " [ ";
+            std::cout << "\n\t [ ";
             block.display( false );
-            std::cout << "] " << std::endl;
+            std::cout << "] ";
         }
-        std::cout << " ]" << std::endl << std::endl ;
+        std::cout << NOMAD::close_block() << " }" << std::endl;
     }
         
 }
@@ -614,7 +614,7 @@ void HyperParameters::read (const std::string & hyperParamFileName )
             pe = entries.find ( searchName );
             if ( pe )
             {
-                if ( !alreadyDisplayedMessage && ( _explicitSetLowerBounds || _explicitSetUpperBounds || _explicitSetX0 ) )
+                if ( _hyperDisplay> 1 && !alreadyDisplayedMessage && ( _explicitSetLowerBounds || _explicitSetUpperBounds || _explicitSetX0 ) )
                 {
                     alreadyDisplayedMessage  = true;
                     std::cout << "===============================================================" << std::endl;
@@ -693,7 +693,7 @@ void HyperParameters::read (const std::string & hyperParamFileName )
         }
     }
     
-    // REMAINING_VARIABLES:
+    // REMAINING_HYPERPARAMETERS:
     // ------------
     {
         pe = entries.find ( "REMAINING_HYPERPARAMETERS" );
