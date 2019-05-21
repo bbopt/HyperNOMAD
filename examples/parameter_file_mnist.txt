@@ -1,0 +1,10 @@
+# Mandatory information
+DATASET  		    MNIST
+MAX_BB_EVAL 		100
+
+# Optional information
+NUM_CON_LAYERS 		5  -  -  FIXED
+KERNELS 		      3
+NUM_FULL_LAYERS		6
+ACTIVATION 		    2
+DROUPOUT_RATE 		0.6  0.3 0.8
