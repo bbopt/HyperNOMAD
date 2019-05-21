@@ -775,7 +775,7 @@ void HyperParameters::updateAndCheckAfterReading ( void )
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: If a DATASET not in the registered list is provided, the NUMBER_OF_CLASSES must be explicitely provided in the hyperparam.txt file." );
     }
     
-    // Set the number of classes
+    // Set the number of classes carefully
     if ( _explicitelyProvidedNumberOfClasses )
     {
         // The registered default number of classes for the dataset is NOT used
@@ -1013,6 +1013,10 @@ void HyperParameters::registerSearchNames()
 
 void HyperParameters::check( void )
 {
+
+    
+    
+    
     // Check base definition of hyperparameters
     for ( auto & aHyperParameterBlock : _baseHyperParameters )
     {
@@ -1022,6 +1026,12 @@ void HyperParameters::check( void )
     // Check expanded
     for ( auto & aHyperParameterBlock : _expandedHyperParameters )
     {
+        // Check for NUMBER_OF_CLASSES
+        GenericHyperParameter & aHP = aHyperParameterBlock.headOfBlockHyperParameter;
+        if ( aHP.searchName.compare("NUMBER_OF_CLASSES") == 0 &&
+             aHP.value != _numberOfClasses )
+                throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: the NUMBER_OF_CLASSES is not properly set (probable error in X0)");
+        
         aHyperParameterBlock.check();
     }
 }
@@ -1365,9 +1375,9 @@ void HyperParameters::HyperParametersBlock::updateAssociatedParameters( NOMAD::P
 
 void HyperParameters::HyperParametersBlock::check()
 {
-    
     if ( headOfBlockHyperParameter.isDefined() )
     {
+        
         if ( ! headOfBlockHyperParameter.value.is_defined() )
         {
             std::string err = "The hyperparameter " + headOfBlockHyperParameter.searchName + " has no value defined.";
