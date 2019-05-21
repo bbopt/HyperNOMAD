@@ -6,7 +6,6 @@ COMPILATOR             = g++
 
 COMPILATOR_OPTIONS     = -std=c++14  
 
-
 LIB_DIR                = $(NOMAD_HOME)/lib
 LIB_NOMAD              = libnomad.so 
 
@@ -22,6 +21,8 @@ LDLIBS                 = -lm -lnomad
 INCLUDE                = -I$(NOMAD_HOME)/src -I$(NOMAD_HOME)/ext/sgtelib/src -I.
 
 COMPILE                = $(COMPILATOR) $(COMPILATOR_OPTIONS) $(INCLUDE) -c
+
+SRC		       = src/nomad_optimizer
 
 OBJS                   = hypernomad.o hyperParameters.o
 
@@ -42,14 +43,16 @@ $(EXE): $(OBJS)
 ifeq ($(UNAME), Darwin)
 	@install_name_tool -change $(LIB_NOMAD) $(NOMAD_HOME)/lib/$(LIB_NOMAD) $(EXE)
 endif
+	@echo "   cleaning obj files"
+	@rm -f $(OBJS)
 
-hypernomad.o: hypernomad.cpp hyperParameters.hpp
+hypernomad.o: $(SRC)/hypernomad.cpp $(SRC)/hyperParameters.hpp
 	$(ECHO_NOMAD)
-	@$(COMPILE) hypernomad.cpp
+	@$(COMPILE) $(SRC)/hypernomad.cpp
 
-hyperParameters.o: hyperParameters.cpp hyperParameters.hpp
+hyperParameters.o: $(SRC)/hyperParameters.cpp $(SRC)/hyperParameters.hpp
 	$(ECHO_NOMAD)
-	@$(COMPILE) hyperParameters.cpp
+	@$(COMPILE) $(SRC)/hyperParameters.cpp
 
 all: $(EXE)
 
