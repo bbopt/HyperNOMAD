@@ -168,6 +168,8 @@ int main ( int argc , char ** argv )
 // For testing getNeighboors
         if ( flagDisplayNeighboors )
         {
+            // Switch to full display
+            hyperParameters->setHyperDisplay(3);
             
             NOMAD::Point X0 = hyperParameters->getValues( ValueType::CURRENT_VALUE);
             std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
@@ -176,7 +178,8 @@ int main ( int argc , char ** argv )
             return 0;
         }
         
-        p.set_DISPLAY_DEGREE( 3 );
+        
+        p.set_DISPLAY_DEGREE( static_cast<int>( hyperParameters->getHyperDisplay() ) );
 
         p.set_DIMENSION( static_cast<int>(hyperParameters->getDimension()) );
         p.set_X0( hyperParameters->getValues( ValueType::CURRENT_VALUE) );

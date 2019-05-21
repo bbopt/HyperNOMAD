@@ -239,6 +239,8 @@ std::vector<HyperParameters> HyperParameters::getNeighboors( const NOMAD::Point 
 
 HyperParameters::HyperParameters ( const std::string & hyperParamFileName )
 {
+    // Default display
+    _hyperDisplay = 1;
     
     initBlockStructureToDefault();
     
@@ -265,56 +267,90 @@ HyperParameters::HyperParameters ( const std::string & hyperParamFileName )
     display();
 }
 
-void HyperParameters::HyperParametersBlock::display () const
+void HyperParameters::HyperParametersBlock::display ( bool detailedDisplay ) const
 {
     // Head of block
-    std::cout << "\t Head of block ";
-    headOfBlockHyperParameter.display();
-    
-    switch ( associatedParametersType )
+    if ( detailedDisplay )
     {
-        case AssociatedHyperParametersType::ZERO_TIME :
-            std::cout << "\t No associated hyperparameters " << std::endl;
-            break;
-        case AssociatedHyperParametersType::ONE_TIME :
-            std::cout << "\t One time associated hyperparameters (always 1 group)" << std::endl;
-            break;
-        case AssociatedHyperParametersType::MULTIPLE_TIMES :
-            std::cout << "\t Multiple times associated hyperparameters: " << groupsOfAssociatedHyperParameters.size() << " groups" << std::endl;
-            break;
+        std::cout << "\t Head of block ";
+        headOfBlockHyperParameter.display( detailedDisplay );
+    }
+    else
+    {
+        std::cout << headOfBlockHyperParameter.searchName << " " << headOfBlockHyperParameter.value << " " ;
+    }
+    
+    if ( detailedDisplay )
+    {
+        switch ( associatedParametersType )
+        {
+            case AssociatedHyperParametersType::ZERO_TIME :
+                std::cout << "\t No associated hyperparameters " << std::endl;
+                break;
+            case AssociatedHyperParametersType::ONE_TIME :
+                std::cout << "\t One time associated hyperparameters (always 1 group)" << std::endl;
+                break;
+            case AssociatedHyperParametersType::MULTIPLE_TIMES :
+                std::cout << "\t Multiple times associated hyperparameters: " << groupsOfAssociatedHyperParameters.size() << " groups" << std::endl;
+                break;
+        }
     }
     
     size_t index = 0;
     for ( const auto & aGAH : groupsOfAssociatedHyperParameters )
     {
-        std::cout << "\t Group #" << index++ << std::endl;
+        if ( detailedDisplay )
+            std::cout << "\t Group #" << index++ << std::endl;
+        else
+            std::cout << "[ " ;
+        
         for ( const auto & aAP : aGAH )
         {
             std::cout << "\t\t " ;
-            aAP.display();
+            aAP.display( detailedDisplay );
         }
+        if ( ! detailedDisplay )
+            std::cout << " ] " ;
     }
 }
 
-void HyperParameters::GenericHyperParameter::display () const
+void HyperParameters::GenericHyperParameter::display ( bool detailedDisplay ) const
 {
-    std::cout << searchName << " -> x0=" << value << ", lb=" << lowerBoundValue << ", ub=" << upperBoundValue << ((isFixed) ? ", is FIXED":", is VARIABLE") << std::endl;
+    if ( detailedDisplay )
+        std::cout << searchName << " -> x0=" << value << ", lb=" << lowerBoundValue << ", ub=" << upperBoundValue << ((isFixed) ? ", is FIXED":", is VARIABLE") << std::endl;
+    else
+        std::cout << value ;
 }
 
 void HyperParameters::display () const
 {
-    std::cout << "===================================================" << std::endl;
-    std::cout << "             BLOCKS OF HYPERPARAMETERS             " << std::endl;
-    std::cout << " Each block has a head hyperparameters and possibly" << std::endl;
-    std::cout << " several groups of associated hyperameters."         << std::endl ;
-    std::cout << "===================================================" << std::endl<< std::endl ;
-    
-    for ( auto & block : _expandedHyperParameters )
+    if ( _hyperDisplay > 1 )
     {
-        std::cout << "-------------------------"  << block.name << "----------------------------" << std::endl;
-        block.display();
-        std::cout << "-----------------------------------------------------------------------" << std::endl << std::endl;
+        std::cout << "===================================================" << std::endl;
+        std::cout << "             BLOCKS OF HYPERPARAMETERS             " << std::endl;
+        std::cout << " Each block has a head hyperparameters and possibly" << std::endl;
+        std::cout << " several groups of associated hyperameters."         << std::endl ;
+        std::cout << "===================================================" << std::endl<< std::endl ;
+        
+        for ( auto & block : _expandedHyperParameters )
+        {
+            std::cout << "-------------------------"  << block.name << "----------------------------" << std::endl;
+            block.display( true );
+            std::cout << "-----------------------------------------------------------------------" << std::endl << std::endl;
+        }
     }
+    else if ( _hyperDisplay == 1 )
+    {
+        std::cout << " X0 = " ;
+        for ( auto & block : _expandedHyperParameters )
+        {
+            std::cout << " [ ";
+            block.display( false );
+            std::cout << "] " ;
+        }
+        std::cout << " ]" << endl;
+    }
+        
 }
 
 
@@ -485,6 +521,25 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                                                             "MAX_BB_EVAL" );
             pe->set_has_been_interpreted();
             _maxBbEval = i;
+        }
+    }
+    
+    // HYPER_DISPLAY
+    // MAX_BB_EVAL:
+    // ------------
+    {
+        int i;
+        pe = entries.find ( "HYPER_DISPLAY" );
+        if ( pe )
+        {
+            if ( !pe->is_unique() )
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "HYPER_DISPLAY not unique" );
+            if ( pe->get_nb_values() != 1 || !NOMAD::atoi (*(pe->get_values().begin()) , i) || i < 0 )
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "HYPER_DISPLAY" );
+            pe->set_has_been_interpreted();
+            _hyperDisplay = i;
         }
     }
     
