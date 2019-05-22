@@ -1,3 +1,7 @@
+ifndef ($(VARIANT))
+VARIANT             = release
+endif
+
 UNAME := $(shell uname)
 
 EXE                    = hypernomad.exe
@@ -22,10 +26,17 @@ INCLUDE                = -I$(NOMAD_HOME)/src -I$(NOMAD_HOME)/ext/sgtelib/src -I.
 
 COMPILE                = $(COMPILATOR) $(COMPILATOR_OPTIONS) $(INCLUDE) -c
 
-SRC		       = src/nomad_optimizer
+
+TOP                    = $(abspath .)
+BUILD_DIR              = $(TOP)/build/$(VARIANT)
+SRC		       = $(TOP)/src/nomad_optimizer
+BIN_DIR                = $(TOP)/bin
+
+$(EXE)                := $(addprefix $(BIN_DIR)/,$(EXE))
+
 
 OBJS                   = hypernomad.o hyperParameters.o
-
+OBJS                  := $(addprefix $(BUILD_DIR)/,$(OBJS))
 
 ifndef NOMAD_HOME
 define ECHO_NOMAD
@@ -37,22 +48,18 @@ endif
 
 $(EXE): $(OBJS)
 	$(ECHO_NOMAD)
-	@echo "   building the scalar version ..."
-	@echo "   exe file : "$(EXE)
+	@mkdir -p $(BIN_DIR)
+	@echo "   building HyperNomad ..."
 	@$(COMPILATOR) -o $(EXE) $(OBJS) $(LDLIBS) $(CXXFLAGS) -L$(LIB_DIR) 
 ifeq ($(UNAME), Darwin)
 	@install_name_tool -change $(LIB_NOMAD) $(NOMAD_HOME)/lib/$(LIB_NOMAD) $(EXE)
 endif
-	@echo "   cleaning obj files"
-	@rm -f $(OBJS)
 
-hypernomad.o: $(SRC)/hypernomad.cpp $(SRC)/hyperParameters.hpp
+$(BUILD_DIR)/%.o: $(SRC)/%.cpp $(SRC)/hyperParameters.hpp
 	$(ECHO_NOMAD)
-	@$(COMPILE) $(SRC)/hypernomad.cpp
+	@mkdir -p $(BUILD_DIR)
+	@$(COMPILE) $< -o $@
 
-hyperParameters.o: $(SRC)/hyperParameters.cpp $(SRC)/hyperParameters.hpp
-	$(ECHO_NOMAD)
-	@$(COMPILE) $(SRC)/hyperParameters.cpp
 
 all: $(EXE)
 
@@ -67,5 +74,7 @@ del: ;
 	@rm -f $(OBJS) 
 	@echo "   cleaning exe file"
 	@rm -f $(EXE) 
+	@echo "   cleaning build dir"
+	@rm -rf $(BUILD_DIR)
 
 
