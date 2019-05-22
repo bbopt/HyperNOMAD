@@ -29,15 +29,15 @@ The next phase of to create a parameter file that contains the necessary informa
 
 ```
 # Mandatory information
-DATASET  		    MNIST
-MAX_BB_EVAL 		100
+DATASET                 MNIST
+MAX_BB_EVAL             100
 
 # Optional information
-NUM_CON_LAYERS 		5  -  -  FIXED
-KERNELS 		      3
-NUM_FULL_LAYERS		6
-ACTIVATION 		    2
-DROUPOUT_RATE 		0.6  0.3 0.8
+NUM_CON_LAYERS          5  -  -  FIXED
+KERNELS                 3
+NUM_FC_LAYERS           6
+ACTIVATION_FUNCTION     2
+DROPOUT_RATE            0.6  0.3 0.8
 ```
 
 ## Running an optimization
