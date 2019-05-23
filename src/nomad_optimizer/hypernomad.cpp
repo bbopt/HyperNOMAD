@@ -100,15 +100,15 @@ void display_hyperhelp()
     display_hyperusage();
     
     std::cout << NOMAD::open_block("DATASET") << std::endl;
-    std::cout << " Default: MNIST" << std::endl;
+    std::cout << " Default: no default " << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
     
     std::cout << NOMAD::open_block("MAX_BB_EVAL") << std::endl;
-    std::cout << " Default: 100" << std::endl;
+    std::cout << " Default: no default " << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
     
     std::cout << NOMAD::open_block("BB_EXE") << std::endl;
-    std::cout << " Default: $python ./pytorch_bb.py " << std::endl;
+    std::cout << " Default: $python src/blackbox/pytorch_bb.py " << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
 
     std::cout << NOMAD::open_block("HYPER_DISPLAY") << std::endl;
