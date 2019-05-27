@@ -48,8 +48,6 @@ endif
 
 $(EXE): $(OBJS)
 	$(ECHO_NOMAD)
-	@echo $(BIN_DIR)
-	@echo $(EXE)
 	@mkdir -p $(BIN_DIR)
 	@echo "   building HyperNomad ..."
 	@$(COMPILATOR) -o $(EXE) $(OBJS) $(LDLIBS) $(CXXFLAGS) -L$(LIB_DIR) 
