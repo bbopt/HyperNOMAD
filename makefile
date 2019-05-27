@@ -32,7 +32,7 @@ BUILD_DIR              = $(TOP)/build/$(VARIANT)
 SRC		       = $(TOP)/src/nomad_optimizer
 BIN_DIR                = $(TOP)/bin
 
-$(EXE)                := $(addprefix $(BIN_DIR)/,$(EXE))
+EXE                   := $(addprefix $(BIN_DIR)/,$(EXE))
 
 
 OBJS                   = hypernomad.o hyperParameters.o
@@ -48,6 +48,8 @@ endif
 
 $(EXE): $(OBJS)
 	$(ECHO_NOMAD)
+	@echo $(BIN_DIR)
+	@echo $(EXE)
 	@mkdir -p $(BIN_DIR)
 	@echo "   building HyperNomad ..."
 	@$(COMPILATOR) -o $(EXE) $(OBJS) $(LDLIBS) $(CXXFLAGS) -L$(LIB_DIR) 
