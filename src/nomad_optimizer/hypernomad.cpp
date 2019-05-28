@@ -27,12 +27,15 @@
 #include "hyperParameters.hpp"
 #include <vector>
 #include <memory>
+
+#include "fileutils.hpp"
+
 using namespace std;
 using namespace NOMAD;
 
-
 bool flagDisplayNeighboors = false;
-const std::string hyperNomadName = "hyperNomad.exe";
+std::string hyperNomadName ;
+const std::string defaultPytorchBB = "src/blackbox/pytorch_bb.py";
 const std::string hyperNomadVersion = "1.0";
 
 
@@ -64,7 +67,7 @@ public:
 
 };
 
-void display_hyperusage()
+void display_hyperusage( )
 {
     cout << std::endl
     << "Run           : " << hyperNomadName << " hyperparameters_file"     << std::endl
@@ -100,15 +103,15 @@ void display_hyperhelp()
     display_hyperusage();
     
     std::cout << NOMAD::open_block("DATASET") << std::endl;
-    std::cout << " Default: no default " << std::endl;
+    std::cout << " Default: No default (must be provided)" << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
     
     std::cout << NOMAD::open_block("MAX_BB_EVAL") << std::endl;
-    std::cout << " Default: no default " << std::endl;
+    std::cout << " Default: no default (must be provided)" << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
     
     std::cout << NOMAD::open_block("BB_EXE") << std::endl;
-    std::cout << " Default: $python src/blackbox/pytorch_bb.py " << std::endl;
+    std::cout << " Default: $python " + defaultPytorchBB << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
 
     std::cout << NOMAD::open_block("HYPER_DISPLAY") << std::endl;
@@ -148,14 +151,16 @@ void display_hyperhelp()
 /*------------------------------------------*/
 int main ( int argc , char ** argv )
 {
+    
+    hyperNomadName = trimDir( argv[0] );
+    if ( hyperNomadName.length() == 0 )
+    {
+        std::cerr << "Cannot determine hyperNomad name! " << endl;
+        return 0;
+    }
+    std::string hyperNomadPath = extractDir( argv[0] );
 
-    // NOMAD initializations:
-    begin ( argc , argv );
-
-    // display:
-    Display out ( cout );
-    out.precision ( DISPLAY_PRECISION_STD );
-
+    
     std::string hyperParamFile="";
     if ( argc > 1 )
     {
@@ -199,13 +204,21 @@ int main ( int argc , char ** argv )
         display_hyperusage();
     }
 
+    // NOMAD initializations:
+    begin ( argc , argv );
+    
+    // display:
+    Display out ( cout );
+    out.precision ( DISPLAY_PRECISION_STD );
+    
+    
     try
     {
-
+        
         // parameters creation:
         Parameters p ( out );
 
-        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile);
+        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile , hyperNomadPath , defaultPytorchBB );
 
 // For testing getNeighboors
         if ( flagDisplayNeighboors )
@@ -278,7 +291,12 @@ int main ( int argc , char ** argv )
         // algorithm creation and execution:
         Mads mads ( p , NULL , &ep , NULL , NULL );
         
-        mads.run();
+        
+        NOMAD::stop_type stopType = mads.run();
+        
+        if ( stopType == X0_FAIL )
+            cerr << endl << "The starting point cannot be evaluated. Please verify that the Pytorch script is available. The default setting for bbExe (" << p.get_bb_exe().front() << " ) seems incorrect. Set _bbExe accordingly." << endl << endl;
+        
     }
     catch ( exception & e ) {
         string error = string ( "HYPER NOMAD has been interrupted: " ) + e.what();

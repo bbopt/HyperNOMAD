@@ -29,6 +29,7 @@
 #define __HYPERPARAMETERS__
 
 #include "nomad.hpp"
+#include "fileutils.hpp"
 
 const std::string UndefinedStr="Undefined";
 
@@ -186,7 +187,7 @@ public:
     
     void operator=(const HyperParameters&) = delete; // No usual assignement is allowed --> see private constructor for assignement from blocks of hyper parameters
     
-    HyperParameters ( const std::string & hyperParamFileName );
+    HyperParameters ( const std::string & hyperParamFileName , const std::string & hyperNomadPath , const std::string & defaultPytorchBB );
     
     NOMAD::Point getValues( ValueType t ) const;
     

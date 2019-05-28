@@ -241,12 +241,48 @@ std::vector<HyperParameters> HyperParameters::getNeighboors( const NOMAD::Point 
     return neighboors;
 }
 
-HyperParameters::HyperParameters ( const std::string & hyperParamFileName )
+HyperParameters::HyperParameters ( const std::string & hyperParamFileName , const std::string & hyperNomadPath , const std::string & defaultPytorchBB )
 {
     // Default display
     _hyperDisplay = 1;
     _lhIterationSearch = 0;
     
+    
+    // The default Python script path is set relative to the exe path if not empty or from the hyperParamFileName (we suppose it is in examples directory)
+    // The script file are assessed for reading
+    std::string pythonScriptPath = defaultPytorchBB;
+    if ( ! checkAccess( pythonScriptPath ) )
+    {
+        // Let us suppose the hyperNomadPath is in HYPERNOMAD/bin
+        pythonScriptPath = hyperNomadPath + ((hyperNomadPath.length() == 0 )? "" : dirSep) + ".." + dirSep + defaultPytorchBB ;
+        
+        
+        if ( ! checkAccess( pythonScriptPath ))
+        {
+            // Let us suppose the hyperParamFileName is in HYPERNOMAD/examples
+            pythonScriptPath = extractDir( hyperParamFileName );
+            pythonScriptPath += ((pythonScriptPath.length() == 0 )? "" : dirSep) ;
+            pythonScriptPath += std::string("..") + dirSep +defaultPytorchBB ;
+            
+            if ( ! checkAccess ( pythonScriptPath ) )
+            {
+                pythonScriptPath  = curDir();
+                pythonScriptPath += ((pythonScriptPath.length() == 0 )? "" : dirSep) ;
+                pythonScriptPath += std::string("..") + dirSep +defaultPytorchBB ;
+                
+                if ( ! checkAccess( pythonScriptPath ) )
+                {
+                    std::cerr << "Cannot access to the pytorch_bb.py. Let's try with the default blackbox command (python " << defaultPytorchBB << "). Consider modifying the bbEXE in hyper parameter file to suite your needs." << std::endl;
+                    pythonScriptPath = defaultPytorchBB;
+                }
+            }
+            
+        }
+            
+    }        
+    // BB_EXE minus the dataset name (dataset name is added during check
+    _bbEXE = "$python " + pythonScriptPath;
+
     initBlockStructureToDefault();
     
     registerSearchNames();
@@ -1077,9 +1113,6 @@ void HyperParameters::initBlockStructureToDefault ( void )
     
     // Max BB eval
     _maxBbEval = 100;
-    
-    // BB_EXE minus the dataset name (dataset name is added during check
-    _bbEXE = "$python src/blackbox/pytorch_bb.py ";
     
     // Default X0 compatible with the default structure (default values in structure are changed)
     const double x0[]={2 , // Number of convolutionnal layers

@@ -32,7 +32,7 @@ BUILD_DIR              = $(TOP)/build/$(VARIANT)
 SRC		       = $(TOP)/src/nomad_optimizer
 BIN_DIR                = $(TOP)/bin
 
-$(EXE)                := $(addprefix $(BIN_DIR)/,$(EXE))
+EXE                   := $(addprefix $(BIN_DIR)/,$(EXE))
 
 
 OBJS                   = hypernomad.o hyperParameters.o
@@ -54,6 +54,7 @@ $(EXE): $(OBJS)
 ifeq ($(UNAME), Darwin)
 	@install_name_tool -change $(LIB_NOMAD) $(NOMAD_HOME)/lib/$(LIB_NOMAD) $(EXE)
 endif
+	@ln -fs $(EXE) $(TOP)/examples/.
 
 $(BUILD_DIR)/%.o: $(SRC)/%.cpp $(SRC)/hyperParameters.hpp
 	$(ECHO_NOMAD)
