@@ -35,7 +35,7 @@ BIN_DIR                = $(TOP)/bin
 EXE                   := $(addprefix $(BIN_DIR)/,$(EXE))
 
 
-OBJS                   = hypernomad.o hyperParameters.o
+OBJS                   = fileutils.o hypernomad.o hyperParameters.o
 OBJS                  := $(addprefix $(BUILD_DIR)/,$(OBJS))
 
 ifndef NOMAD_HOME
@@ -56,7 +56,7 @@ ifeq ($(UNAME), Darwin)
 endif
 	@ln -fs $(EXE) $(TOP)/examples/.
 
-$(BUILD_DIR)/%.o: $(SRC)/%.cpp $(SRC)/hyperParameters.hpp
+$(BUILD_DIR)/%.o: $(SRC)/%.cpp $(SRC)/hyperParameters.hpp $(SRC)/fileutils.hpp
 	$(ECHO_NOMAD)
 	@mkdir -p $(BUILD_DIR)
 	@$(COMPILE) $< -o $@
