@@ -36,7 +36,7 @@ from datahandler import *
 
 
 class Evaluator(object):
-    def __init__(self, device, cnn, trainloader, validloader, testloader, optimizer, batch_size):
+    def __init__(self, device, cnn, trainloader, validloader, testloader, optimizer, batch_size, dataset):
         self.__device = device
         self.__cnn = cnn
         self.__trainloader = trainloader
@@ -44,6 +44,7 @@ class Evaluator(object):
         self.__testloader = testloader
         self.__batch_size = batch_size
         self.__optimizer = optimizer
+        self.__dataset = dataset
         self.__train_acc = None
         self.__val_acc = None
         self.__test_acc = None
@@ -81,6 +82,10 @@ class Evaluator(object):
     def optimizer(self):
         return self.__optimizer
 
+    @property
+    def dataset(self):
+        return self.__dataset
+
     def train(self):
         criterion = nn.CrossEntropyLoss()
 
@@ -94,6 +99,9 @@ class Evaluator(object):
         l_train_acc = []
         best_val_acc = 0
         epochs = []
+        max_epochs = 500
+        if self.dataset =='MINIMNIST':
+            max_epochs = 50
 
         # plots
         fig = plt.figure()
@@ -103,7 +111,7 @@ class Evaluator(object):
         ax1.set_ylabel('Accuracies')
         plt.ion()
 
-        while (not stop) and (epoch < 500):
+        while (not stop) and (epoch < max_epochs):
             self.cnn.train()
             train_loss = 0
             correct = 0

@@ -117,7 +117,7 @@ except ValueError:
 print(cnn)
 
 # The evaluator trains and tests the network
-evaluator = Evaluator(device, cnn, trainloader, validloader, testloader, optimizer, batch_size)
+evaluator = Evaluator(device, cnn, trainloader, validloader, testloader, optimizer, batch_size, dataset)
 print('> Training')
 best_val_acc, best_epoch = evaluator.train()
 print('> Testing')

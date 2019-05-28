@@ -32,7 +32,7 @@ class DataHandler(object):
     def __init__(self, dataset, batch_size):
         self.__dataset = dataset
         available_datasets = ['MNIST', 'Fashion-MNIST', 'KMNIST', 'EMNIST', 'CIFAR10', 'CIFAR100', 'STL10', 'SVHN',
-                              'CUSTOM']
+                              'CUSTOM', 'MINIMNIST']
         self.__batch_size = batch_size
         self.__transform_train = None
         self.__transform_test = None
@@ -86,7 +86,7 @@ class DataHandler(object):
         """Get the size of the images and number of classes for each dataset"""
         image_size = None
         total_number_classes = 0
-        if self.dataset in ['MNIST', 'Fashion-MNIST', 'KMNIST', 'EMNIST']:
+        if self.dataset in ['MINIMNIST', 'MNIST', 'Fashion-MNIST', 'KMNIST', 'EMNIST']:
             image_size = (1, 28, 28)
             total_number_classes = 10
         if self.dataset in ['CIFAR10', 'SVNH']:
@@ -105,6 +105,30 @@ class DataHandler(object):
         validloader = None
         testloader = None
         root = os.path.join('./data', self.dataset)
+
+        if self.dataset == 'MINIMNIST':
+            print(">>> Preparing the simplifed MNIST dataset...")
+            transform_train = transforms.Compose([transforms.ToTensor(),
+                                                  transforms.Normalize((0.1307,), (0.3081,)), ])
+            trainset = torchvision.datasets.MNIST(root=root, train=True, download=True, transform=transform_train)
+            testset = torchvision.datasets.MNIST(root=root, train=False, download=True, transform=transform_train)
+
+            n_train = 300
+            n_valid = 100
+            indices = list(range(len(trainset)))
+            random.shuffle(indices)
+
+            indices_test = list(range(len(testset)))
+            random.shuffle(indices_test)
+
+            train_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[:n_train])
+            valid_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[n_valid:])
+            test_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices_test[:n_valid])
+
+            trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.batch_size, num_workers=2,
+                                                      sampler=train_sampler)
+            validloader = torch.utils.data.DataLoader(trainset, batch_size=100, sampler=valid_sampler, num_workers=2)
+            testloader = torch.utils.data.DataLoader(testset, batch_size=100, sampler=test_sampler, num_workers=2)
 
         if self.dataset in ['MNIST', 'Fashion-MNIST', 'KMNIST', 'EMNIST']:
             if self.dataset == 'MNIST':
