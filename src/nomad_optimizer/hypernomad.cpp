@@ -107,7 +107,7 @@ void display_hyperhelp()
     std::cout << NOMAD::close_block() << std::endl;
     
     std::cout << NOMAD::open_block("MAX_BB_EVAL") << std::endl;
-    std::cout << " Default: 100" << std::endl;
+    std::cout << " Default: no default (must be provided)" << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
     
     std::cout << NOMAD::open_block("BB_EXE") << std::endl;
@@ -228,8 +228,14 @@ int main ( int argc , char ** argv )
             
             NOMAD::Point X0 = hyperParameters->getValues( ValueType::CURRENT_VALUE);
             std::vector<HyperParameters> neighboors = hyperParameters->getNeighboors(X0);
+            size_t index=0;
             for ( const auto & n : neighboors )
+            {
+                std::cout << std::endl << NOMAD::open_block("Neighboor #"+std::to_string(index)) ;
                 n.display();
+                std::cout << NOMAD::close_block() << std::endl << std::endl;
+                index ++;
+            }
             return 0;
         }
         
