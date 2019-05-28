@@ -232,6 +232,10 @@ std::vector<HyperParameters> HyperParameters::getNeighboors( const NOMAD::Point 
                     allBlocksForCompleteHyperParameters.push_back( aNBlock );
             }
             neighboors.push_back( allBlocksForCompleteHyperParameters );
+            
+            // Update display attribute of a neighboor from the current hyperparameters
+            neighboors.back()._hyperDisplay = _hyperDisplay;
+            
         }
     }
     return neighboors;
@@ -533,6 +537,9 @@ void HyperParameters::read (const std::string & hyperParamFileName )
             pe->set_has_been_interpreted();
             _maxBbEval = i;
         }
+        else
+            throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                        "MAX_BB_EVAL must be provided." );
     }
     
     // HYPER_DISPLAY
@@ -978,6 +985,7 @@ HyperParameters::HyperParameters ( const std::vector<HyperParametersBlock> & hyp
     // This is equivalent to an assignement
     for ( const auto & block : hyperParamBlocks )
         _expandedHyperParameters.push_back( block );
+    
 }
 
 void HyperParameters::registerSearchNames()
@@ -1089,7 +1097,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     HyperParametersBlock block4={"Optimizer",headOfBlock4, NeighborType::LOOP_PLUS_ONE_RIGHT, AssociatedHyperParametersType::ONE_TIME, associatedHyperParameters5};
     
     // FITH BLOCK (single regular parameter: Dropout rate)
-    GenericHyperParameter headOfBlock5={"DROPOUT_RATE","Dropout rate",NOMAD::CONTINUOUS,0.2,0,0.75};
+    GenericHyperParameter headOfBlock5={"DROPOUT_RATE","Dropout rate",NOMAD::CONTINUOUS,0.2,0,0.95};
     HyperParametersBlock block5={"Dropout rate",headOfBlock5, NeighborType::NONE, AssociatedHyperParametersType::ZERO_TIME,};
     
     // SIXTH BLOCK (single regular parameter: Activation function)
@@ -1220,7 +1228,7 @@ void HyperParameters::HyperParametersBlock::expandAndUpdateAssociatedParametersW
         NOMAD::Double headValue = headOfBlockHyperParameter.value;
         NOMAD::Double headUpperBound = headOfBlockHyperParameter.upperBoundValue;
         
-        if ( ! headValue.is_defined() || headValue > headUpperBound )
+        if ( ! headValue.is_defined() || ! headUpperBound.is_defined() || headValue > headUpperBound )
             return;
         
         // No need to expand. The number of groups >= the value in head of block
@@ -1266,7 +1274,7 @@ void HyperParameters::HyperParametersBlock::reduceAssociatedParametersWithConstr
         NOMAD::Double headValue = headOfBlockHyperParameter.value;
         NOMAD::Double headLowerBound = headOfBlockHyperParameter.lowerBoundValue;
         
-        if ( ! headValue.is_defined() || headValue < headLowerBound )
+        if ( ! headValue.is_defined() || ! headLowerBound.is_defined() || headValue < headLowerBound )
             return;
         
         
@@ -1529,7 +1537,9 @@ std::vector<HyperParameters::HyperParametersBlock> HyperParameters::HyperParamet
     std::vector<HyperParametersBlock> neighboorsOfBlock;
     
     // Neighboors are created only when the head of block is categorical
-    if ( neighborType == NeighborType::NONE || headOfBlockHyperParameter.type != NOMAD::CATEGORICAL )
+    if ( neighborType == NeighborType::NONE
+        || headOfBlockHyperParameter.type != NOMAD::CATEGORICAL
+        || headOfBlockHyperParameter.isFixed )
         return neighboorsOfBlock;
     
     // Make a Plus One and Minus copy of the block ( put in the neighboors only if options allow it )
