@@ -1053,7 +1053,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     //
     
     // Pytorch dataset available by default
-    _registeredDataset = { "MNIST","Fashion-MNIST","EMNIST","KMNIST","CIFAR10","CIFAR100","STL10","SVHN"};
+    _registeredDataset = { "MINIMNIST", "MNIST","Fashion-MNIST","EMNIST","KMNIST","CIFAR10","CIFAR100","STL10","SVHN"};
     
     // dataset name and the corresponding number of classes have no default
     _dataset = "";
