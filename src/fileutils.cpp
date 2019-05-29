@@ -2,7 +2,11 @@
 #include "fileutils.hpp"
 
 
-
+#ifdef _MSC_VER
+const char *dirSep = "\\";
+#else
+const char *dirSep = "/";
+#endif
 
 std::string curDir()
 {

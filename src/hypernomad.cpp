@@ -28,8 +28,6 @@
 #include <vector>
 #include <memory>
 
-#include "fileutils.hpp"
-
 using namespace std;
 using namespace NOMAD;
 

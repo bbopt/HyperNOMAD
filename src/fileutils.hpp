@@ -20,16 +20,11 @@
 // use of 'access' or '_access', and getpid() or _getpid():
 #ifdef _MSC_VER
 #include <io.h>
-//#include <process.h>
 #else
 #include <unistd.h>
 #endif
 
-#ifdef _MSC_VER
-const char dirSep[] = "\";
-#else
-const char dirSep[] = "/";
-#endif
+
 
 
 using namespace std;
