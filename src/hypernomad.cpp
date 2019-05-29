@@ -35,7 +35,7 @@ using namespace NOMAD;
 
 bool flagDisplayNeighboors = false;
 std::string hyperNomadName ;
-const std::string defaultPytorchBB = "src/blackbox/pytorch_bb.py";
+const std::string defaultPytorchBB = "./blackbox/pytorch_bb.py";
 const std::string hyperNomadVersion = "1.0";
 
 
@@ -218,7 +218,7 @@ int main ( int argc , char ** argv )
         // parameters creation:
         Parameters p ( out );
 
-        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile , hyperNomadPath , defaultPytorchBB );
+        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile , defaultPytorchBB );
 
 // For testing getNeighboors
         if ( flagDisplayNeighboors )

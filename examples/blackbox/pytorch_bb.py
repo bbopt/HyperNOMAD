@@ -33,7 +33,7 @@ Lin = fin.readlines()
 Xin = Lin[0].split()
 fin.close()
 
-syst_cmd = 'OMP_NUM_THREADS=3 python src/blackbox/blackbox.py '+ sys.argv[1] +' '
+syst_cmd = 'OMP_NUM_THREADS=3 python ./blackbox/blackbox.py '+ sys.argv[1] +' '
 for i in range(len(Xin)):
     syst_cmd += str(Xin[i]) + ' '
 

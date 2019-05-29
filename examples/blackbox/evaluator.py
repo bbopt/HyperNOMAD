@@ -34,6 +34,7 @@ import sys
 from neural_net import *
 from datahandler import *
 
+sys.path.append("blackbox")
 
 class Evaluator(object):
     def __init__(self, device, cnn, trainloader, validloader, testloader, optimizer, batch_size, dataset):

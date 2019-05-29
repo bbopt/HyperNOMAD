@@ -24,6 +24,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import list_param_conv_layers
+
+sys.path.append("blackbox")
 
 
 class NeuralNet(nn.Module):

@@ -30,6 +30,7 @@ from datahandler import DataHandler
 from evaluator import *
 from neural_net import NeuralNet
 
+sys.path.append("blackbox")
 
 # Read the inputs sent from HYPERNOMAD
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

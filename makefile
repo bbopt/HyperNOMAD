@@ -19,6 +19,9 @@ CXXFLAGS              += -Wl,-rpath,'$(LIB_DIR)'
 CXXFLAGS              += -ansi
 endif
 
+ifeq ($(VARIANT), debug)
+COMPILATOR_OPTIONS    += -g
+endif
 
 LDLIBS                 = -lm -lnomad
 
@@ -29,7 +32,7 @@ COMPILE                = $(COMPILATOR) $(COMPILATOR_OPTIONS) $(INCLUDE) -c
 
 TOP                    = $(abspath .)
 BUILD_DIR              = $(TOP)/build/$(VARIANT)
-SRC		       = $(TOP)/src/nomad_optimizer
+SRC		       = $(TOP)/src
 BIN_DIR                = $(TOP)/bin
 
 EXE                   := $(addprefix $(BIN_DIR)/,$(EXE))
@@ -45,11 +48,10 @@ define ECHO_NOMAD
 endef
 endif
 
-
 $(EXE): $(OBJS)
 	$(ECHO_NOMAD)
 	@mkdir -p $(BIN_DIR)
-	@echo "   building HYPERNOMAD ..."
+	@echo "   building HyperNomad ..."
 	@$(COMPILATOR) -o $(EXE) $(OBJS) $(LDLIBS) $(CXXFLAGS) -L$(LIB_DIR) 
 ifeq ($(UNAME), Darwin)
 	@install_name_tool -change $(LIB_NOMAD) $(NOMAD_HOME)/lib/$(LIB_NOMAD) $(EXE)

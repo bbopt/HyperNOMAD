@@ -241,7 +241,7 @@ std::vector<HyperParameters> HyperParameters::getNeighboors( const NOMAD::Point 
     return neighboors;
 }
 
-HyperParameters::HyperParameters ( const std::string & hyperParamFileName , const std::string & hyperNomadPath , const std::string & defaultPytorchBB )
+HyperParameters::HyperParameters ( const std::string & hyperParamFileName , const std::string & defaultPytorchBB )
 {
     // Default display
     _hyperDisplay = 1;
@@ -250,38 +250,12 @@ HyperParameters::HyperParameters ( const std::string & hyperParamFileName , cons
     
     // The default Python script path is set relative to the exe path if not empty or from the hyperParamFileName (we suppose it is in examples directory)
     // The script file are assessed for reading
-    std::string pythonScriptPath = defaultPytorchBB;
-    if ( ! checkAccess( pythonScriptPath ) )
+    if ( ! checkAccess( defaultPytorchBB ) )
     {
-        // Let us suppose the hyperNomadPath is in HYPERNOMAD/bin
-        pythonScriptPath = hyperNomadPath + ((hyperNomadPath.length() == 0 )? "" : dirSep) + ".." + dirSep + defaultPytorchBB ;
-        
-        
-        if ( ! checkAccess( pythonScriptPath ))
-        {
-            // Let us suppose the hyperParamFileName is in HYPERNOMAD/examples
-            pythonScriptPath = extractDir( hyperParamFileName );
-            pythonScriptPath += ((pythonScriptPath.length() == 0 )? "" : dirSep) ;
-            pythonScriptPath += std::string("..") + dirSep +defaultPytorchBB ;
-            
-            if ( ! checkAccess ( pythonScriptPath ) )
-            {
-                pythonScriptPath  = curDir();
-                pythonScriptPath += ((pythonScriptPath.length() == 0 )? "" : dirSep) ;
-                pythonScriptPath += std::string("..") + dirSep +defaultPytorchBB ;
-                
-                if ( ! checkAccess( pythonScriptPath ) )
-                {
-                    std::cerr << "Cannot access to the pytorch_bb.py. Let's try with the default blackbox command (python " << defaultPytorchBB << "). Consider modifying the bbEXE in hyper parameter file to suite your needs." << std::endl;
-                    pythonScriptPath = defaultPytorchBB;
-                }
-            }
-            
-        }
-            
-    }        
+            std::cerr << "Cannot access to the pytorch_bb.py. Let's try with the default blackbox command (python " << defaultPytorchBB << "). Consider modifying the bbEXE in hyper parameter file to suite your needs." << std::endl;
+    }
     // BB_EXE minus the dataset name (dataset name is added during check
-    _bbEXE = "$python " + pythonScriptPath;
+    _bbEXE = "$python " + defaultPytorchBB;
 
     initBlockStructureToDefault();
     
