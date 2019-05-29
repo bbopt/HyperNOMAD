@@ -295,7 +295,7 @@ int main ( int argc , char ** argv )
         NOMAD::stop_type stopType = mads.run();
         
         if ( stopType == X0_FAIL )
-            cerr << endl << "The starting point cannot be evaluated. Please verify that the Pytorch script is available. The default setting for bbExe (" << p.get_bb_exe().front() << " ) seems incorrect. Set _bbExe accordingly." << endl << endl;
+            cerr << endl << "The starting point cannot be evaluated. Please verify that all pytorch scripts are available. The default setting for bbExe (" << p.get_bb_exe().front() << " ) maybe incorrect. Read the out.txt file for more details." << endl << endl;
         
     }
     catch ( exception & e ) {

@@ -21,6 +21,7 @@ endif
 
 ifeq ($(VARIANT), debug)
 COMPILATOR_OPTIONS    += -g
+CXXFLAGS              += -g
 endif
 
 LDLIBS                 = -lm -lnomad
@@ -31,7 +32,8 @@ COMPILE                = $(COMPILATOR) $(COMPILATOR_OPTIONS) $(INCLUDE) -c
 
 
 TOP                    = $(abspath .)
-BUILD_DIR              = $(TOP)/build/$(VARIANT)
+BUILD_DIR              = $(TOP)/build
+BUILD_DIR_VAR          = $(BUILD_DIR)/$(VARIANT)
 SRC		       = $(TOP)/src
 BIN_DIR                = $(TOP)/bin
 
@@ -39,7 +41,7 @@ EXE                   := $(addprefix $(BIN_DIR)/,$(EXE))
 
 
 OBJS                   = fileutils.o hypernomad.o hyperParameters.o
-OBJS                  := $(addprefix $(BUILD_DIR)/,$(OBJS))
+OBJS                  := $(addprefix $(BUILD_DIR_VAR)/,$(OBJS))
 
 ifndef NOMAD_HOME
 define ECHO_NOMAD
@@ -58,9 +60,9 @@ ifeq ($(UNAME), Darwin)
 endif
 	@ln -fs $(EXE) $(TOP)/examples/.
 
-$(BUILD_DIR)/%.o: $(SRC)/%.cpp $(SRC)/hyperParameters.hpp $(SRC)/fileutils.hpp
+$(BUILD_DIR_VAR)/%.o: $(SRC)/%.cpp $(SRC)/hyperParameters.hpp $(SRC)/fileutils.hpp
 	$(ECHO_NOMAD)
-	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR_VAR)
 	@$(COMPILE) $< -o $@
 
 
@@ -73,11 +75,9 @@ clean: ;
 del: ;
 	@echo "   cleaning trash files"
 	@rm -f core *~
-	@echo "   cleaning obj files"
-	@rm -f $(OBJS) 
 	@echo "   cleaning exe file"
 	@rm -f $(EXE) 
-	@echo "   cleaning build dir"
+	@echo "   cleaning all build dirs"
 	@rm -rf $(BUILD_DIR)
 
 
