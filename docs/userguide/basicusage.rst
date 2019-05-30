@@ -100,3 +100,30 @@ This table lists all the possible keywords, their interpretation and the default
 |REMAINING_HYPERPARAMETERS| use to fixe or vary those not listed in     | VAR       | FIXED, VAR                       |
 |                         | the parameter file                          |           |                                  |
 +-------------------------+---------------------------------------------+-----------+----------------------------------+
+
+
+Example of a parameter file
+==============================
+Here is an example of an acceptable parameter file. First, the dataset MNIST is choosen and we specify that HYPERNOMAD is allowed to try a maximum of 100 configurations. Then, the number of convolutional layers is fixed throught the optimization to 5, the two '-' appearing after the '5' mean that the default lower and upper bounds are not changed. The kernels, number of fully connected layers and activation function are respectively initialzed at 3, 6, and 2 (Sigmoid) and the dropout rate is initialized at 0.6 with a new lower bound of 0.3 and upper bound of 0.8
+
+
+.. code-block:: sh
+
+    # Mandatory information
+    DATASET                 MNIST
+    MAX_BB_EVAL             100
+
+    # Optional information
+    NUM_CON_LAYERS          5  -  -  FIXED
+    KERNELS                 3
+    NUM_FC_LAYERS           6
+    ACTIVATION_FUNCTION     2
+    DROPOUT_RATE            0.6  0.3 0.8
+
+
+This parameter file is provided in the directory 'examples' from where we can execute the following command in order to run 
+HYPERNOMAD on this search space
+
+.. code-block:: sh
+
+    ./hypernomad.exe parameter_file_mnist.txt
