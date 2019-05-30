@@ -187,7 +187,7 @@ public:
     
     void operator=(const HyperParameters&) = delete; // No usual assignement is allowed --> see private constructor for assignement from blocks of hyper parameters
     
-    HyperParameters ( const std::string & hyperParamFileName , const std::string & hyperNomadPath , const std::string & defaultPytorchBB );
+    HyperParameters ( const std::string & hyperParamFileName , const std::string & pytorchBB );
     
     NOMAD::Point getValues( ValueType t ) const;
     

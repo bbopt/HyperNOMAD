@@ -241,47 +241,14 @@ std::vector<HyperParameters> HyperParameters::getNeighboors( const NOMAD::Point 
     return neighboors;
 }
 
-HyperParameters::HyperParameters ( const std::string & hyperParamFileName , const std::string & hyperNomadPath , const std::string & defaultPytorchBB )
+HyperParameters::HyperParameters ( const std::string & hyperParamFileName , const std::string & pytorchBB )
 {
     // Default display
     _hyperDisplay = 1;
     _lhIterationSearch = 0;
     
-    
-    // The default Python script path is set relative to the exe path if not empty or from the hyperParamFileName (we suppose it is in examples directory)
-    // The script file are assessed for reading
-    std::string pythonScriptPath = defaultPytorchBB;
-    if ( ! checkAccess( pythonScriptPath ) )
-    {
-        // Let us suppose the hyperNomadPath is in HYPERNOMAD/bin
-        pythonScriptPath = hyperNomadPath + ((hyperNomadPath.length() == 0 )? "" : dirSep) + ".." + dirSep + defaultPytorchBB ;
-        
-        
-        if ( ! checkAccess( pythonScriptPath ))
-        {
-            // Let us suppose the hyperParamFileName is in HYPERNOMAD/examples
-            pythonScriptPath = extractDir( hyperParamFileName );
-            pythonScriptPath += ((pythonScriptPath.length() == 0 )? "" : dirSep) ;
-            pythonScriptPath += std::string("..") + dirSep +defaultPytorchBB ;
-            
-            if ( ! checkAccess ( pythonScriptPath ) )
-            {
-                pythonScriptPath  = curDir();
-                pythonScriptPath += ((pythonScriptPath.length() == 0 )? "" : dirSep) ;
-                pythonScriptPath += std::string("..") + dirSep +defaultPytorchBB ;
-                
-                if ( ! checkAccess( pythonScriptPath ) )
-                {
-                    std::cerr << "Cannot access to the pytorch_bb.py. Let's try with the default blackbox command (python " << defaultPytorchBB << "). Consider modifying the bbEXE in hyper parameter file to suite your needs." << std::endl;
-                    pythonScriptPath = defaultPytorchBB;
-                }
-            }
-            
-        }
-            
-    }        
     // BB_EXE minus the dataset name (dataset name is added during check
-    _bbEXE = "$python " + pythonScriptPath;
+    _bbEXE = "$python " + pytorchBB;
 
     initBlockStructureToDefault();
     
@@ -492,7 +459,7 @@ void HyperParameters::read (const std::string & hyperParamFileName )
             pe->set_has_been_interpreted();
         }
         else
-            throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+            throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , 0 ,
                                                         "DATASET must be provided." );
             
     }
@@ -538,7 +505,7 @@ void HyperParameters::read (const std::string & hyperParamFileName )
             _maxBbEval = i;
         }
         else
-            throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+            throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , 0 ,
                                                         "MAX_BB_EVAL must be provided." );
     }
     
