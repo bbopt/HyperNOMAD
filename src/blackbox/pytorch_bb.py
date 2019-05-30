@@ -28,11 +28,11 @@ if len(sys.argv) != 3:
     print ('Usage of pytorch_bb.py: DATABASE_NAME X.txt')
     exit()
 
-if 'HYPERNOMAD_HOME' not in os.environ:
-    print('The environment variable $HYPERNOMAD_HOME is not set')
+if 'HYPERNOMAD' not in os.environ:
+    print('The environment variable $HYPERNOMAD is not set')
 
 # print(os.environ.get('HYPERNOMAD_HOME'))
-hypernomad_home = os.environ.get('HYPERNOMAD_HOME')
+hypernomad_home = os.environ.get('HYPERNOMAD')
 blackbox_path = hypernomad_home + '/src/blackbox/blackbox.py'
 
 fin = open(sys.argv[2], 'r')

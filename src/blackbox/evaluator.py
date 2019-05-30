@@ -34,7 +34,7 @@ import sys
 from neural_net import *
 from datahandler import *
 
-sys.path.append(os.environ.get('HYPERNOMAD_HOME')+"/src/blackbox/blackbox")
+sys.path.append(os.environ.get('HYPERNOMAD')+"/src/blackbox/blackbox")
 
 
 class Evaluator(object):

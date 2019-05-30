@@ -28,7 +28,7 @@ import random
 import os
 import sys
 
-sys.path.append(os.environ.get('HYPERNOMAD_HOME')+"/src/blackbox/blackbox")
+sys.path.append(os.environ.get('HYPERNOMAD')+"/src/blackbox/blackbox")
 
 
 class DataHandler(object):
