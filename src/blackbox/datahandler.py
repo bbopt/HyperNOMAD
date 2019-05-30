@@ -26,6 +26,9 @@ import torchvision.transforms as transforms
 import torch.utils.data
 import random
 import os
+import sys
+
+sys.path.append(os.environ.get('HYPERNOMAD_HOME')+"/src/blackbox/blackbox")
 
 
 class DataHandler(object):

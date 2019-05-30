@@ -24,6 +24,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import sys
+import os
+
+sys.path.append(os.environ.get('HYPERNOMAD_HOME')+"/src/blackbox/blackbox")
 
 
 class NeuralNet(nn.Module):
