@@ -25,10 +25,8 @@ HYPERNOMAD is a Python package dedicated to the hyperparameter optimization of d
    :maxdepth: 1
 
    userguide/basicusage
-   useguider/searchspace
-   userguide/parameterfile
-   userguide/advancedusage
-   
+   useguider/x0
+   userguide/personnaldataset
    
 .. toctree::
    :caption: Examples
