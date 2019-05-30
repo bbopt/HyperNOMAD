@@ -104,7 +104,7 @@ This table lists all the possible keywords, their interpretation and the default
 
 Example of a parameter file
 ==============================
-Here is an example of an acceptable parameter file. First, the dataset MNIST is choosen and we specify that HYPERNOMAD is allowed to try a maximum of 100 configurations. Then, the number of convolutional layers is fixed throught the optimization to 5, the two '-' appearing after the '5' mean that the default lower and upper bounds are not changed. The kernels, number of fully connected layers and activation function are respectively initialzed at 3, 6, and 2 (Sigmoid) and the dropout rate is initialized at 0.6 with a new lower bound of 0.3 and upper bound of 0.8
+Here is an example of an acceptable parameter file. First, the dataset MNIST is choosen and we specify that HYPERNOMAD is allowed to try a maximum of 100 configurations. Then, the number of convolutional layers is fixed throught the optimization to 5, the two '-' appearing after the '5' mean that the default lower and upper bounds are not changed. The kernels, number of fully connected layers and activation function are respectively initialized at 3, 6, and 2 (Sigmoid) and the dropout rate is initialized at 0.6 with a new lower bound of 0.3 and upper bound of 0.8
 
 
 .. code-block:: sh
