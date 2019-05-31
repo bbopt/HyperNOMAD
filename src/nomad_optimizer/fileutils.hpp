@@ -26,7 +26,7 @@
 #endif
 
 #ifdef _MSC_VER
-const char dirSep[] = "\";
+const char dirSep[] = "\\";
 #else
 const char dirSep[] = "/";
 #endif
