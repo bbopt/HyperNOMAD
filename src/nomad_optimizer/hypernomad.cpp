@@ -35,7 +35,7 @@ using namespace NOMAD;
 
 bool flagDisplayNeighboors = false;
 std::string hyperNomadName ;
-const std::string defaultPytorchBB = "src/blackbox/pytorch_bb.py";
+const std::string shortPytorchBBPath = "src" + std::string(dirSep) + "blackbox" + std::string(dirSep) + "pytorch_bb.py";
 const std::string hyperNomadVersion = "1.0";
 
 
@@ -111,7 +111,7 @@ void display_hyperhelp()
     std::cout << NOMAD::close_block() << std::endl;
     
     std::cout << NOMAD::open_block("BB_EXE") << std::endl;
-    std::cout << " Default: $python " + defaultPytorchBB << std::endl;
+    std::cout << " Default: $python $(HYPERNOMAD)/" + shortPytorchBBPath << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
 
     std::cout << NOMAD::open_block("HYPER_DISPLAY") << std::endl;
@@ -152,13 +152,33 @@ void display_hyperhelp()
 int main ( int argc , char ** argv )
 {
     
+    // Detect hyper nomad name
     hyperNomadName = trimDir( argv[0] );
     if ( hyperNomadName.length() == 0 )
     {
         std::cerr << "Cannot determine hyperNomad name! " << endl;
         return 0;
     }
-    std::string hyperNomadPath = extractDir( argv[0] );
+    
+    // Detect hypernomad_home environment variable
+    const char * hyperNomadPath = getenv ("HYPERNOMAD_HOME");
+    if ( hyperNomadPath == nullptr )
+    {
+        std::cerr << "Cannot access HYPERNOMAD_HOME environment variable. Make sure to define it properly." << std::endl;
+        return 0;
+        
+    }
+        
+    std::string pytorchBB = std::string(hyperNomadPath) + dirSep +shortPytorchBBPath;
+    // The default Python script path is set relative to the HYPERNOMAD path
+    // The script file are assessed for reading
+    if ( ! checkAccess( pytorchBB ) )
+    {
+        std::cerr << "Cannot access to " << pytorchBB << ". Make sure to set the HYPERNOMAD environment variable properly." << std::endl;
+        return 0;
+        
+    }
+
 
     
     std::string hyperParamFile="";
@@ -218,7 +238,7 @@ int main ( int argc , char ** argv )
         // parameters creation:
         Parameters p ( out );
 
-        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile , hyperNomadPath , defaultPytorchBB );
+        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile , pytorchBB );
 
 // For testing getNeighboors
         if ( flagDisplayNeighboors )
@@ -295,7 +315,7 @@ int main ( int argc , char ** argv )
         NOMAD::stop_type stopType = mads.run();
         
         if ( stopType == X0_FAIL )
-            cerr << endl << "The starting point cannot be evaluated. Please verify that the Pytorch script is available. The default setting for bbExe (" << p.get_bb_exe().front() << " ) seems incorrect. Set _bbExe accordingly." << endl << endl;
+            cerr << endl << "The starting point cannot be evaluated. Please verify that the Pytorch script is available and runs correctly. The default setting for bbExe is " << p.get_bb_exe().front() << ". Make sure it works correctly on its own." << endl << endl;
         
     }
     catch ( exception & e ) {
@@ -360,5 +380,3 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         add_extended_poll_point ( nX , *(nP.get_signature()) );
     }
 }
-
-
