@@ -7,17 +7,25 @@ The installation of HYPERNOMAD can start once the package is downloaded and the 
 .. code-block:: sh
 
     make
+    
+When the compilation is successful, a message appears asking to set an environment variable 'HYPERNOMAD'. This can be done by adding a line in the file .profile or .bashrc :
+
+.. code-block:: sh
+
+    export HYPERNOMAD=path_to_home_directory_of_hypernomad
+    
 
 Check that the installation is successful
 ============================================
+
 
 The executable hypernomad.exe is located in the bin directory. You can check that the installation is successful by trying to run the commad
 
 .. code-block:: sh
 
-    (path_to_bin)/hypernomad.exe -i
+    $HYPERNOMAD/bin/hypernomad.exe -i
     
-This should return the following informations:
+which should return the following informations:
 
 
 .. code-block:: sh
