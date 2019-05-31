@@ -31,7 +31,7 @@ make
     
 ```
 
-When the compilation is successful, a message appears asking to set an environment variable 'HYPERNOMAD'. This can be done by adding a line in the file .profile or .bashrc :
+When the compilation is successful, a message appears asking to set an environment variable 'HYPERNOMAD_HOME'. This can be done by adding a line in the file .profile or .bashrc :
 
 
 ```
