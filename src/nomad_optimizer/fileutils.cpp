@@ -1,5 +1,4 @@
-
-#include "fileutils.hpp"
+include "fileutils.hpp"
 
 
 
@@ -60,6 +59,3 @@ bool checkAccess(const std::string &filename)
     return (access ( filename.c_str() , R_OK ) == 0);
 #endif
 }
-
-
-
