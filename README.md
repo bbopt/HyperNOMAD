@@ -87,7 +87,7 @@ More details are provided in the user guide section of the [documentation](https
 The optimization starts by executing the command:
 
 ```
-./hypernomad.exe parameter_file.txt
+$HYPERNOMAD_HOME/bin/./hypernomad.exe parameter_file.txt
 ```
 
 Two examples of parameter files are provided in the folder examples. One uses CIFAR-10 starting from the default starting point and the second uses MNIST with the specifications detailed in the previous section.
@@ -95,11 +95,11 @@ Two examples of parameter files are provided in the folder examples. One uses CI
 To use this files, the cammand is:
 
 ```
-$HYPERNOMAD_HOME/bin./hypernomad.exe $HYPERNOMAD_HOME/examples/parameter_file_cifar10.txt
+$HYPERNOMAD_HOME/bin/./hypernomad.exe $HYPERNOMAD_HOME/examples/parameter_file_cifar10.txt
 ```
 or 
 
 
 ```
-$HYPERNOMAD_HOME/bin./hypernomad.exe $HYPERNOMAD_HOME/examples/parameter_file_mnist.txt
+$HYPERNOMAD_HOME/bin/./hypernomad.exe $HYPERNOMAD_HOME/examples/parameter_file_mnist.txt
 ```
