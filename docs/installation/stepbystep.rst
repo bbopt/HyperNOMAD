@@ -7,6 +7,11 @@ The installation of HYPERNOMAD can start once the package is downloaded and the 
 .. code-block:: sh
 
     make
+        building HYPERNOMAD ...
+
+        To be able to run the example
+        the HYPERNOMAD_HOME environment variable
+        must be set to path_to_home_directory_of_hypernomad
     
 When the compilation is successful, a message appears asking to set an environment variable 'HYPERNOMAD'. This can be done by adding a line in the file .profile or .bashrc :
 
