@@ -380,3 +380,5 @@ void My_Extended_Poll::construct_extended_points ( const Eval_Point & x)
         add_extended_poll_point ( nX , *(nP.get_signature()) );
     }
 }
+
+
