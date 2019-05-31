@@ -20,7 +20,7 @@ The order and meaning of the variables in X0 is hardcoded in HYPERNOMAD. Let's u
   #              [ CONVOLUTION BLOCK               ]   [ FULLY CONNECTED BLOCK ]  [BATCH] [   OPTIMIZER BLOCK      ] [DROPOUT][ACTIVATION]
   X0           (   2     6  5 1 0 1    16  5 1 0 1        2  128   84               128     3   0.1  0.9  0.0005 0     0.2        1        )
   #LOWER_BOUND (   1     1  1 1 0 0     1  1 1 0 0        0    1    1                1       1   0    0     0    0       0        1        )  
-  #UPPER_BOUND ( 100  1000 20 3 2 1  1000 20 3 2 1      500 1000 1000              400       4   1    1    1      1   1    3 )
+  #UPPER_BOUND ( 100  1000 20 3 2 1  1000 20 3 2 1      500 1000 1000              400       4   1    1     1    1       1        3        )
 
 
   DROPOUT_RATE 0.5 - - FIXED
