@@ -10,7 +10,7 @@ This is done in a parameter file which is passed as an argument to hypernomad.ex
 
 .. code-block:: sh
 
-    $HYPERNOMAD_HOME/bin/.hypernomad.exe parameter_file.txt
+    $HYPERNOMAD_HOME/bin/./hypernomad.exe parameter_file.txt
     
     
 Choosing a dataset
@@ -128,4 +128,4 @@ HYPERNOMAD on this search space
 
 .. code-block:: sh
 
-    $HYPERNOMAD_HOME/bin/.hypernomad.exe $HYPERNOMAD_HOME/examples/parameter_file_mnist.txt
+    $HYPERNOMAD_HOME/bin/./hypernomad.exe $HYPERNOMAD_HOME/examples/parameter_file_mnist.txt
