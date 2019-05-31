@@ -57,7 +57,7 @@ endif
 	@ln -fs $(EXE) $(TOP)/examples/.
 	@echo     
 	@echo    To be able to run the example 
-        @echo    the HYPERNOMAD_HOME environment variable 
+	@echo    the HYPERNOMAD_HOME environment variable 
 	@echo    must be set to $(TOP)
 
 $(BUILD_DIR)/%.o: $(SRC)/%.cpp $(SRC)/hyperParameters.hpp $(SRC)/fileutils.hpp
