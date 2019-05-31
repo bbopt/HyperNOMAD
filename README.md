@@ -1,5 +1,5 @@
 *****
-# A tutorial on hyperparameter optimization of deep neural networks with HYPERNOMAD
+# Hyperparameter optimization of deep neural networks with HYPERNOMAD
 *****
 
 HYPERNOMAD is a C++ and Python package dedicated to the hyperparameter optimization of deep neural networks. The package contains a blackbox specifically designed for this problematic and provides a link with the NOMAD software used for the optimization. The blackbox takes as inputs a list of hyperparameters, builds a corresponding deep neural network in order to train, validate and test it on a specific data set before returning the test error as a mesure of performance. NOMAD is then used to minimize this error. The following appendix provides an overview of how to use the HYPERNOMAD package.
