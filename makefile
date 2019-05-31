@@ -55,7 +55,7 @@ ifeq ($(UNAME), Darwin)
 	@install_name_tool -change $(LIB_NOMAD) $(NOMAD_HOME)/lib/$(LIB_NOMAD) $(EXE)
 endif
 	@ln -fs $(EXE) $(TOP)/examples/.
-        @echo     
+	@echo     
 	@echo    To be able to run the example 
         @echo    the HYPERNOMAD_HOME environment variable 
 	@echo    must be set to $(TOP)
