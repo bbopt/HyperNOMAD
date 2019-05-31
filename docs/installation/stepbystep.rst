@@ -17,7 +17,7 @@ When the compilation is successful, a message appears asking to set an environme
 
 .. code-block:: sh
 
-    export HYPERNOMAD=path_to_home_directory_of_hypernomad
+    export HYPERNOMAD_HOME=path_to_home_directory_of_hypernomad
     
 
 Check that the installation is successful
@@ -28,7 +28,7 @@ The executable hypernomad.exe is located in the bin directory. You can check tha
 
 .. code-block:: sh
 
-    $HYPERNOMAD/bin/hypernomad.exe -i
+    $HYPERNOMAD_HOME/bin/./hypernomad.exe -i
     
 which should return the following informations:
 
