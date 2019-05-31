@@ -160,11 +160,11 @@ int main ( int argc , char ** argv )
         return 0;
     }
     
-    // Detect hypernomad environment variable
-    const char * hyperNomadPath = getenv ("HYPERNOMAD");
+    // Detect hypernomad_home environment variable
+    const char * hyperNomadPath = getenv ("HYPERNOMAD_HOME");
     if ( hyperNomadPath == nullptr )
     {
-        std::cerr << "Cannot access HYPERNOMAD environment variable. Make sure to define it properly." << std::endl;
+        std::cerr << "Cannot access HYPERNOMAD_HOME environment variable. Make sure to define it properly." << std::endl;
         return 0;
         
     }
