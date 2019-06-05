@@ -30,6 +30,7 @@ if len(sys.argv) != 3:
 
 if 'HYPERNOMAD_HOME' not in os.environ:
     print('The environment variable $HYPERNOMAD_HOME is not set')
+    exit()
 
 # print(os.environ.get('HYPERNOMAD_HOME'))
 hypernomad_home = os.environ.get('HYPERNOMAD_HOME')
@@ -49,7 +50,7 @@ for i in range(len(Xin)):
 syst_cmd += '> out.txt 2>&1'
 os.system(syst_cmd)
 
-print(syst_cmd)
+# print(syst_cmd)
 
 fout = open('out.txt', 'r')
 Lout = fout.readlines()
