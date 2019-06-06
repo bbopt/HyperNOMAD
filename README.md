@@ -1,14 +1,14 @@
 *****
-# Hyperparameter optimization of deep neural networks with HYPERNOMAD
+# Hyperparameter optimization of deep neural networks with hyperNOMAD
 *****
 
-HYPERNOMAD is a C++ and Python package dedicated to the hyperparameter optimization of deep neural networks. The package contains a blackbox specifically designed for this problematic and provides a link with the NOMAD software used for the optimization. The blackbox takes as inputs a list of hyperparameters, builds a corresponding deep neural network in order to train, validate and test it on a specific data set before returning the test error as a mesure of performance. NOMAD is then used to minimize this error. The following appendix provides an overview of how to use the HYPERNOMAD package.
+hyperNOMAD is a C++ and Python package dedicated to the hyperparameter optimization of deep neural networks. The package contains a blackbox specifically designed for this problematic and provides a link with the NOMAD software used for the optimization. The blackbox takes as inputs a list of hyperparameters, builds a corresponding deep neural network in order to train, validate and test it on a specific data set before returning the test error as a mesure of performance. NOMAD is then used to minimize this error. The following appendix provides an overview of how to use the hyperNOMAD package.
 
-The following tutorial shows the different steps to take in order to run HYPERNOMAD on a first example. The complete functionalities of HYPERNOMAD are described in the [documentation](https://hypernomad.readthedocs.io/en/latest/).
+The following tutorial shows the different steps to take in order to run hyperNOMAD on a first example. The complete functionalities of hyperNOMAD are described in the [documentation](https://hypernomad.readthedocs.io/en/latest/).
 
 ## Prerequisites
 
-In order to run HYPERNOMAD correctly, please make sure to have:
+In order to run hyperNOMAD correctly, please make sure to have:
 
 * A compiled version of [NOMAD](https://www.gerad.ca/nomad/).
 * Python > 3.6
@@ -16,14 +16,14 @@ In order to run HYPERNOMAD correctly, please make sure to have:
 * GCC > 3.8
 
 
-## installation of HYPERNOMAD
+## installation of hyperNOMAD
 
 First build the executable by running the following command.
 
 ```
 make
 
-    building HYPERNOMAD ...
+    building hyperNOMAD ...
 
     To be able to run the example
     the HYPERNOMAD_HOME environment variable

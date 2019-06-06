@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-#  HYPERNOMAD - Hyper-parameter optimization of deep neural networks with
+#  hyperNOMAD - Hyper-parameter optimization of deep neural networks with
 #               NOMAD.
 #
 #
@@ -31,7 +31,7 @@ from evaluator import *
 from neural_net import NeuralNet
 
 
-# Read the inputs sent from HYPERNOMAD
+# Read the inputs sent from hyperNOMAD
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 print('> Reading the inputs..')

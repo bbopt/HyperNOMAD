@@ -6,7 +6,7 @@
 //  Copyright © 2019 GERAD. All rights reserved.
 //
 /* ------------------------------------------------------------------------------*/
-/*  HYPERNOMAD - Hyper-parameter optimization of deep neural networks with NOMAD */
+/*  hyperNOMAD - Hyper-parameter optimization of deep neural networks with NOMAD */
 /*                                                                               */
 /*                                                                               */
 /*  This program is free software: you can redistribute it and/or modify it      */

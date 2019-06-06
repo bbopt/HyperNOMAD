@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-#  HYPERNOMAD - Hyper-parameter optimization of deep neural networks with
+#  hyperNOMAD - Hyper-parameter optimization of deep neural networks with
 #		        NOMAD.
 #
 #

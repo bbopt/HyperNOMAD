@@ -3,7 +3,7 @@ Prerequisites
 ***************************
 
 
-In order to run HYPERNOMAD correctly, please make sure to have:
+In order to run hyperNOMAD correctly, please make sure to have:
 
 * Python > 3.6
 * PyTorch_.
@@ -14,7 +14,7 @@ In order to run HYPERNOMAD correctly, please make sure to have:
 Check that the requirements are fullfiled
 ============================================
 
-Here are simple tests to check that everything is set correctly before installing HYPERNOMAD.
+Here are simple tests to check that everything is set correctly before installing hyperNOMAD.
 
 
 Pytorch

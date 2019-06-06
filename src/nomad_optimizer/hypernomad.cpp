@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------------------*/
-/*  HYPERNOMAD - Hyper-parameter optimization of deep neural networks with NOMAD */
+/*  hyperNOMAD - Hyper-parameter optimization of deep neural networks with NOMAD */
 /*                                                                               */
 /*                                                                               */
 /*  This program is free software: you can redistribute it and/or modify it      */
@@ -174,7 +174,7 @@ int main ( int argc , char ** argv )
     // The script file are assessed for reading
     if ( ! checkAccess( pytorchBB ) )
     {
-        std::cerr << "Cannot access to " << pytorchBB << ". Make sure to set the HYPERNOMAD environment variable properly." << std::endl;
+        std::cerr << "Cannot access to " << pytorchBB << ". Make sure to set the HYPERNOMAD_HOME environment variable properly." << std::endl;
         return 0;
         
     }
