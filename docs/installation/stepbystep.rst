@@ -1,13 +1,13 @@
 ***************************
-Step by step installation of HYPERNOMAD
+Step by step installation of HyperNOMAD
 ***************************
 
-The installation of hyperNOMAD can start once the package is downloaded and the prerequisites installed. The package contains a Makefile responsible for builinding the binaries. To start the installation, you need to execute the following command:
+The installation of HyperNOMAD can start once the package is downloaded and the prerequisites installed. The package contains a Makefile responsible for builinding the binaries. To start the installation, you need to execute the following command:
 
 .. code-block:: sh
 
     make
-        building hyperNOMAD ...
+        building HyperNOMAD ...
 
         To be able to run the example
         the HYPERNOMAD_HOME environment variable

@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------------------*/
-/*  hyperNOMAD - Hyper-parameter optimization of deep neural networks with NOMAD */
+/*  HyperNOMAD - Hyper-parameter optimization of deep neural networks with NOMAD */
 /*                                                                               */
 /*                                                                               */
 /*  This program is free software: you can redistribute it and/or modify it      */

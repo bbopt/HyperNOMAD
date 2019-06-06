@@ -1,14 +1,14 @@
 *****
-# Hyperparameter optimization of deep neural networks with hyperNOMAD
+# Hyperparameter optimization of deep neural networks with HyperNOMAD
 *****
 
-hyperNOMAD is a C++ and Python package dedicated to the hyperparameter optimization of deep neural networks. The package contains a blackbox specifically designed for this problematic and provides a link with the NOMAD software used for the optimization. The blackbox takes as inputs a list of hyperparameters, builds a corresponding deep neural network in order to train, validate and test it on a specific data set before returning the test error as a mesure of performance. NOMAD is then used to minimize this error. The following appendix provides an overview of how to use the hyperNOMAD package.
+HyperNOMAD is a C++ and Python package dedicated to the hyperparameter optimization of deep neural networks. The package contains a blackbox specifically designed for this problematic and provides a link with the NOMAD software used for the optimization. The blackbox takes as inputs a list of hyperparameters, builds a corresponding deep neural network in order to train, validate and test it on a specific data set before returning the test error as a mesure of performance. NOMAD is then used to minimize this error. The following appendix provides an overview of how to use the HyperNOMAD package.
 
-The following tutorial shows the different steps to take in order to run hyperNOMAD on a first example. The complete functionalities of hyperNOMAD are described in the [documentation](https://hypernomad.readthedocs.io/en/latest/).
+The following tutorial shows the different steps to take in order to run HyperNOMAD on a first example. The complete functionalities of HyperNOMAD are described in the [documentation](https://hypernomad.readthedocs.io/en/latest/).
 
 ## Prerequisites
 
-In order to run hyperNOMAD correctly, please make sure to have:
+In order to run HyperNOMAD correctly, please make sure to have:
 
 * A compiled version of [NOMAD](https://www.gerad.ca/nomad/).
 * Python > 3.6
@@ -16,14 +16,14 @@ In order to run hyperNOMAD correctly, please make sure to have:
 * GCC > 3.8
 
 
-## installation of hyperNOMAD
+## installation of HyperNOMAD
 
 First build the executable by running the following command.
 
 ```
 make
 
-    building hyperNOMAD ...
+    building HyperNOMAD ...
 
     To be able to run the example
     the HYPERNOMAD_HOME environment variable
@@ -63,7 +63,15 @@ which should return the following informations:
 
 ## Getting started
 
-The next phase of to create a parameter file that contains the necessary informations to specify the classification problem, the search space and the initial starting point. Here is an example of a parameter file designed for the MNIST problem. The number of convolutional layers is fixed to 5, which means that this value will not change during the optimization, and it bounds are not changed from the default values. On the other hand, the dropout rate is allowed to vary between [0.3, 0.8] instead of the default range of [0, 1] and is initialized at 0.6
+The next phase is to create a parameter file that contains the necessary informations to specify the classification problem, the search space and the initial starting point. HyperNOMAD allows for a good flexibility of tuning a convolutional network by considering multiple aspects of a network at once such as the architecture, the dropout rate, the choice of the optimizer and the hyperparameters related to the optimization aspect (learning rate, weight decay, momentum, ...), the batch size, etc. The user can choose to optimize all these aspects or select a few and fixe the others to certain values. The user can also change the default range of each hyperparameter. 
+
+This information is passed through the parameter file by using a specific synthax:
+
+```
+  KEYWORD   INITIAL_VALUE   LOWER_BOUND   UPPER_BOUND   FIXED/VAR
+```
+
+Here is an example of an acceptable parameter file. First, the dataset MNIST is choosen and we specify that HyperNOMAD is allowed to try a maximum of 100 configurations. Then, the number of convolutional layers is fixed throught the optimization to 5, the two '-' appearing after the '5' mean that the default lower and upper bounds are not changed. The kernels, number of fully connected layers and activation function are respectively initialized at 3, 6, and 2 (Sigmoid) and the dropout rate is initialized at 0.6 with a new lower bound of 0.3 and upper bound of 0.8
 
 
 ```

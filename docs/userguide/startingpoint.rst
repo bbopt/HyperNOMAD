@@ -6,7 +6,7 @@ The main advantage of choosing this method of initialization rather than the pre
 an X0 allows for more flexiblity since one can choose a value for each parameter of each layer. For example, using a keyword such as 'KERNELS' means that all the kernels applied on every convolutional layer will have the same initial value.
 Whereas an X0 allows to initialize each kernel individually.
 
-The order and meaning of the variables in X0 is hardcoded in hyperNOMAD. Let's use the following parameter file as an example :
+The order and meaning of the variables in X0 is hardcoded in HyperNOMAD. Let's use the following parameter file as an example :
 
 
 .. code-block:: sh
@@ -31,7 +31,7 @@ The order and meaning of the variables in X0 is hardcoded in hyperNOMAD. Let's u
 Analysis of the example
 =========================
 
-First, 'HYPER_DISPLAY' allows set the level of details on the steps of hyperNOMAD. The default value is 1, and the maximum is 3.
+First, 'HYPER_DISPLAY' allows set the level of details on the steps of HyperNOMAD. The default value is 1, and the maximum is 3.
 Then, X0 is presented as a list of parameters that are respectively categorised into the convolutional block, the fully connected block, 
 the batch size, the optimizer block, the dropout rate and the activate function.
 

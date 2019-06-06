@@ -49,7 +49,7 @@ endif
 $(EXE): $(OBJS)
 	$(ECHO_NOMAD)
 	@mkdir -p $(BIN_DIR)
-	@echo "   building hyperNOMAD ..."
+	@echo "   building HyperNOMAD ..."
 	@$(COMPILATOR) -o $(EXE) $(OBJS) $(LDLIBS) $(CXXFLAGS) -L$(LIB_DIR) 
 ifeq ($(UNAME), Darwin)
 	@install_name_tool -change $(LIB_NOMAD) $(NOMAD_HOME)/lib/$(LIB_NOMAD) $(EXE)
