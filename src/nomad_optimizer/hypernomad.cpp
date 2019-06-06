@@ -240,7 +240,7 @@ int main ( int argc , char ** argv )
 
         std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile , pytorchBB );
 
-// For testing getNeighboors
+	// For testing getNeighboors
         if ( flagDisplayNeighboors )
         {
             // Switch to full display

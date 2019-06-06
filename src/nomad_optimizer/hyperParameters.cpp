@@ -280,7 +280,7 @@ void HyperParameters::HyperParametersBlock::display ( bool detailedDisplay ) con
     // Head of block
     if ( detailedDisplay )
     {
-        std::cout << "\t Head of block ";
+        std::cout << " Head of block ";
         headOfBlockHyperParameter.display( detailedDisplay );
     }
     else
@@ -308,13 +308,13 @@ void HyperParameters::HyperParametersBlock::display ( bool detailedDisplay ) con
     for ( const auto & aGAH : groupsOfAssociatedHyperParameters )
     {
         if ( detailedDisplay )
-            std::cout << "\t Group #" << index++ << std::endl;
+            std::cout << " Group #" << index++ << std::endl;
         else
             std::cout << "[ " ;
         
         for ( const auto & aAP : aGAH )
         {
-            std::cout << "\t\t " ;
+            std::cout << " " ;
             aAP.display( detailedDisplay );
         }
         if ( ! detailedDisplay )

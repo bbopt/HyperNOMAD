@@ -125,7 +125,7 @@ class DataHandler(object):
             random.shuffle(indices_test)
 
             train_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[:n_train])
-            valid_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[n_valid:])
+            valid_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[60000-n_valid:])
             test_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices_test[:n_valid])
 
             trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.batch_size, num_workers=2,

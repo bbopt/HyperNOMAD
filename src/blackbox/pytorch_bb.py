@@ -50,8 +50,6 @@ for i in range(len(Xin)):
 syst_cmd += '> out.txt 2>&1'
 os.system(syst_cmd)
 
-# print(syst_cmd)
-
 fout = open('out.txt', 'r')
 Lout = fout.readlines()
 for line in Lout:
