@@ -677,25 +677,25 @@ void HyperParameters::read (const std::string & hyperParamFileName )
         }
     }
     
-    // REMAINING_HYPERPARAMETERS:
+    // REMAINING_HPS:
     // ------------
     {
-        pe = entries.find ( "REMAINING_HYPERPARAMETERS" );
+        pe = entries.find ( "REMAINING_HPS" );
         if ( pe )
         {
             if ( !pe->is_unique() )
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "REMAINING_HYPERPARAMETERS not unique" );
+                                                            "REMAINING_HPS not unique" );
             if ( pe->get_nb_values() != 1 )
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "REMAINING_HYPERPARAMETERS FIXED/VAR" );
+                                                            "REMAINING_HPS FIXED/VAR" );
             
             bool fixed = false;
             if ( pe->get_values().begin()->compare("FIXED") == 0 )
                 fixed = true;
             else if ( pe->get_values().begin()->compare("VAR") != 0 )
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "REMAINING_HYPERPARAMETERS FIXED/VAR" );
+                                                            "REMAINING_HPS FIXED/VAR" );
             
             for ( auto & block : _baseHyperParameters )
             {
@@ -1028,7 +1028,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // FIRST HYPER PARAMETERS BLOCK (Convolutionnal layers)
     GenericHyperParameter headOfBlock1={"NUM_CON_LAYERS","Number of convolutionnal layers",NOMAD::CATEGORICAL,2,0,100};
     
-    GenericHyperParameter hp1={"NUM_OUTPUT_LAYERS","Number of output channels",NOMAD::INTEGER,6,1,1000, ReportValueType::COPY_VALUE};
+    GenericHyperParameter hp1={"NUM_OUTPUT_CHANNELS","Number of output channels",NOMAD::INTEGER,6,1,1000, ReportValueType::COPY_VALUE};
     GenericHyperParameter hp2={"KERNELS","Kernel size",NOMAD::INTEGER,5,1,20, ReportValueType::COPY_VALUE};
     GenericHyperParameter hp3={"STRIDES","Stride",NOMAD::INTEGER,1,1,3, ReportValueType::COPY_VALUE};
     GenericHyperParameter hp4={"PADDINGS","Padding",NOMAD::INTEGER,0,0,2, ReportValueType::COPY_VALUE};
