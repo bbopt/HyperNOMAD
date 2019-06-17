@@ -183,13 +183,11 @@ class Evaluator(object):
                 if (std_train > 0.001) and (std_val < 0.001):
                     stop = True
 
-            if epoch == 100:
-                for param_group in self.optimizer.param_groups:
-                    param_group['lr'] /= 10
-
-            if (epoch > 101) and (epoch % 100 == 0):
-                for param_group in self.optimizer.param_groups:
-                    param_group['lr'] /= 5
+            if self.optimizer.__class__.__name__ == 'SGD':
+                if epoch % 100 == 0:
+                    for param_group in self.optimizer.param_groups:
+                        if param_group['lr'] > 1e-6:
+                            param_group['lr'] /= 10
 
             print("Epoch {},  Train accuracy: {:.3f}, Val accuracy: {:.3f}".format(epoch + 1, self.__train_acc,
                                                                                    self.__val_acc))

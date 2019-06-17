@@ -138,7 +138,7 @@ void display_hyperhelp()
     std::cout << " Default:  " << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
     
-    std::cout << NOMAD::open_block("REMAINING_HPS") << std::endl;
+    std::cout << NOMAD::open_block("REMAINING_HYPERPARAMETERS") << std::endl;
     std::cout << " Default: VAR " << std::endl;
     std::cout << NOMAD::close_block() << std::endl;
     
