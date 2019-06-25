@@ -639,7 +639,10 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                     if ( !v.atof(*it) ) // Undefined (-) is ok
                         throw NOMAD::Parameters::Invalid_Parameter (  hyperParamFileName  , pe->get_line() ,
                                                                     " cannot read value of "+searchName );
-                    aHP->lowerBoundValue = v ;
+                    // If not defined the default value is used
+                    if ( v.is_defined() )
+                        aHP->lowerBoundValue = v ;
+                    
                     
                     ++it;
                 }
@@ -651,7 +654,10 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                     if ( !v.atof(*it) ) // Undefined (-) is ok
                         throw NOMAD::Parameters::Invalid_Parameter (  hyperParamFileName  , pe->get_line() ,
                                                                     " cannot read value of "+searchName );
-                    aHP->upperBoundValue = v ;
+                    
+                    // If not defined the default value is used
+                    if ( v.is_defined() )
+                        aHP->upperBoundValue = v ;
                     
                     ++it;
                 }
@@ -677,25 +683,25 @@ void HyperParameters::read (const std::string & hyperParamFileName )
         }
     }
     
-    // REMAINING_HYPERPARAMETERS:
+    // REMAINING_HPS:
     // ------------
     {
-        pe = entries.find ( "REMAINING_HYPERPARAMETERS" );
+        pe = entries.find ( "REMAINING_HPS" );
         if ( pe )
         {
             if ( !pe->is_unique() )
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "REMAINING_HYPERPARAMETERS not unique" );
+                                                            "REMAINING_HPS not unique" );
             if ( pe->get_nb_values() != 1 )
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "REMAINING_HYPERPARAMETERS FIXED/VAR" );
+                                                            "REMAINING_HPS FIXED/VAR" );
             
             bool fixed = false;
             if ( pe->get_values().begin()->compare("FIXED") == 0 )
                 fixed = true;
             else if ( pe->get_values().begin()->compare("VAR") != 0 )
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "REMAINING_HYPERPARAMETERS FIXED/VAR" );
+                                                            "REMAINING_HPS FIXED/VAR" );
             
             for ( auto & block : _baseHyperParameters )
             {
