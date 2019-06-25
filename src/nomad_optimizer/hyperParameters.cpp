@@ -666,9 +666,13 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                 // THE FIXED/VAR FLAG IS NOT SUPERSEDED
                 if ( it != pe->get_values().end() )
                 {
-                    if ( (*it).compare("FIXED") == 0 )
+                    // Accept lower case and upper case
+                    std::string key = *it;
+                    NOMAD::toupper( key );
+                    
+                    if ( key.compare("FIXED") == 0 )
                         aHP->isFixed = true ;
-                    else if ( (*it).compare("VAR") == 0 )
+                    else if ( key.compare("VAR") == 0 )
                         aHP->isFixed = false ;
                     else
                         throw NOMAD::Parameters::Invalid_Parameter (  hyperParamFileName  , pe->get_line() ,
@@ -1152,11 +1156,18 @@ void HyperParameters::HyperParametersBlock::expandAssociatedParameters()
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
         }
         
-        std::vector<GenericHyperParameter> tmpAssociatedHyperParameters = groupsOfAssociatedHyperParameters[0];
-        // Expand the associated parameters by copying multiple times at the end of first group
-        for ( size_t i= 1 ; i < headValue.round() ; i++ )
+        // Special case of head value equal to 0
+        if ( headValue == 0 )
+            groupsOfAssociatedHyperParameters.clear();
+        else
         {
-            groupsOfAssociatedHyperParameters.push_back( tmpAssociatedHyperParameters ) ;
+            
+            std::vector<GenericHyperParameter> tmpAssociatedHyperParameters = groupsOfAssociatedHyperParameters[0];
+            // Expand the associated parameters by copying multiple times at the end of first group
+            for ( size_t i= 1 ; i < headValue.round() ; i++ )
+            {
+                groupsOfAssociatedHyperParameters.push_back( tmpAssociatedHyperParameters ) ;
+            }
         }
     }
 }
