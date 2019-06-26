@@ -73,6 +73,8 @@ This information is passed through the parameter file by using a specific syntha
 
 Here is an example of an acceptable parameter file. First, the dataset MNIST is choosen and we specify that HyperNOMAD is allowed to try a maximum of 100 configurations. Then, the number of convolutional layers is fixed throught the optimization to 5, the two '-' appearing after the '5' mean that the default lower and upper bounds are not changed. The kernels, number of fully connected layers and activation function are respectively initialized at 3, 6, and 2 (Sigmoid) and the dropout rate is initialized at 0.6 with a new lower bound of 0.3 and upper bound of 0.8
 
+Finally, all the remaining hyperparameters that are not explicitly mentioned in this file are fixed to their default values during the optimization.
+
 
 ```
 # Mandatory information
@@ -85,6 +87,7 @@ KERNELS                 3
 NUM_FC_LAYERS           6
 ACTIVATION_FUNCTION     2
 DROPOUT_RATE            0.6  0.3 0.8
+REMAINING_HPS           FIXED
 ```
 
 More details are provided in the user guide section of the [documentation](https://hypernomad.readthedocs.io/en/latest/).
@@ -98,16 +101,16 @@ The optimization starts by executing the command:
 $HYPERNOMAD_HOME/bin/./hypernomad.exe parameter_file.txt
 ```
 
-Two examples of parameter files are provided in the folder examples. One uses CIFAR-10 starting from the default starting point and the second uses MNIST with the specifications detailed in the previous section.
+Multiple examples of parameter files are provided in the folder examples. One uses CIFAR-10 starting from the default starting point and the other use MNIST with different configurations.
 
-To use this files, the cammand is:
+To use these files, the cammand is:
 
 ```
-$HYPERNOMAD_HOME/bin/./hypernomad.exe $HYPERNOMAD_HOME/examples/parameter_file_cifar10.txt
+$HYPERNOMAD_HOME/bin/./hypernomad.exe $HYPERNOMAD_HOME/examples/cifar10_default.txt
 ```
 or 
 
 
 ```
-$HYPERNOMAD_HOME/bin/./hypernomad.exe $HYPERNOMAD_HOME/examples/parameter_file_mnist.txt
+$HYPERNOMAD_HOME/bin/./hypernomad.exe $HYPERNOMAD_HOME/examples/mnist_fc_optim.txt
 ```
