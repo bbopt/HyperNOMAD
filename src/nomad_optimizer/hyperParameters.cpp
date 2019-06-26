@@ -639,7 +639,10 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                     if ( !v.atof(*it) ) // Undefined (-) is ok
                         throw NOMAD::Parameters::Invalid_Parameter (  hyperParamFileName  , pe->get_line() ,
                                                                     " cannot read value of "+searchName );
-                    aHP->lowerBoundValue = v ;
+                    // If not defined the default value is used
+                    if ( v.is_defined() )
+                        aHP->lowerBoundValue = v ;
+                    
                     
                     ++it;
                 }
@@ -651,7 +654,10 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                     if ( !v.atof(*it) ) // Undefined (-) is ok
                         throw NOMAD::Parameters::Invalid_Parameter (  hyperParamFileName  , pe->get_line() ,
                                                                     " cannot read value of "+searchName );
-                    aHP->upperBoundValue = v ;
+                    
+                    // If not defined the default value is used
+                    if ( v.is_defined() )
+                        aHP->upperBoundValue = v ;
                     
                     ++it;
                 }
@@ -660,9 +666,13 @@ void HyperParameters::read (const std::string & hyperParamFileName )
                 // THE FIXED/VAR FLAG IS NOT SUPERSEDED
                 if ( it != pe->get_values().end() )
                 {
-                    if ( (*it).compare("FIXED") == 0 )
+                    // Accept lower case and upper case
+                    std::string key = *it;
+                    NOMAD::toupper( key );
+                    
+                    if ( key.compare("FIXED") == 0 )
                         aHP->isFixed = true ;
-                    else if ( (*it).compare("VAR") == 0 )
+                    else if ( key.compare("VAR") == 0 )
                         aHP->isFixed = false ;
                     else
                         throw NOMAD::Parameters::Invalid_Parameter (  hyperParamFileName  , pe->get_line() ,
@@ -677,25 +687,25 @@ void HyperParameters::read (const std::string & hyperParamFileName )
         }
     }
     
-    // REMAINING_HYPERPARAMETERS:
+    // REMAINING_HPS:
     // ------------
     {
-        pe = entries.find ( "REMAINING_HYPERPARAMETERS" );
+        pe = entries.find ( "REMAINING_HPS" );
         if ( pe )
         {
             if ( !pe->is_unique() )
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "REMAINING_HYPERPARAMETERS not unique" );
+                                                            "REMAINING_HPS not unique" );
             if ( pe->get_nb_values() != 1 )
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "REMAINING_HYPERPARAMETERS FIXED/VAR" );
+                                                            "REMAINING_HPS FIXED/VAR" );
             
             bool fixed = false;
             if ( pe->get_values().begin()->compare("FIXED") == 0 )
                 fixed = true;
             else if ( pe->get_values().begin()->compare("VAR") != 0 )
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
-                                                            "REMAINING_HYPERPARAMETERS FIXED/VAR" );
+                                                            "REMAINING_HPS FIXED/VAR" );
             
             for ( auto & block : _baseHyperParameters )
             {
@@ -1146,11 +1156,18 @@ void HyperParameters::HyperParametersBlock::expandAssociatedParameters()
             throw NOMAD::Exception ( __FILE__ , __LINE__ ,err);
         }
         
-        std::vector<GenericHyperParameter> tmpAssociatedHyperParameters = groupsOfAssociatedHyperParameters[0];
-        // Expand the associated parameters by copying multiple times at the end of first group
-        for ( size_t i= 1 ; i < headValue.round() ; i++ )
+        // Special case of head value equal to 0
+        if ( headValue == 0 )
+            groupsOfAssociatedHyperParameters.clear();
+        else
         {
-            groupsOfAssociatedHyperParameters.push_back( tmpAssociatedHyperParameters ) ;
+            
+            std::vector<GenericHyperParameter> tmpAssociatedHyperParameters = groupsOfAssociatedHyperParameters[0];
+            // Expand the associated parameters by copying multiple times at the end of first group
+            for ( size_t i= 1 ; i < headValue.round() ; i++ )
+            {
+                groupsOfAssociatedHyperParameters.push_back( tmpAssociatedHyperParameters ) ;
+            }
         }
     }
 }
