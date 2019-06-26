@@ -3,6 +3,12 @@ DATASET                 MNIST
 MAX_BB_EVAL             150
 
 # Optional information
-NUM_FC_LAYERS           10
-SIZE\_FC\_LAYER         500
+NUM_FC_LAYERS           10  # Initial value is set to 10
+                            # the lower and upper bounds are 
+                            # the default ones
+                            
+SIZE_FC_LAYER           500  -  2000 # Initial value is set to 500
+                                     # the lower bound is the default one
+                                     # the upper bound in now 2000
+                                     
 REMAINING_HPS           FIXED
