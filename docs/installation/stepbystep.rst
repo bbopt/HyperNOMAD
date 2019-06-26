@@ -11,13 +11,13 @@ The installation of HyperNOMAD can start once the package is downloaded and the 
 
         To be able to run the example
         the HYPERNOMAD_HOME environment variable
-        must be set to path_to_home_directory_of_hypernomad
+        must be set to the HyperNOMAD home directory
     
 When the compilation is successful, a message appears asking to set an environment variable 'HYPERNOMAD_HOME'. This can be done by adding a line in the file .profile or .bashrc :
 
 .. code-block:: sh
 
-    export HYPERNOMAD_HOME=path_to_home_directory_of_hypernomad
+    export HYPERNOMAD_HOME=hypernomad_directory
     
 
 Check that the installation is successful
@@ -41,9 +41,9 @@ which should return the following informations:
       Using Nomad version 3.9.0 - www.gerad.ca/nomad
     --------------------------------------------------
 
-    Run           : hypernomad.exe hyperparameters_file
+    Run           : hypernomad.exe parameters_file
     Info          : hypernomad.exe -i
     Help          : hypernomad.exe -h
     Version       : hypernomad.exe -v
     Usage         : hypernomad.exe -u
-    Neighboors    : hypernomad.exe -n hyperparameters_file
+    Neighboors    : hypernomad.exe -n parameters_file

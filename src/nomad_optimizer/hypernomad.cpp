@@ -75,7 +75,7 @@ void display_hyperusage( )
     << "Help          : " << hyperNomadName << " -h"                       << std::endl
     << "Version       : " << hyperNomadName << " -v"                       << std::endl
     << "Usage         : " << hyperNomadName << " -u"                       << std::endl
-    << "Neighboors    : " << hyperNomadName << " -n hyperparameters_file"  << std::endl
+    << "Neighboors    : " << hyperNomadName << " -n parameters_file"  << std::endl
     << std::endl;
 }
 

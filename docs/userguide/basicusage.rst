@@ -107,7 +107,7 @@ This table lists all the possible keywords, their interpretation and the default
 Example of a parameter file
 ==============================
 Here is an example of an acceptable parameter file. First, the dataset MNIST is choosen and we specify that HyperNOMAD is allowed to try a maximum of 100 configurations. Then, the number of convolutional layers is fixed throught the optimization to 5, the two '-' appearing after the '5' mean that the default lower and upper bounds are not changed. The kernels, number of fully connected layers and activation function are respectively initialized at 3, 6, and 2 (Sigmoid) and the dropout rate is initialized at 0.6 with a new lower bound of 0.3 and upper bound of 0.8
-
+Finally, all the remaining hyperparameters from Table~\ref{tab:keywords} that are not explicitly mentioned in this file are fixed to their default values during the optimization.
 
 .. code-block:: sh
 
@@ -121,6 +121,7 @@ Here is an example of an acceptable parameter file. First, the dataset MNIST is 
     NUM_FC_LAYERS           6
     ACTIVATION_FUNCTION     2
     DROPOUT_RATE            0.6  0.3 0.8
+    REMAINING_HPS           FIXED
 
 
 This parameter file is provided in the directory 'examples' from where we can execute the following command in order to run 
@@ -128,4 +129,4 @@ HyperNOMAD on this search space
 
 .. code-block:: sh
 
-    $HYPERNOMAD_HOME/bin/./hypernomad.exe $HYPERNOMAD_HOME/examples/parameter_file_mnist.txt
+    $HYPERNOMAD_HOME/bin/./hypernomad.exe $HYPERNOMAD_HOME/examples/mnist_first_example.txt

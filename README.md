@@ -27,7 +27,7 @@ make
 
     To be able to run the example
     the HYPERNOMAD_HOME environment variable
-    must be set to path_to_home_directory_of_hypernomad
+    must be set to the HyperNOMAD home directory
     
 ```
 
@@ -35,7 +35,7 @@ When the compilation is successful, a message appears asking to set an environme
 
 
 ```
-    export HYPERNOMAD_HOME=path_to_home_directory_of_hypernomad
+    export HYPERNOMAD_HOME=hypernomad_directory
 ```    
 
 The executable hypernomad.exe is located in the bin directory. You can check that the installation is successful by trying to run the commad
@@ -58,7 +58,7 @@ which should return the following informations:
     Help          : hypernomad.exe -h
     Version       : hypernomad.exe -v
     Usage         : hypernomad.exe -u
-    Neighboors    : hypernomad.exe -n hyperparameters_file
+    Neighboors    : hypernomad.exe -n parameters_file
 ```
 
 ## Getting started

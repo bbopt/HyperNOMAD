@@ -1,0 +1,8 @@
+# Mandatory information
+DATASET                 MNIST
+MAX_BB_EVAL             150
+
+# Optional information
+NUM_FC_LAYERS           10
+SIZE\_FC\_LAYER         500
+REMAINING_HPS           FIXED
