@@ -1,5 +1,0 @@
-# Mandatory information
-DATASET                 MNIST
-MAX_BB_EVAL             100    
-
-# Default setting for the remaining HPS
