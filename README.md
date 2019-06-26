@@ -53,7 +53,7 @@ which should return the following informations:
       Using Nomad version 3.9.0 - www.gerad.ca/nomad
     --------------------------------------------------
 
-    Run           : hypernomad.exe hyperparameters_file
+    Run           : hypernomad.exe parameters_file
     Info          : hypernomad.exe -i
     Help          : hypernomad.exe -h
     Version       : hypernomad.exe -v
