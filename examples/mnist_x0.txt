@@ -1,16 +1,19 @@
+
+# Mandatory information
 DATASET MNIST
+MAX_BB_EVAL 100
 
+# Optional information
 
-HYPER_DISPLAY 3
+HYPER_DISPLAY 3          # Display all available information during execution
 
 X0           (   2     6  5 1 0 1    16  5 1 0 1    2  128   84   128   3   0.1  0.9  0.0005 0   0.2  1 )
-#LOWER_BOUND  (   1     1  1 1 0 0     1  1 1 0 0    0    1    1     1   1   0    0    0      0   0    1 )  
-#UPPER_BOUND  ( 100  1000 20 3 2 1  1000 20 3 2 1  500 1000 1000   400   4   1    1    1      1   1    3 )
+#LOWER_BOUND  (   1     1  1 1 0 0     1  1 1 0 0    0    1    1     1   1   0    0    0      0   0    1 )  # default lower bound
+#UPPER_BOUND  ( 100  1000 20 3 2 1  1000 20 3 2 1  500 1000 1000   400   4   1    1    1      1   1    3 )  # default upper bound
 
 
-DROPOUT_RATE 0.5 - - FIXED
-KERNELS 10 - - FIXED
+DROPOUT_RATE 0.5 - - FIXED      # DROPOUT_RATE fixed at 0.5 (no need for lower and upper bounds)
+KERNELS 10 - - FIXED            # KERNELS fixed at 10 (no need for lower and upper bounds)
 
-REMAINING_HYPERPARAMETERS VAR
-
-MAX_BB_EVAL 100
+REMAINING_HPS VAR               # DROPOUT_RATE and KERNELS are fixed,
+                                # but the remaining hyperparameters are variable (default)
