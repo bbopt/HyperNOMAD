@@ -147,3 +147,5 @@ If you use HyperNOMAD, please cite the following [paper](https://arxiv.org/abs/1
 }
 
 ```
+[![DOI](https://zenodo.org/badge/160553898.svg)](https://zenodo.org/badge/latestdoi/160553898)
+
