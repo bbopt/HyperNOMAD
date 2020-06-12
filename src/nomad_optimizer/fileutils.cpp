@@ -7,13 +7,7 @@
 std::string curDir()
 {
     char dirbuff[ PATH_MAX ];
-#ifdef _MSC_VER
-#include <direct.h>
-    _getcwd(dirbuff, PATH_MAX );
-#else
-#include <unistd.h>
     getcwd(dirbuff, PATH_MAX );
-#endif
     std::string dir(dirbuff);
     
     return dir;

@@ -20,7 +20,10 @@
 // use of 'access' or '_access', and getpid() or _getpid():
 #ifdef _MSC_VER
 #include <io.h>
-//#include <process.h>
+#include <direct.h>
+#define PATH_MAX 260
+#define getcwd(x,y) _getcwd(x,y)
+#define isdigit(x) iswdigit(x)
 #else
 #include <unistd.h>
 #endif
