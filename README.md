@@ -13,7 +13,7 @@ In order to run HyperNOMAD correctly, please make sure to have:
 * A compiled version of [NOMAD](https://www.gerad.ca/nomad/).
 * Python > 3.6
 * [PyTorch](https://pytorch.org/)
-* GCC > 3.8
+* GCC > 9.0
 
 
 ## installation of HyperNOMAD
