@@ -128,10 +128,10 @@ class DataHandler(object):
             valid_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[60000-n_valid:])
             test_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices_test[:n_valid])
 
-            trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.batch_size, num_workers=2,
+            trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.batch_size, num_workers=12,
                                                       sampler=train_sampler)
-            validloader = torch.utils.data.DataLoader(trainset, batch_size=100, sampler=valid_sampler, num_workers=2)
-            testloader = torch.utils.data.DataLoader(testset, batch_size=100, sampler=test_sampler, num_workers=2)
+            validloader = torch.utils.data.DataLoader(trainset, batch_size=100, sampler=valid_sampler, num_workers=12)
+            testloader = torch.utils.data.DataLoader(testset, batch_size=100, sampler=test_sampler, num_workers=12)
 
         if self.dataset in ['MNIST', 'Fashion-MNIST', 'KMNIST', 'EMNIST']:
             if self.dataset == 'MNIST':
@@ -171,10 +171,10 @@ class DataHandler(object):
             train_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[:n_valid])
             valid_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[n_valid:])
 
-            trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.batch_size, num_workers=2,
+            trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.batch_size, num_workers=12,
                                                       sampler=train_sampler)
-            validloader = torch.utils.data.DataLoader(trainset, batch_size=100, sampler=valid_sampler, num_workers=2)
-            testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=True, num_workers=2)
+            validloader = torch.utils.data.DataLoader(trainset, batch_size=100, sampler=valid_sampler, num_workers=12)
+            testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=True, num_workers=12)
 
         if self.dataset in ['CIFAR10', 'CIFAR100']:
 
@@ -206,11 +206,11 @@ class DataHandler(object):
 
             trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.batch_size, shuffle=False,
                                                       sampler=torch.utils.data.sampler.SubsetRandomSampler(
-                                                          indices[:n_valid]), num_workers=2)
+                                                          indices[:n_valid]), num_workers=12)
             validloader = torch.utils.data.DataLoader(trainset, batch_size=100,
                                                       sampler=torch.utils.data.sampler.SubsetRandomSampler(
-                                                          indices[n_valid:]), num_workers=2)
-            testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
+                                                          indices[n_valid:]), num_workers=12)
+            testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=12)
 
         if self.dataset == 'STL10':
             print(">>> Preparing STL10 dataset...")
