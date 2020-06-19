@@ -77,14 +77,18 @@ class NeuralNet(nn.Module):
             stride = params_i[2]
             padding = params_i[3]
 
-            layers += [nn.Conv2d(n_in_channel, n_out_channel, kernel_size, stride=stride,
-                                 padding=padding), nn.BatchNorm2d(n_out_channel)]
+            layer = nn.Conv2d(n_in_channel, n_out_channel, kernel_size, stride=stride,
+                                 padding=padding)
+            nn.init.xavier_uniform_(layer.weight)
+            layers += [layer]
             if self.activation == 1:
                 layers += [nn.ReLU(inplace=True)]
             if self.activation == 2:
                 layers += [nn.Sigmoid()]
             if self.activation == 3:
                 layers += [nn.Tanh()]
+
+            layers += [nn.BatchNorm2d(n_out_channel)]
 
             if params_i[-1] == 1:
                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
@@ -100,11 +104,13 @@ class NeuralNet(nn.Module):
             size_input = self.number_input_channels * (self.init_im_size ** 2)
         else:
             size_input = (self.get_input_size_first_lin_layer() ** 2) * self.param_conv[-1][0]
-            
+
         self.in_size_first_full_layer = size_input
 
         for i in range(self.num_full_layers):
-            layers += [nn.Linear(size_input, self.param_full[i])]
+            layer = nn.Linear(size_input, self.param_full[i])
+            nn.init.xavier_uniform_(layer.weight)
+            layers += [layer]
             size_input = self.param_full[i]
             if self.activation == 1:
                 layers += [nn.ReLU(inplace=True)]
@@ -113,7 +119,12 @@ class NeuralNet(nn.Module):
             if self.activation == 3:
                 layers += [nn.Tanh()]
             layers += [nn.Dropout(self.dropout)]
-        layers += [nn.Linear(size_input, self.total_classes)]
+            layers += [nn.BatchNorm1d(self.param_full[i])]
+
+        layer = nn.Linear(size_input, self.total_classes)
+        nn.init.xavier_uniform_(layer.weight)
+        layers += [layer]
+        layers += [nn.BatchNorm1d(self.total_classes)]
         self.classifier = nn.Sequential(*layers)
         return self.features, self.classifier
 
@@ -129,13 +140,13 @@ class NeuralNet(nn.Module):
         :return: current_size
         """
         current_size = self.init_im_size
-        for i in range(self.num_conv_layers):
+        for i in range(self.num_conv_layers):                                                                
             temp = (current_size - self.param_conv[i][1] + 2 * self.param_conv[i][3]) / self.param_conv[i][2] + 1
-            current_size = np.floor(temp)
-            if self.param_conv[i][-1] == 1:
-                if current_size > 1:
-                    current_size = np.floor(current_size / 2)
-            current_size = int(current_size)
-        return current_size
+            current_size = np.floor(temp)                                                                    
+            if self.param_conv[i][-1] == 1:                                                                  
+                if current_size > 1:                                                                         
+                    current_size = np.floor(current_size / 2)                                                
+            current_size = int(current_size)                                                                 
+        return current_size     
     
     
