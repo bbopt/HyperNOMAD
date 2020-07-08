@@ -1042,7 +1042,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     GenericHyperParameter hp2={"KERNELS","Kernel size",NOMAD::INTEGER,5,1,20, ReportValueType::COPY_VALUE};
     GenericHyperParameter hp3={"STRIDES","Stride",NOMAD::INTEGER,1,1,3, ReportValueType::COPY_VALUE};
     GenericHyperParameter hp4={"PADDINGS","Padding",NOMAD::INTEGER,0,0,2, ReportValueType::COPY_VALUE};
-    GenericHyperParameter hp5={"DO_POOLS","Do a pooling",NOMAD::BINARY,0,0,1, ReportValueType::COPY_VALUE};
+    GenericHyperParameter hp5={"POOLING_SIZE","Pooling",NOMAD::INTEGER,2,1,5, ReportValueType::COPY_VALUE};
     GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2,hp3,hp4,hp5}};
     
     HyperParametersBlock block1={"Convolutionnal layers",headOfBlock1, NeighborType::PLUS_ONE_MINUS_ONE_RIGHT, AssociatedHyperParametersType::MULTIPLE_TIMES, associatedHyperParameters1};
