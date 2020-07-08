@@ -218,6 +218,18 @@ class DataHandler(object):
                                                   download=True)
             testset = torchvision.datasets.STL10(root, train=False, transform=None, target_transform=None,
                                                  download=True)
+            
+            n_valid = 40000
+            indices = list(range(len(trainset)))
+            random.shuffle(indices)
+
+            trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.batch_size, shuffle=False,
+                                                      sampler=torch.utils.data.sampler.SubsetRandomSampler(
+                                                          indices[:n_valid]), num_workers=12)
+            validloader = torch.utils.data.DataLoader(trainset, batch_size=100,
+                                                      sampler=torch.utils.data.sampler.SubsetRandomSampler(
+                                                          indices[n_valid:]), num_workers=12)
+            testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=12)
 
         return trainloader, validloader, testloader
 
