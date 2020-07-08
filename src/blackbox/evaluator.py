@@ -112,6 +112,10 @@ class Evaluator(object):
         ax1.set_xlabel('Number of epochs')
         ax1.set_ylabel('Accuracies')
         plt.ion()
+        
+        # LR scheduler - SGD only
+        T_max = 10
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max, eta_min=0.001, last_epoch=-1)
 
         while (not stop) and (epoch < max_epochs):
             self.cnn.train()
@@ -183,11 +187,12 @@ class Evaluator(object):
                 if (std_train > 0.001) and (std_val < 0.001):
                     stop = True
 
-            if self.optimizer.__class__.__name__ == 'SGD':
-                if epoch % 100 == 0:
-                    for param_group in self.optimizer.param_groups:
-                        if param_group['lr'] > 1e-6:
-                            param_group['lr'] /= 10
+            if self.optimizer.__class__.__name__ == 'SGD':                                                                      
+                # if epoch % 100 == 0:                                                                                          
+                #     for param_group in self.optimizer.param_groups:                                                           
+                #         if param_group['lr'] > 1e-6:                                                                          
+                #             param_group['lr'] /= 10                                                                           
+                scheduler.step() 
 
             print("Epoch {},  Train accuracy: {:.3f}, Val accuracy: {:.3f}".format(epoch + 1, self.__train_acc,
                                                                                    self.__val_acc))
