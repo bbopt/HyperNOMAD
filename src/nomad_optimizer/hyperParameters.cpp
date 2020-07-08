@@ -241,7 +241,7 @@ std::vector<HyperParameters> HyperParameters::getNeighboors( const NOMAD::Point 
     return neighboors;
 }
 
-HyperParameters::HyperParameters ( const std::string & hyperParamFileName , const std::string & pytorchBB )
+HyperParameters::HyperParameters ( const std::string & hyperParamFileName , const std::string & pytorchBB, const std::string & pytorchSGTE )
 {
     // Default display
     _hyperDisplay = 1;
@@ -249,7 +249,8 @@ HyperParameters::HyperParameters ( const std::string & hyperParamFileName , cons
     
     // BB_EXE minus the dataset name (dataset name is added during check
     _bbEXE = "$python " + pytorchBB;
-
+    _sgteEXE = "$python " + pytorchSGTE;
+    
     initBlockStructureToDefault();
     
     registerSearchNames();
@@ -482,6 +483,29 @@ void HyperParameters::read (const std::string & hyperParamFileName )
             {
                 throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
                                                             "number of BB_EXE (>1)." );
+            }
+            pe->set_has_been_interpreted();
+        }
+    }
+    
+    // SGTE_EXE:
+    // -------
+    {
+        pe = entries.find ( "SGTE_EXE" );
+        if ( pe )
+        {
+            if ( !pe->is_unique() )
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "SGTE_EXE not unique" );
+            
+            m = pe->get_nb_values();
+            
+            if ( m == 1 )
+                _sgteEXE =  *pe->get_values().begin();
+            else
+            {
+                throw NOMAD::Parameters::Invalid_Parameter ( hyperParamFileName , pe->get_line() ,
+                                                            "number of SGTE_EXE (>1)." );
             }
             pe->set_has_been_interpreted();
         }

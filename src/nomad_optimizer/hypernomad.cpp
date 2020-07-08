@@ -36,6 +36,7 @@ using namespace NOMAD;
 bool flagDisplayNeighboors = false;
 std::string hyperNomadName ;
 const std::string shortPytorchBBPath = "src" + std::string(dirSep) + "blackbox" + std::string(dirSep) + "pytorch_bb.py";
+const std::string shortPytorchSGTEPath = "src" + std::string(dirSep) + "blackbox" + std::string(dirSep) + "pytorch_sgte.py";
 const std::string hyperNomadVersion = "1.0";
 
 
@@ -169,12 +170,22 @@ int main ( int argc , char ** argv )
         
     }
         
-    std::string pytorchBB = std::string(hyperNomadPath) + dirSep +shortPytorchBBPath;
+    std::string pytorchBB = std::string(hyperNomadPath) + dirSep + shortPytorchBBPath;
     // The default Python script path is set relative to the HYPERNOMAD path
     // The script file are assessed for reading
     if ( ! checkAccess( pytorchBB ) )
     {
         std::cerr << "Cannot access to " << pytorchBB << ". Make sure to set the HYPERNOMAD_HOME environment variable properly." << std::endl;
+        return 0;
+        
+    }
+    
+    std::string pytorchSGTE = std::string(hyperNomadPath) + dirSep + shortPytorchSGTEPath;
+    // The default Python script path is set relative to the HYPERNOMAD path
+    // The script file are assessed for reading
+    if ( ! checkAccess( pytorchSGTE ) )
+    {
+        std::cerr << "Cannot access to " << pytorchSGTE << ". Make sure to set the HYPERNOMAD_HOME environment variable properly." << std::endl;
         return 0;
         
     }
@@ -238,7 +249,7 @@ int main ( int argc , char ** argv )
         // parameters creation:
         Parameters p ( out );
 
-        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile , pytorchBB );
+        std::shared_ptr<HyperParameters> hyperParameters = std::make_shared<HyperParameters>(hyperParamFile , pytorchBB , pytorchSGTE );
 
 	// For testing getNeighboors
         if ( flagDisplayNeighboors )
