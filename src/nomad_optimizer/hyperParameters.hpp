@@ -146,6 +146,7 @@ private:
     
     std::string _dataset;
     std::string _bbEXE;
+    std::string _sgteEXE;
     std::vector<NOMAD::bb_output_type> _bbot;
     size_t _maxBbEval;
     std::list<std::string> _registeredDataset;
@@ -187,7 +188,7 @@ public:
     
     void operator=(const HyperParameters&) = delete; // No usual assignement is allowed --> see private constructor for assignement from blocks of hyper parameters
     
-    HyperParameters ( const std::string & hyperParamFileName , const std::string & pytorchBB );
+    HyperParameters ( const std::string & hyperParamFileName , const std::string & pytorchBB, const std::string & pytorchSGTE );
     
     NOMAD::Point getValues( ValueType t ) const;
     
