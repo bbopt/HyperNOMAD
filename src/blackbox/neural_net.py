@@ -95,7 +95,8 @@ class NeuralNet(nn.Module):
             layers += [nn.MaxPool2d(kernel_size=pooling, stride=pooling)]                                                       
                                                                                                                                 
             n_in_channel = n_out_channel                                                                                        
-        layers += [nn.AvgPool2d(kernel_size=1, stride=1)]                                                                       
+        if self.num_conv_layers > 0:
+            layers += [nn.AvgPool2d(kernel_size=1, stride=1)]                                                                       
         self.features = nn.Sequential(*layers)                                                                                  
         layers = []                                                                                                             
         # print('Done with conv layer')                                                                                         
@@ -150,7 +151,8 @@ class NeuralNet(nn.Module):
                                                                                                                                 
             # Pooling                                                                                                           
             current_size = np.floor(current_size / self.param_conv[i][-1])                                                      
-            current_size = int(current_size)                                                                                    
+            current_size = int(current_size)
+            print(current_size)                                                                                   
         return current_size        
     
     

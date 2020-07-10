@@ -101,7 +101,7 @@ class Evaluator(object):
         l_train_acc = []
         best_val_acc = 0
         epochs = []
-        max_epochs = 500
+        max_epochs = 100
         if self.dataset =='MINIMNIST':
             max_epochs = 50
 
