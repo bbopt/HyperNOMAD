@@ -87,46 +87,48 @@ class NeuralNet(nn.Module):
                 layers += [nn.Sigmoid()]
             if self.activation == 3:
                 layers += [nn.Tanh()]
-
+            layers += [nn.Dropout2d(self.dropout)]
             layers += [nn.BatchNorm2d(n_out_channel)]
 
-            if params_i[-1] == 1:
-                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
-
-            n_in_channel = n_out_channel
-        # layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
-        self.features = nn.Sequential(*layers)
-        layers = []
-        # print('Done with conv layer')
-
-        # construct the full layers
-        if not self.param_conv:
-            size_input = self.number_input_channels * (self.init_im_size ** 2)
-        else:
-            size_input = (self.get_input_size_first_lin_layer() ** 2) * self.param_conv[-1][0]
-
-        self.in_size_first_full_layer = size_input
-
-        for i in range(self.num_full_layers):
-            layer = nn.Linear(size_input, self.param_full[i])
-            nn.init.xavier_uniform_(layer.weight)
-            layers += [layer]
-            size_input = self.param_full[i]
-            if self.activation == 1:
-                layers += [nn.ReLU(inplace=True)]
-            if self.activation == 2:
-                layers += [nn.Sigmoid()]
-            if self.activation == 3:
-                layers += [nn.Tanh()]
-            layers += [nn.Dropout(self.dropout)]
-            layers += [nn.BatchNorm1d(self.param_full[i])]
-
-        layer = nn.Linear(size_input, self.total_classes)
-        nn.init.xavier_uniform_(layer.weight)
-        layers += [layer]
-        layers += [nn.BatchNorm1d(self.total_classes)]
-        self.classifier = nn.Sequential(*layers)
-        return self.features, self.classifier
+            pooling = params_i[-1]                                                                                              
+            # if params_i[-1] == 1:                                                                                             
+            layers += [nn.MaxPool2d(kernel_size=pooling, stride=pooling)]                                                       
+                                                                                                                                
+            n_in_channel = n_out_channel                                                                                        
+        if self.num_conv_layers > 0:
+            layers += [nn.AvgPool2d(kernel_size=1, stride=1)]                                                                       
+        self.features = nn.Sequential(*layers)                                                                                  
+        layers = []                                                                                                             
+        # print('Done with conv layer')                                                                                         
+                                                                                                                                
+        # construct the full layers                                                                                             
+        if not self.param_conv:                                                                                                 
+            size_input = self.number_input_channels * (self.init_im_size ** 2)                                                  
+        else:                                                                                                                   
+            size_input = (self.get_input_size_first_lin_layer() ** 2) * self.param_conv[-1][0]                                  
+                                                                                                                                
+        self.in_size_first_full_layer = size_input                                                                              
+                                                                                                                                
+        for i in range(self.num_full_layers):                                                                                   
+            layer = nn.Linear(size_input, self.param_full[i])                                                                   
+            nn.init.xavier_uniform_(layer.weight)                                                                               
+            layers += [layer]                                                                                                   
+            size_input = self.param_full[i]                                                                                     
+            if self.activation == 1:                                                                                            
+                layers += [nn.ReLU(inplace=True)]                                                                               
+            if self.activation == 2:                                                                                            
+                layers += [nn.Sigmoid()]                                                                                        
+            if self.activation == 3:                                                                                            
+                layers += [nn.Tanh()]                                                                                           
+            layers += [nn.Dropout(self.dropout)]                                                                                
+            layers += [nn.BatchNorm1d(self.param_full[i])]                                                                      
+                                                                                                                                
+        layer = nn.Linear(size_input, self.total_classes)                                                                       
+        nn.init.xavier_uniform_(layer.weight)                                                                                   
+        layers += [layer]                                                                                                       
+        layers += [nn.BatchNorm1d(self.total_classes)]                                                                          
+        self.classifier = nn.Sequential(*layers)                                                                                
+        return self.features, self.classifier   
 
     def forward(self, x):
         x = self.features(x)
@@ -135,18 +137,22 @@ class NeuralNet(nn.Module):
         x = self.classifier(x)
         return x
 
-    def get_input_size_first_lin_layer(self):
-        """
-        :return: current_size
-        """
-        current_size = self.init_im_size
-        for i in range(self.num_conv_layers):                                                                
-            temp = (current_size - self.param_conv[i][1] + 2 * self.param_conv[i][3]) / self.param_conv[i][2] + 1
-            current_size = np.floor(temp)                                                                    
-            if self.param_conv[i][-1] == 1:                                                                  
-                if current_size > 1:                                                                         
-                    current_size = np.floor(current_size / 2)                                                
-            current_size = int(current_size)                                                                 
-        return current_size     
+    def get_input_size_first_lin_layer(self):                                                                                   
+        """                                                                                                                     
+        :return: current_size                                                                                                   
+        """                                                                                                                     
+        current_size = self.init_im_size                                                                                        
+        for i in range(self.num_conv_layers):                                                                                   
+            temp = (current_size - self.param_conv[i][1] + 2 * self.param_conv[i][3]) / self.param_conv[i][2] + 1               
+            current_size = np.floor(temp)                                                                                       
+            # if self.param_conv[i][-1] == 1:                                                                                   
+            #     if current_size > 1:                                                                                          
+            #         current_size = np.floor(current_size / 2)                                                                 
+                                                                                                                                
+            # Pooling                                                                                                           
+            current_size = np.floor(current_size / self.param_conv[i][-1])                                                      
+            current_size = int(current_size)
+            print(current_size)                                                                                   
+        return current_size        
     
     
