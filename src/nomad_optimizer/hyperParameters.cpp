@@ -1293,7 +1293,8 @@ void HyperParameters::HyperParametersBlock::reduceAssociatedParametersWithConstr
             while ( groupsOfAssociatedHyperParameters.size() > headValue.round() )
             {
                 groupsOfAssociatedHyperParameters.pop_back( ) ;
-                updateAssociatedParameters ( groupsOfAssociatedHyperParameters.back() );
+                if ( groupsOfAssociatedHyperParameters.size() > 0 )
+                    updateAssociatedParameters ( groupsOfAssociatedHyperParameters.back() );
             }
         }
         
