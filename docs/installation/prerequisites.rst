@@ -11,6 +11,12 @@ In order to run HyperNOMAD correctly, please make sure to have:
 * A compiled version of NOMAD_.
 
 
+Additionally, \hypernomad has the following Python requirements:
+
+    * Numpy
+    * Matplotlib
+
+
 Check that the requirements are fullfiled
 ============================================
 
