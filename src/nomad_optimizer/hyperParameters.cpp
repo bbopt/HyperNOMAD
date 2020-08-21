@@ -1046,6 +1046,28 @@ HyperParameters::GenericHyperParameter * HyperParameters::getHyperParameter( con
     return aHP;
 }
 
+HyperParameters::GroupsOfAssociatedHyperParameters HyperParameters::createGroupsOfAssociatedParameters(const std::string & blockName)
+{
+    GroupsOfAssociatedHyperParameters associatedHyperParameters;
+    if ( blockName.compare("Convolutional layers") == 0 )
+    {
+        
+        GenericHyperParameter hp1={"NUM_OUTPUT_LAYERS","Number of output channels",NOMAD::INTEGER,6,1,1000, ReportValueType::COPY_VALUE};
+        GenericHyperParameter hp2={"KERNELS","Kernel size",NOMAD::INTEGER,5,1,20, ReportValueType::COPY_VALUE};
+        GenericHyperParameter hp3={"STRIDES","Stride",NOMAD::INTEGER,1,1,3, ReportValueType::COPY_VALUE};
+        GenericHyperParameter hp4={"PADDINGS","Padding",NOMAD::INTEGER,0,0,2, ReportValueType::COPY_VALUE};
+        GenericHyperParameter hp5={"POOLING_SIZE","Pooling",NOMAD::INTEGER,2,1,5, ReportValueType::COPY_VALUE};
+        associatedHyperParameters={{hp1,hp2,hp3,hp4,hp5}};
+    }
+    else if ( blockName.compare("Full layers") == 0 )
+    {
+        GenericHyperParameter hp6={"SIZE_FC_LAYER","Size of a full layer",NOMAD::INTEGER,128,1,1000, ReportValueType::COPY_VALUE };
+        associatedHyperParameters={{hp6}};
+    }
+    else
+        throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: cannot create Groups of associated parameters of name " + blockName );
+    return associatedHyperParameters;
+}
 
 void HyperParameters::initBlockStructureToDefault ( void )
 {
@@ -1062,12 +1084,14 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // FIRST HYPER PARAMETERS BLOCK (Convolutionnal layers)
     GenericHyperParameter headOfBlock1={"NUM_CON_LAYERS","Number of convolutionnal layers",NOMAD::CATEGORICAL,2,0,100};
     
-    GenericHyperParameter hp1={"NUM_OUTPUT_LAYERS","Number of output channels",NOMAD::INTEGER,6,1,1000, ReportValueType::COPY_VALUE};
-    GenericHyperParameter hp2={"KERNELS","Kernel size",NOMAD::INTEGER,5,1,20, ReportValueType::COPY_VALUE};
-    GenericHyperParameter hp3={"STRIDES","Stride",NOMAD::INTEGER,1,1,3, ReportValueType::COPY_VALUE};
-    GenericHyperParameter hp4={"PADDINGS","Padding",NOMAD::INTEGER,0,0,2, ReportValueType::COPY_VALUE};
-    GenericHyperParameter hp5={"POOLING_SIZE","Pooling",NOMAD::INTEGER,2,1,5, ReportValueType::COPY_VALUE};
-    GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2,hp3,hp4,hp5}};
+//    GenericHyperParameter hp1={"NUM_OUTPUT_LAYERS","Number of output channels",NOMAD::INTEGER,6,1,1000, ReportValueType::COPY_VALUE};
+//    GenericHyperParameter hp2={"KERNELS","Kernel size",NOMAD::INTEGER,5,1,20, ReportValueType::COPY_VALUE};
+//    GenericHyperParameter hp3={"STRIDES","Stride",NOMAD::INTEGER,1,1,3, ReportValueType::COPY_VALUE};
+//    GenericHyperParameter hp4={"PADDINGS","Padding",NOMAD::INTEGER,0,0,2, ReportValueType::COPY_VALUE};
+//    GenericHyperParameter hp5={"POOLING_SIZE","Pooling",NOMAD::INTEGER,2,1,5, ReportValueType::COPY_VALUE};
+//    GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2,hp3,hp4,hp5}};
+    
+    GroupsOfAssociatedHyperParameters associatedHyperParameters1= createGroupsOfAssociatedParameters("Convolutional layers");
     
     HyperParametersBlock block1={"Convolutionnal layers",headOfBlock1, NeighborType::PLUS_ONE_MINUS_ONE_RIGHT, AssociatedHyperParametersType::MULTIPLE_TIMES, associatedHyperParameters1};
     
@@ -1075,9 +1099,11 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // SECOND CATEGORICAL BLOCK (Full layers)
     GenericHyperParameter headOfBlock2={"NUM_FC_LAYERS","Number of modifyable full layers",NOMAD::CATEGORICAL,2,0,500};
     
-    GenericHyperParameter hp6={"SIZE_FC_LAYER","Size of a full layer",NOMAD::INTEGER,128,1,1000, ReportValueType::COPY_VALUE };
+//    GenericHyperParameter hp6={"SIZE_FC_LAYER","Size of a full layer",NOMAD::INTEGER,128,1,1000, ReportValueType::COPY_VALUE };
+//
+//    GroupsOfAssociatedHyperParameters associatedHyperParameters2={{hp6}};
     
-    GroupsOfAssociatedHyperParameters associatedHyperParameters2={{hp6}};
+    GroupsOfAssociatedHyperParameters associatedHyperParameters2 = createGroupsOfAssociatedParameters("Full layers");
     
     HyperParametersBlock block2={"Full layers",headOfBlock2, NeighborType::PLUS_ONE_MINUS_ONE_LEFT, AssociatedHyperParametersType::MULTIPLE_TIMES, associatedHyperParameters2};
     
@@ -1249,7 +1275,15 @@ void HyperParameters::HyperParametersBlock::expandAndUpdateAssociatedParametersW
             // Expand the associated parameters by copying multiple times at the end of first group
             while ( groupsOfAssociatedHyperParameters.size() < headValue.round() )
             {
-                std::vector<GenericHyperParameter> tmpAssociatedHyperParameters = updateAssociatedParameters ( groupsOfAssociatedHyperParameters.back() );
+                std::vector<GenericHyperParameter> tmpAssociatedHyperParameters;
+                if ( groupsOfAssociatedHyperParameters.size() > 0 )
+                    tmpAssociatedHyperParameters = updateAssociatedParameters ( groupsOfAssociatedHyperParameters.back() );
+                else  // No Groups are available, a default one must be created
+                {
+                    GroupsOfAssociatedHyperParameters a = createGroupsOfAssociatedParameters(name);
+                    tmpAssociatedHyperParameters = updateAssociatedParameters ( a[0] );
+                }
+                
                 groupsOfAssociatedHyperParameters.push_back( tmpAssociatedHyperParameters ) ;
             }
         }
@@ -1260,7 +1294,14 @@ void HyperParameters::HyperParametersBlock::expandAndUpdateAssociatedParametersW
             // Expand the associated parameters by copying multiple times before first group
             while ( groupsOfAssociatedHyperParameters.size() < headValue.round() )
             {
-                std::vector<GenericHyperParameter> tmpAssociatedHyperParameters = updateAssociatedParameters ( groupsOfAssociatedHyperParameters[0] );
+                std::vector<GenericHyperParameter> tmpAssociatedHyperParameters;
+                if ( groupsOfAssociatedHyperParameters.size() > 0 )
+                    tmpAssociatedHyperParameters = updateAssociatedParameters ( groupsOfAssociatedHyperParameters[0] );
+                else  // No Groups are available, a default one must be created
+                {
+                    GroupsOfAssociatedHyperParameters a = createGroupsOfAssociatedParameters(name);
+                    tmpAssociatedHyperParameters = updateAssociatedParameters ( a[0] );
+                }
                 groupsOfAssociatedHyperParameters.insert( groupsOfAssociatedHyperParameters.begin() , tmpAssociatedHyperParameters ) ;
             }
         }
