@@ -1064,6 +1064,14 @@ HyperParameters::GroupsOfAssociatedHyperParameters HyperParameters::createGroups
         GenericHyperParameter hp6={"SIZE_FC_LAYER","Size of a full layer",NOMAD::INTEGER,128,1,1000, ReportValueType::COPY_VALUE };
         associatedHyperParameters={{hp6}};
     }
+    else if ( blockName.compare("Optimizer") == 0 )
+    {
+        GenericHyperParameter hp7={"OPT_PARAM_1","Learning rate",NOMAD::CONTINUOUS,0.1,0,1, ReportValueType::COPY_INITIAL_VALUE};
+        GenericHyperParameter hp8={"OPT_PARAM_2","Momentum",NOMAD::CONTINUOUS,0.9,0,1, ReportValueType::COPY_INITIAL_VALUE};
+        GenericHyperParameter hp9={"OPT_PARAM_3","Weight decay",NOMAD::CONTINUOUS,0.0005,0,1, ReportValueType::COPY_INITIAL_VALUE};
+        GenericHyperParameter hp10={"OPT_PARAM_4","Dampening",NOMAD::CONTINUOUS,0,0,1, ReportValueType::COPY_INITIAL_VALUE};
+        associatedHyperParameters={{hp7,hp8,hp9,hp10}};
+    }
     else
         throw NOMAD::Exception ( __FILE__ , __LINE__ ,"HyperParameters: cannot create Groups of associated parameters of name " + blockName );
     return associatedHyperParameters;
@@ -1084,13 +1092,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // FIRST HYPER PARAMETERS BLOCK (Convolutionnal layers)
     GenericHyperParameter headOfBlock1={"NUM_CON_LAYERS","Number of convolutionnal layers",NOMAD::CATEGORICAL,2,0,100};
     
-//    GenericHyperParameter hp1={"NUM_OUTPUT_LAYERS","Number of output channels",NOMAD::INTEGER,6,1,1000, ReportValueType::COPY_VALUE};
-//    GenericHyperParameter hp2={"KERNELS","Kernel size",NOMAD::INTEGER,5,1,20, ReportValueType::COPY_VALUE};
-//    GenericHyperParameter hp3={"STRIDES","Stride",NOMAD::INTEGER,1,1,3, ReportValueType::COPY_VALUE};
-//    GenericHyperParameter hp4={"PADDINGS","Padding",NOMAD::INTEGER,0,0,2, ReportValueType::COPY_VALUE};
-//    GenericHyperParameter hp5={"POOLING_SIZE","Pooling",NOMAD::INTEGER,2,1,5, ReportValueType::COPY_VALUE};
-//    GroupsOfAssociatedHyperParameters associatedHyperParameters1={{hp1,hp2,hp3,hp4,hp5}};
-    
+    // Call static function to create the associated parameters
     GroupsOfAssociatedHyperParameters associatedHyperParameters1= createGroupsOfAssociatedParameters("Convolutional layers");
     
     HyperParametersBlock block1={"Convolutionnal layers",headOfBlock1, NeighborType::PLUS_ONE_MINUS_ONE_RIGHT, AssociatedHyperParametersType::MULTIPLE_TIMES, associatedHyperParameters1};
@@ -1099,14 +1101,10 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // SECOND CATEGORICAL BLOCK (Full layers)
     GenericHyperParameter headOfBlock2={"NUM_FC_LAYERS","Number of modifyable full layers",NOMAD::CATEGORICAL,2,0,500};
     
-//    GenericHyperParameter hp6={"SIZE_FC_LAYER","Size of a full layer",NOMAD::INTEGER,128,1,1000, ReportValueType::COPY_VALUE };
-//
-//    GroupsOfAssociatedHyperParameters associatedHyperParameters2={{hp6}};
-    
+    // Call static function to create the associated parameters
     GroupsOfAssociatedHyperParameters associatedHyperParameters2 = createGroupsOfAssociatedParameters("Full layers");
     
     HyperParametersBlock block2={"Full layers",headOfBlock2, NeighborType::PLUS_ONE_MINUS_ONE_LEFT, AssociatedHyperParametersType::MULTIPLE_TIMES, associatedHyperParameters2};
-    
     
     // THIRD BLOCK (single regular parameter: batch size)
     GenericHyperParameter headOfBlock3={"BATCH_SIZE","Batch size",NOMAD::INTEGER,128,1,400};
@@ -1115,13 +1113,10 @@ void HyperParameters::initBlockStructureToDefault ( void )
     // FOURTH CATEGORICAL BLOCK (Optimizer select)
     GenericHyperParameter headOfBlock4={"OPTIMIZER_CHOICE","Choice of optimizer",NOMAD::CATEGORICAL,3,1,4};
     
-    GenericHyperParameter hp7={"OPT_PARAM_1","Learning rate",NOMAD::CONTINUOUS,0.1,0,1, ReportValueType::COPY_INITIAL_VALUE};
-    GenericHyperParameter hp8={"OPT_PARAM_2","Momentum",NOMAD::CONTINUOUS,0.9,0,1, ReportValueType::COPY_INITIAL_VALUE};
-    GenericHyperParameter hp9={"OPT_PARAM_3","Weight decay",NOMAD::CONTINUOUS,0.0005,0,1, ReportValueType::COPY_INITIAL_VALUE};
-    GenericHyperParameter hp10={"OPT_PARAM_4","Dampening",NOMAD::CONTINUOUS,0,0,1, ReportValueType::COPY_INITIAL_VALUE};
-    GroupsOfAssociatedHyperParameters associatedHyperParameters5={{hp7,hp8,hp9,hp10}};
+    // Call static function to create the associated parameters
+    GroupsOfAssociatedHyperParameters associatedHyperParameters4 = createGroupsOfAssociatedParameters("Optimizer");
     
-    HyperParametersBlock block4={"Optimizer",headOfBlock4, NeighborType::LOOP_PLUS_ONE_RIGHT, AssociatedHyperParametersType::ONE_TIME, associatedHyperParameters5};
+    HyperParametersBlock block4={"Optimizer",headOfBlock4, NeighborType::LOOP_PLUS_ONE_RIGHT, AssociatedHyperParametersType::ONE_TIME, associatedHyperParameters4};
     
     // FITH BLOCK (single regular parameter: Dropout rate)
     GenericHyperParameter headOfBlock5={"DROPOUT_RATE","Dropout rate",NOMAD::CONTINUOUS,0.2,0,0.95};
