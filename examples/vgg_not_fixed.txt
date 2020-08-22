@@ -1,0 +1,11 @@
+# Mandatory information
+
+DATASET                 CIFAR10
+BB_EXE                  "$perl ./bbFromHistory.pl"
+# BB_EXE                 "$python ./pytorch_bb.py"
+
+MAX_BB_EVAL             200
+HYPER_DISPLAY           3
+
+
+X0 ( 13 1000 3 1 2 1 512 3 1 2 1 750 3 1 2 1 512 3 1 2 1 104 4 1 1 1 128 4 2 2 1 158 2 1 1 1 246 4 1 0 1 256 2 1 0 1 522 5 1 2 1 512 3 2 0 2 512 6 1 2 2 512 1 1 0 1 0 138 1 0.001000000000000 0.900000000000000 0.0005000000000 0 0.750000000000000 1 )

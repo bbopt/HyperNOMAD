@@ -174,6 +174,8 @@ private:
     
     void initBlockStructureToDefault ( void );
     
+    static GroupsOfAssociatedHyperParameters createGroupsOfAssociatedParameters(const std::string & blockName);
+    
     HyperParameters ( const std::vector<HyperParametersBlock> & hpbs);
 
     void read ( const std::string & hyperParamFileName );
