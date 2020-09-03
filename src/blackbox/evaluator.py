@@ -216,15 +216,17 @@ class Evaluator(object):
         correct_test = 0
         self.cnn.eval()
         test_loss = 0
-        for batch_idx, (inputs, targets) in enumerate(self.testloader):
-            inputs, targets = inputs.to(self.device), targets.to(self.device)
-            outputs = self.cnn(inputs)
-            loss = criterion(outputs, targets)
-            test_loss += loss.item()
-            _, predicted = outputs.max(1)
-            total_test += targets.size(0)
-            correct_test += predicted.eq(targets).sum().item()
-            test_acc = 100. * correct_test / total_test
+
+        with torch.no_grad():
+            for batch_idx, (inputs, targets) in enumerate(self.testloader):
+                inputs, targets = inputs.to(self.device), targets.to(self.device)
+                outputs = self.cnn(inputs)
+                loss = criterion(outputs, targets)
+                test_loss += loss.item()
+                _, predicted = outputs.max(1)
+                total_test += targets.size(0)
+                correct_test += predicted.eq(targets).sum().item()
+                test_acc = 100. * correct_test / total_test
 
         # exit(0)
         return test_acc
