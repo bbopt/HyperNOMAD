@@ -1090,7 +1090,7 @@ void HyperParameters::initBlockStructureToDefault ( void )
     _dataset = "";
     
     // FIRST HYPER PARAMETERS BLOCK (Convolutionnal layers)
-    GenericHyperParameter headOfBlock1={"NUM_CON_LAYERS","Number of convolutionnal layers",NOMAD::CATEGORICAL,2,0,100};
+    GenericHyperParameter headOfBlock1={"NUM_CON_LAYERS","Number of convolutionnal layers",NOMAD::CATEGORICAL,1,0,100};
     
     // Call static function to create the associated parameters
     GroupsOfAssociatedHyperParameters associatedHyperParameters1= createGroupsOfAssociatedParameters("Convolutional layers");
