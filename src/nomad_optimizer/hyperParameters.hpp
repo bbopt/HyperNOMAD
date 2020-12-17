@@ -195,6 +195,7 @@ public:
     NOMAD::Point getValues( ValueType t ) const;
     
     const std::string & getBB ( void ) const { return _bbEXE;  }
+    const std::string & getSGTE ( void ) const { return _sgteEXE;  }
     const vector<NOMAD::bb_output_type> & getBbOutputType ( void ) const { return _bbot; }
     size_t getMaxBbEval( void ) const { return _maxBbEval; }
     

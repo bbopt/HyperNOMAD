@@ -291,6 +291,8 @@ int main ( int argc , char ** argv )
         p.set_BB_OUTPUT_TYPE ( hyperParameters->getBbOutputType() );
         p.set_BB_EXE( hyperParameters->getBB() );
         
+        p.set_SGTE_EXE(hyperParameters->getBB(), hyperParameters->getSGTE());
+        
         p.set_LH_SEARCH(0 , static_cast<int>( hyperParameters->getLhIterationSearch() ) );
 
         p.set_MAX_BB_EVAL( static_cast<int>( hyperParameters->getMaxBbEval()) );
