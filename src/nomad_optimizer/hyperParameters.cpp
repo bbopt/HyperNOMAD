@@ -792,6 +792,7 @@ void HyperParameters::updateAndCheckAfterReading ( void )
     
     // Complete the line for the blackbox with the dataset name (ex.: python pytorch_bb.py MNIST)
     _bbEXE += " " + _dataset;
+    _sgteEXE += " " + _dataset;
     
 }
 
