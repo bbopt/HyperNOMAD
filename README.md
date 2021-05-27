@@ -10,7 +10,7 @@ The following tutorial shows the different steps to take in order to run HyperNO
 
 In order to run HyperNOMAD correctly, please make sure to have:
 
-* A compiled version of [NOMAD](https://www.gerad.ca/nomad/).
+* A compiled version of [NOMAD 3](https://www.gerad.ca/nomad/). Please note that HyperNomad is not compatible with NOMAD 4.
 * Python > 3.6
 * [PyTorch](https://pytorch.org/)
 * GCC > 9.0
