@@ -129,22 +129,19 @@ If you use HyperNOMAD, please cite the following [paper](https://arxiv.org/abs/1
 
 
 ```
-@article{DBLP:journals/corr/abs-1907-01698,
-  author    = {Dounia Lakhmiri and
-               S{\'{e}}bastien Le Digabel and
-               Christophe Tribes},
-  title     = {HyperNOMAD: Hyperparameter optimization of deep neural networks using
-               mesh adaptive direct search},
-  journal   = {CoRR},
-  volume    = {abs/1907.01698},
-  year      = {2019},
-  url       = {http://arxiv.org/abs/1907.01698},
-  archivePrefix = {arXiv},
-  eprint    = {1907.01698},
-  timestamp = {Mon, 08 Jul 2019 14:12:33 +0200},
-  biburl    = {https://dblp.org/rec/bib/journals/corr/abs-1907-01698},
-  bibsource = {dblp computer science bibliography, https://dblp.org}
+
+@article{lakhmiri2021hypernomad,
+  title={HyperNOMAD: Hyperparameter Optimization of Deep Neural Networks Using Mesh Adaptive Direct Search},
+  author={Lakhmiri, Dounia and Digabel, S{\'e}bastien Le and Tribes, Christophe},
+  journal={ACM Transactions on Mathematical Software (TOMS)},
+  volume={47},
+  number={3},
+  pages={1--27},
+  year={2021},
+  publisher={ACM New York, NY, USA}
 }
+
+
 
 ```
 [![DOI](https://zenodo.org/badge/160553898.svg)](https://zenodo.org/badge/latestdoi/160553898)
